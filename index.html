@@ -1,241 +1,390 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="my">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <title>ATOMX D PROJECT</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    
+    <title>Game Store Manager Pro</title>
+    <meta name="theme-color" content="#1d4ed8">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        :root { --primary: #4f46e5; --bg-color: #f8fafc; --card-bg: #ffffff; --text-main: #334155; --text-light: #94a3b8; --sidebar-bg: #0f172a; --danger: #ef4444; --success: #10b981; --warning: #f59e0b; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1); }
-        [data-theme="dark"] { --primary: #6366f1; --bg-color: #111827; --card-bg: #1f2937; --text-main: #f1f5f9; --text-light: #9ca3af; --sidebar-bg: #000000; --shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.5); }
-        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg-color); color: var(--text-main); margin: 0; overflow-x: hidden; transition: 0.3s; }
-        * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+        /* ================= Theme Variables ================= */
+        :root {
+            --primary-blue: #1d4ed8; --dark-blue: #1e3a8a; --light-blue: #eff6ff; --hover-blue: #2563eb;
+            --bg-color: #f1f5f9; --white: #ffffff; --text-dark: #0f172a; --text-gray: #64748b;
+            --border-color: #cbd5e1; --red: #ef4444; --green: #10b981; --gray-light: #f8fafc;
+            --sidebar-bg: #121212; --sidebar-header: #000000; --sidebar-hover: #222222;
+            --sidebar-border: #333333; --sidebar-text: #e5e7eb;
+            --header-height: 50px;
+        }
 
-        /* PRIVACY BLUR */
-        body.privacy-active .privacy-sensitive { filter: blur(6px); user-select: none; }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-color); color: var(--text-dark); overflow: hidden; height: 100vh; width: 100vw; }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+        button { cursor: pointer; border: none; outline: none; background: transparent; }
+        svg { display: block; }
 
-        /* LOGIN PAGE */
-        #loginPage { position: fixed; inset: 0; background: var(--bg-color); z-index: 5000; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
-        .login-card { background: var(--card-bg); padding: 30px; border-radius: 20px; width: 100%; max-width: 350px; box-shadow: var(--shadow); text-align: center; }
-        .login-input { width: 100%; padding: 14px; margin-bottom: 15px; border: 1px solid #e2e8f0; border-radius: 12px; background: var(--bg-color); color: var(--text-main); outline:none; }
-        .btn-login { width: 100%; padding: 14px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        /* ================= Login Screen ================= */
+        .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 99999; }
+        .auth-box { background: var(--white); padding: 25px 20px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 4px solid var(--primary-blue); text-align: center; }
+        .auth-box h2 { color: var(--primary-blue); margin-bottom: 5px; font-size: 18px;}
+        .auth-box p { font-size: 11px; color: var(--text-gray); margin-bottom: 15px; }
+        .auth-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; background: var(--gray-light); }
+        .auth-input:focus { border-color: var(--primary-blue); background: var(--white); }
+        .btn-auth { width: 100%; padding: 10px; background: var(--primary-blue); color: white; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 13px;}
+        .btn-auth-outline { width: 100%; padding: 10px; background: transparent; color: var(--primary-blue); border: 1px solid var(--primary-blue); border-radius: 6px; font-weight: bold; font-size: 13px;}
+        #authMsg { font-size: 11px; margin-top: 10px; font-weight: bold; }
 
-        /* LOADING */
-        #loadingScreen { position: fixed; inset: 0; background: var(--bg-color); z-index: 4000; display: none; flex-direction: column; align-items: center; justify-content: center; }
-        .spinner { width: 50px; height: 50px; border: 5px solid #e2e8f0; border-top: 5px solid var(--primary); border-radius: 50%; animation: spin 1s linear infinite; margin-bottom: 15px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        /* ================= App Bar ================= */
+        .app-header { height: var(--header-height); background: var(--white); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: fixed; top: 0; left: 0; width: 100%; z-index: 40; border-bottom: 1px solid var(--border-color); }
+        .header-left { display: flex; align-items: center; gap: 8px; }
+        .menu-btn { color: var(--primary-blue); padding: 5px; display: flex; }
+        .app-title { font-size: 14px; font-weight: bold; color: var(--primary-blue); text-transform: uppercase; letter-spacing: 1px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .btn-logout { background: #fee2e2; color: var(--red); padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; }
 
-        /* MAIN APP */
-        #mainApp { display: none; }
-        header { background: var(--card-bg); padding: 15px 20px; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.05); position: sticky; top: 0; z-index: 100; }
-        .app-title { font-weight: 800; font-size: 1.1rem; color: var(--primary); letter-spacing: 1px; }
-        .status-indicator { font-size: 1rem; transition: color 0.3s; }
-        .status-online { color: var(--success); } .status-offline { color: var(--danger); }
-
-        /* SIDEBAR */
-        .sidebar { position: fixed; left: -280px; top: 0; width: 280px; height: 100%; background: var(--sidebar-bg); color: #f3f4f6; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 1000; display: flex; flex-direction: column; box-shadow: 5px 0 15px rgba(0,0,0,0.3); }
-        .sidebar.active { left: 0; }
-        .overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; z-index: 999; backdrop-filter: blur(2px); }
-        .overlay.active { display: block; }
+        /* ================= Sidebar ================= */
+        .sidebar { width: 240px; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; height: 100vh; position: fixed; left: -250px; top: 0; z-index: 100; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.4); }
+        .sidebar.open { transform: translateX(250px); }
+        .sidebar-header { padding: 0 15px; background: var(--sidebar-header); font-weight: bold; font-size: 13px; display: flex; justify-content: space-between; align-items: center; height: var(--header-height); border-bottom: 1px solid var(--sidebar-border); color: #fff; }
+        .close-btn { color: #fff; font-size: 18px; display: flex;}
         
-        .menu-item { padding: 15px 25px; display: flex; align-items: center; gap: 15px; cursor: pointer; color: #cbd5e1; transition: 0.2s; border-left: 4px solid transparent; }
-        .menu-item.active { background: rgba(255,255,255,0.05); border-left-color: var(--primary); color: white; }
-        .toggle-switch { position: relative; width: 40px; height: 20px; background: #334155; border-radius: 20px; transition: 0.3s; margin-left: auto; }
-        .toggle-switch::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; background: white; border-radius: 50%; transition: 0.3s; }
-        .toggle-active { background: var(--success); } .toggle-active::after { left: 22px; }
-
-        /* CONTAINER */
-        .container { padding: 20px; max-width: 800px; margin: auto; padding-bottom: 50px; }
-        .page { display: none; animation: fadeIn 0.4s; }
-        .page.active { display: block; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
-
-        /* DASHBOARD */
-        .dashboard-card { background: linear-gradient(135deg, var(--primary), #8b5cf6); color: white; padding: 30px 20px; border-radius: 20px; text-align: center; box-shadow: 0 10px 20px -5px rgba(79, 70, 229, 0.4); margin-bottom: 20px; }
-        .clock { font-size: 2.8rem; font-weight: 800; }
-        .user-status-card { background: var(--card-bg); padding: 15px; border-radius: 15px; margin-bottom: 20px; display: flex; align-items: center; gap: 15px; box-shadow: var(--shadow); border-left: 5px solid var(--success); }
-
-        /* FORMS */
-        .form-group { margin-bottom: 15px; position: relative; }
-        label { display: block; margin-bottom: 8px; font-weight: 600; color: var(--text-light); }
-        input { width: 100%; padding: 12px; border: 1px solid var(--text-light); border-radius: 10px; background: var(--card-bg); color: var(--text-main); outline: none; }
-        .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 5px; }
-        .chip { padding: 8px 16px; border: 1px solid var(--text-light); border-radius: 20px; cursor: pointer; }
-        .chip.active { background: var(--primary); color: white; border-color: var(--primary); }
-        .btn-save { width: 100%; padding: 15px; background: var(--primary); color: white; border: none; border-radius: 12px; font-weight: bold; margin-top: 10px; }
-
-        /* LIST & LOGS */
-        .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 15px; }
-        .card { background: var(--card-bg); padding: 20px; border-radius: 16px; box-shadow: var(--shadow); cursor: pointer; display: flex; gap: 15px; }
-        .user-icon { width: 50px; height: 50px; border-radius: 50%; background: #e0e7ff; color: var(--primary); display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
-        .card-info { flex-grow: 1; }
-        .card-title { font-weight: bold; font-size: 1.1rem; }
-        .card-time { font-size: 0.75rem; color: var(--text-light); margin-top: 8px; border-top: 1px dashed #e2e8f0; padding-top: 5px; }
+        .nav-menu { list-style: none; padding: 10px 0; border-bottom: 1px solid var(--sidebar-border); }
+        .nav-item { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: bold; color: #aaa; transition: 0.2s; }
+        .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: #fff; border-left: 3px solid var(--primary-blue); }
         
-        .log-item { background: var(--card-bg); padding: 12px; border-radius: 10px; font-size: 0.9rem; display: flex; justify-content: space-between; align-items: center; border-left: 3px solid var(--text-light); margin-bottom: 10px; }
-        .log-item.login { border-left-color: var(--success); } .log-item.create { border-left-color: var(--primary); } .log-item.edit { border-left-color: var(--warning); }
-
-        /* MODAL */
-        .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.6); display: none; justify-content: center; align-items: center; z-index: 2000; }
-        .modal-overlay.active { display: flex; }
-        .modal-content { background: var(--card-bg); width: 90%; max-width: 380px; border-radius: 24px; overflow: hidden; }
-        .modal-header { padding: 30px; text-align: center; color: white; }
-        .modal-profile-img { width: 80px; height: 80px; border-radius: 50%; background: white; color: #333; display: flex; align-items: center; justify-content: center; font-size: 35px; margin: -40px auto 10px auto; border: 4px solid var(--card-bg); }
-        .modal-body { padding: 10px 25px 25px 25px; }
-        .modal-row { display: flex; justify-content: space-between; padding: 12px 0; border-bottom: 1px dashed var(--text-light); }
-        .modal-val { font-weight: bold; color: var(--text-main); cursor: pointer; }
+        .sidebar-title { font-size: 10px; color: #666; text-transform: uppercase; padding: 10px 15px 5px; font-weight: bold; letter-spacing: 1px; }
+        .game-list { list-style: none; flex-grow: 1; overflow-y: auto; }
+        .game-item { padding: 8px 15px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #ccc; border-bottom: 1px solid #1a1a1a;}
+        .game-item:hover, .game-item.active { background: rgba(255,255,255,0.05); color: #fff; }
+        .game-info { display: flex; align-items: center; gap: 8px; overflow: hidden; }
+        .game-no { font-weight: bold; color: #555; font-size: 11px; }
+        .game-actions { display: flex; align-items: center; gap: 5px; }
+        .count-badge { background: #333; padding: 2px 5px; border-radius: 8px; font-size: 10px; }
+        .btn-del-game { color: #ef4444; padding: 3px; border-radius: 4px; display: flex; align-items: center; transition: 0.2s; }
         
-        .bg-kpay { background: #0056b3; } .bg-wave { background: #fbbf24; color: #333 !important; } .bg-uab { background: #000; } .bg-yoma { background: #dc2626; } .bg-cb { background: linear-gradient(135deg, #000080, #dc2626); } .bg-other { background: var(--primary); }
+        .sidebar-footer { padding: 10px; background: var(--sidebar-header); display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--sidebar-border); }
+        .sidebar-footer input[type="text"] { width: 100%; padding: 6px 8px; background: #1a1a1a; color: #fff; border: 1px solid var(--sidebar-border); border-radius: 4px; font-size: 12px; outline: none;}
+        .btn-add-game { background: var(--primary-blue); color: white; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px;}
+        
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50; display: none; }
+        .overlay.show { display: block; }
 
-        /* TOAST */
-        .toast { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); background: white; color: #333; padding: 15px 25px; border-radius: 30px; box-shadow: 0 15px 30px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 12px; z-index: 6000; transition: 0.4s; font-weight: 600; border-left: 5px solid var(--success); }
-        .toast.show { top: 30px; } .toast.error { border-left-color: var(--danger); }
+        /* ================= View Containers ================= */
+        .view-container { display: none; padding-top: var(--header-height); height: 100vh; flex-direction: column; }
+        .view-container.active { display: flex; }
+        .content-scroll { padding: 8px; overflow-y: auto; flex-grow: 1; padding-bottom: 60px; }
+        
+        /* Shared Buttons & Tools */
+        .page-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+        .page-title-row h2 { color: var(--primary-blue); font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .action-btns-group { display: flex; gap: 4px; }
+        .btn-secondary { background: var(--white); color: var(--text-dark); border: 1px solid var(--border-color); padding: 5px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.2s;}
+        .btn-primary { background: var(--primary-blue); color: white; padding: 5px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; box-shadow: 0 1px 2px rgba(29, 78, 216, 0.3); display: flex; align-items: center; gap: 4px;}
+
+        .tools-row { background: var(--white); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;}
+        .search-box { display: flex; align-items: center; gap: 4px; background: var(--gray-light); border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 6px; flex-grow: 1; max-width: 130px; }
+        .search-box input { border: none; background: transparent; outline: none; font-size: 11px; width: 100%; color: var(--text-dark);}
+        
+        .switch-wrap { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: bold; }
+        .switch { position: relative; width: 26px; height: 14px; }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; transition: .3s; border-radius: 14px; }
+        .slider:before { position: absolute; content: ""; height: 10px; width: 10px; left: 2px; bottom: 2px; background: white; transition: .3s; border-radius: 50%; }
+        input:checked + .slider { background: var(--primary-blue); }
+        input:checked + .slider:before { transform: translateX(12px); }
+        .exchange-input { width: 50px; padding: 2px; border: 1px solid var(--primary-blue); border-radius: 4px; text-align: center; color: var(--primary-blue); font-weight: bold; display: none; font-size: 10px; }
+        .exchange-input.active { display: block; }
+
+        /* Summary Cards */
+        .summary-grid { display: grid; gap: 4px; margin-bottom: 8px; grid-template-columns: repeat(3, 1fr); }
+        .summary-box { background: var(--white); border: 1px solid var(--border-color); padding: 6px 4px; border-radius: 4px; text-align: center; }
+        .summary-box span { display: block; font-size: 9px; color: var(--text-gray); margin-bottom: 2px; font-weight: bold; }
+        .summary-box strong { font-size: 11px; display: block; color: var(--text-dark); word-break: break-all; }
+        .summary-box.highlight { background: var(--light-blue); border-top: 2px solid var(--primary-blue); }
+        .summary-box.highlight strong { color: var(--primary-blue); }
+
+        /* ================= ULTRA COMPACT GRID (MOBILE OPTIMIZED) ================= */
+        .table-wrapper { width: 100%; }
+        table { width: 100%; border-collapse: collapse; display: block; }
+        thead { display: none; }
+        tbody { display: block; width: 100%; }
+        
+        tr { 
+            display: grid; 
+            grid-template-columns: repeat(4, 1fr); /* 4 Columns Grid */
+            gap: 4px; /* Very tight gap */
+            background: var(--white); 
+            padding: 6px 8px; /* Very tight padding */
+            margin-bottom: 6px; 
+            border-radius: 6px; 
+            border: 1px solid var(--border-color); 
+            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
+            position: relative;
+        }
+        td { display: block; border: none; padding: 0; }
+        
+        /* Grid Layout mapping */
+        .col-no { display: none; } 
+        .col-name { grid-column: 1 / 4; } /* Name spans 3 columns */
+        .col-del { grid-column: 4 / 5; display: flex; justify-content: flex-end; align-items: flex-start;} /* Del spans 1 column, aligned right */
+        .col-code { grid-column: 1 / 5; } /* Code spans all 4 */
+        .col-fcost { grid-column: 1 / 5; } /* Foreign cost spans all 4 */
+        .col-cost { grid-column: 1 / 3; } /* Cost spans 2 */
+        .col-sell { grid-column: 3 / 5; } /* Sell spans 2 */
+        .col-qty { grid-column: 1 / 2; } /* Qty spans 1 */
+        .col-profit { grid-column: 2 / 5; } /* Profit spans 3 */
+
+        .mobile-label { display: block; font-size: 9px; color: var(--text-gray); margin-bottom: 2px; font-weight: bold; }
+        
+        /* Inputs made smaller */
+        td input { width: 100%; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--gray-light); font-size: 11px; font-weight: bold; outline: none; color: var(--text-dark); height: 26px;}
+        td input:focus { border-color: var(--primary-blue); background: var(--white); }
+        
+        .profit-cell { padding: 4px; font-weight: bold; font-size: 11px; background: var(--gray-light); border-radius: 4px; border: 1px solid var(--border-color); text-align: center; height: 26px; display: flex; align-items: center; justify-content: center;}
+        .text-right { text-align: right; } .text-center { text-align: center; }
+        
+        /* Tiny Delete Button */
+        .btn-delete { background: transparent; color: var(--red); padding: 4px; border-radius: 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--red); height: 26px; width: 26px;}
+        .btn-delete:active { background: #fee2e2; }
+
+        .col-fcost { display: none; }
+        .col-fcost.show { display: block; }
+
+        .code-wrapper { display: flex; align-items: center; gap: 4px; }
+        .code-input { flex-grow: 1; font-family: monospace; letter-spacing: 0.5px; }
+        .code-input.used { color: var(--green); text-decoration: line-through; background: #ecfdf5; border-color: var(--green); }
+        .btn-copy { background: var(--primary-blue); color: white; padding: 0; width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
+        .btn-copy.used { background: var(--green); }
+
+        /* ================= Other Views (Receipt, Replies, Settings) ================= */
+        /* Hidden locally to focus on the request, but functionality remains active */
+        .receipt-form { width: 100%; max-width: 400px; background: var(--white); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin: 0 auto 15px;}
+        .r-group { margin-bottom: 8px; }
+        .r-group label { display: block; font-size: 10px; font-weight: bold; margin-bottom: 3px; color: var(--text-gray); }
+        .r-group input { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px; outline: none; background: var(--gray-light); }
+        
+        .receipt-slip-wrapper { width: 100%; display: none; flex-direction: column; gap: 10px; align-items: center; }
+        .receipt-slip { width: 100%; max-width: 300px; background: #fff; padding: 15px; border-radius: 4px; border: 1px solid #eee; box-shadow: 0 5px 15px rgba(0,0,0,0.08); font-family: 'Courier New', Courier, monospace; position: relative; }
+        .r-header { text-align: center; border-bottom: 1px dashed #ccc; padding-bottom: 8px; margin-bottom: 10px; }
+        .r-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: #333; }
+        .r-row.total { border-top: 1px dashed #ccc; padding-top: 8px; font-weight: bold; font-size: 12px; color: #000; }
+        
+        .add-reply-box { background: var(--white); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px;}
+        .add-reply-box textarea { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 11px; outline: none; resize: vertical; min-height: 50px; background: var(--gray-light); }
+        .replies-grid { display: grid; grid-template-columns: 1fr; gap: 8px; padding-bottom: 20px; }
+        .reply-card { background: var(--white); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 6px;}
+        .reply-text { font-size: 12px; color: var(--text-dark); line-height: 1.4; background: var(--gray-light); padding: 8px; border-radius: 4px; border: 1px dashed var(--border-color); white-space: pre-wrap;}
+
+        .settings-container { max-width: 400px; margin: 0 auto; background: var(--white); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
+        .settings-header { font-size: 14px; font-weight: bold; margin-bottom: 15px; color: var(--primary-blue); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+
+        /* Modal */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; }
+        .modal-box { background: #fff; width: 240px; padding: 15px; border-radius: 8px; text-align: center; }
+        .modal-actions { display: flex; gap: 8px; justify-content: center; margin-top: 15px;}
+        .modal-btn { padding: 8px; border-radius: 4px; font-size: 11px; font-weight: bold; width: 100%; }
+
+        /* ================= DESKTOP VIEW ================= */
+        @media (min-width: 768px) {
+            .table-wrapper { background: var(--white); border-radius: 6px; border: 1px solid var(--border-color); }
+            table { display: table; table-layout: fixed; } thead { display: table-header-group; } tbody { display: table-row-group; }
+            tr { display: table-row; margin: 0; padding: 0; border: none; box-shadow: none; border-radius: 0; background: transparent; }
+            th { background: var(--light-blue); color: var(--dark-blue); padding: 6px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 11px; white-space: nowrap; }
+            td { display: table-cell; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; padding: 0; vertical-align: middle; }
+            .col-no { display: table-cell; text-align: center; font-weight: bold; font-size: 11px; color: var(--text-gray); }
+            .col-name, .col-code, .col-fcost, .col-cost, .col-sell, .col-qty, .col-profit, .col-del { grid-column: auto; justify-self: auto; align-items: center; }
+            .mobile-label { display: none; } 
+            .col-fcost { display: none; } .col-fcost.show { display: table-cell; }
+            td input { border: none; border-radius: 0; background: transparent; padding: 6px; font-size: 12px; height: auto;}
+            td input:focus { background: var(--light-blue); box-shadow: inset 0 0 0 1px var(--primary-blue); }
+            .profit-cell { border: none; border-radius: 0; text-align: right; background: transparent; padding: 6px; font-size: 12px; height: auto; justify-content: flex-end;}
+            .btn-delete { width: auto; height: auto; padding: 4px 8px; margin: 0 auto; display: block; font-size: 11px; background: transparent; border: none; color: var(--text-gray);}
+            .btn-delete:hover { color: var(--red); }
+            .btn-copy { height: 24px; width: 24px; }
+        }
     </style>
 </head>
 <body>
 
-    <div id="loginPage">
-        <div class="login-card">
-            <h2 style="color:var(--primary); margin-top:0;">ATOMX D LOGIN</h2>
-            <input type="text" id="loginUser" class="login-input" placeholder="User Name">
-            <div style="position:relative; margin-bottom:15px;">
-                <input type="password" id="loginPass" class="login-input" placeholder="Password" style="margin-bottom:0;">
-                <i class="fas fa-eye" style="position:absolute; right:15px; top:50%; transform:translateY(-50%); color:#94a3b8; cursor:pointer;" onclick="togglePass()"></i>
-            </div>
-            <button class="btn-login" onclick="handleLogin()">Log In</button>
+    <div class="auth-overlay" id="authScreen">
+        <div class="auth-box">
+            <h2>Game Store Manager</h2>
+            <p>Please login to access your store data.</p>
+            <input type="email" id="authEmail" class="auth-input" placeholder="Email ">
+            <input type="password" id="authPassword" class="auth-input" placeholder="Password">
+            <button class="btn-auth" onclick="window.handleLogin()">Login </button>
+            <button class="btn-auth-outline" onclick="window.handleRegister()">Register</button>
+            <div id="authMsg"></div>
         </div>
     </div>
 
-    <div id="loadingScreen">
-        <div class="spinner"></div>
-        <p style="color:var(--text-light); margin-top:15px;">Syncing with Cloud...</p>
-    </div>
-
-    <div class="toast" id="toast"><i id="toastIcon" class="fas fa-check-circle"></i><span id="toastMsg">Success</span></div>
-
-    <div id="mainApp">
-        <header>
-            <i class="fas fa-bars" style="font-size:22px; cursor:pointer;" onclick="toggleSidebar()"></i>
-            <span class="app-title">ATOMX D PROJECT</span>
-            <div style="display:flex; gap:15px; align-items:center;">
-                <i class="fas fa-wifi status-indicator" id="wifiIcon"></i>
-                <i class="fas fa-eye" style="font-size:20px; cursor:pointer;" onclick="togglePrivacy()"></i>
-            </div>
-        </header>
-
-        <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
-
-        <div class="sidebar" id="sidebar">
-            <div style="padding:25px 20px; display:flex; justify-content:space-between; align-items:center;">
-                <h3>Menu</h3><i class="fas fa-times" onclick="toggleSidebar()"></i>
-            </div>
-            <div style="flex-grow:1; overflow-y:auto;">
-                <div class="menu-item active" onclick="navTo('dashboardPage', this)"><i class="fas fa-home"></i> Dashboard</div>
-                <div class="menu-item" onclick="navTo('createPage', this)"><i class="fas fa-plus-circle"></i> Create Account</div>
-                <div class="menu-item" onclick="navTo('listPage', this)"><i class="fas fa-list-ul"></i> Account List</div>
-                <div class="menu-item" onclick="navTo('logPage', this)"><i class="fas fa-history"></i> Activity Log</div>
-                <div style="height:1px; background:#334155; margin:10px 20px;"></div>
-                <div class="menu-item" onclick="toggleTheme()"><i class="fas fa-adjust"></i> Dark/Light Mode</div>
-                <div class="menu-item" onclick="toggleHaptic()">
-                    <i class="fas fa-mobile-alt"></i> Haptic
-                    <div id="hapticSwitch" class="toggle-switch"></div>
-                </div>
-            </div>
-            <div style="padding:20px; color:var(--danger); cursor:pointer; font-weight:bold; display:flex; align-items:center; gap:10px;" onclick="logout()">
-                <i class="fas fa-sign-out-alt"></i> Log Out
-            </div>
+    <header class="app-header">
+        <div class="header-left">
+            <button class="menu-btn" onclick="window.toggleSidebar()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+            </button>
+            <span class="app-title" id="topStoreNameDisplay">Loading...</span>
         </div>
+        <button class="btn-logout" onclick="window.handleLogout()">Logout</button>
+    </header>
 
-        <div class="container">
-            <div id="dashboardPage" class="page active">
-                <div class="dashboard-card">
-                    <div class="clock" id="clock">00:00</div>
-                    <div class="date" id="date">Mon, 1 Jan</div>
-                </div>
-                <div class="user-status-card privacy-sensitive">
-                    <div style="width:40px; height:40px; background:#e0e7ff; color:var(--primary); border-radius:50%; display:flex; align-items:center; justify-content:center;"><i class="fas fa-user-check"></i></div>
-                    <div>
-                        <div style="font-weight:bold; font-size:1.1rem;" id="dashUser">Guest</div>
-                        <div style="font-size:0.85rem; color:var(--text-light);">Online • <span id="dashTime">-</span></div>
-                    </div>
-                </div>
-                <div style="display:grid; grid-template-columns:1fr 1fr; gap:15px;">
-                    <div style="background:var(--card-bg); padding:20px; border-radius:15px; text-align:center; box-shadow:var(--shadow);">
-                        <div class="privacy-sensitive" style="font-size:2rem; font-weight:bold; color:var(--primary);" id="totalCount">0</div>
-                        <div style="color:var(--text-light); font-size:0.9rem;">Total Accounts</div>
-                    </div>
-                    <div style="background:var(--card-bg); padding:20px; border-radius:15px; text-align:center; box-shadow:var(--shadow);">
-                        <div class="privacy-sensitive" style="font-size:2rem; font-weight:bold; color:var(--success);" id="todayCount">0</div>
-                        <div style="color:var(--text-light); font-size:0.9rem;">Created Today</div>
-                    </div>
-                </div>
-            </div>
+    <div class="overlay" id="overlay" onclick="window.toggleSidebar()"></div>
+    <aside class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <span>Menu</span>
+            <button class="close-btn" onclick="window.toggleSidebar()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+        </div>
+        <ul class="nav-menu">
+            <li class="nav-item active" id="nav-inventory" onclick="window.switchView('inventory')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
+                <span>Game Grid</span>
+            </li>
+            <li class="nav-item" id="nav-receipt" onclick="window.switchView('receipt')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
+                <span>Receipt</span>
+            </li>
+            <li class="nav-item" id="nav-replies" onclick="window.switchView('replies')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
+                <span>Quick Replies</span>
+            </li>
+            <li class="nav-item" id="nav-settings" onclick="window.switchView('settings')">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle></svg>
+                <span>Settings</span>
+            </li>
+        </ul>
+        <div class="sidebar-title">Categories</div>
+        <ul class="game-list" id="sidebarGameList"></ul>
+        <div class="sidebar-footer">
+            <input type="text" id="newCategoryInput" placeholder="New Game...">
+            <button class="btn-add-game" onclick="window.addCategory()">+ Add</button>
+        </div>
+    </aside>
 
-            <div id="createPage" class="page">
-                <h2 id="formTitle">Create Account</h2>
-                <input type="hidden" id="editId">
-                <div class="form-group"><label>Name</label><input type="text" id="name"></div>
-                <div class="form-group"><label>Bank Number</label><input type="tel" id="bankNum"></div>
-                <div class="form-group"><label>NRC</label><input type="text" id="nrc"></div>
-                <div class="form-group"><label>PIN</label><input type="password" id="pin"><i class="fas fa-eye" style="position:absolute; right:15px; top:40px; color:#94a3b8;" onclick="toggleFormPin()"></i></div>
-                <div class="form-group"><label>Auto No.</label><input type="text" id="autoNo"></div>
-                <div class="form-group"><label>Platform</label>
-                    <div class="chips">
-                        <span class="chip" onclick="setPlatform(this, 'KBZPay')">KBZPay</span>
-                        <span class="chip" onclick="setPlatform(this, 'Wave Money')">Wave Money</span>
-                        <span class="chip" onclick="setPlatform(this, 'CB Pay')">CB Pay</span>
-                        <span class="chip" onclick="setPlatform(this, 'UAB Pay')">UAB Pay</span>
-                        <span class="chip" onclick="setPlatform(this, 'Yoma Bank')">Yoma Bank</span>
-                        <span class="chip" onclick="setPlatform(this, 'Other')">Other</span>
-                    </div>
-                    <input type="hidden" id="platform">
-                </div>
-                <button class="btn-save" id="saveBtn" onclick="saveData()">Create Account</button>
-                <button class="btn-save" style="background:var(--text-light); display:none;" id="cancelBtn" onclick="resetForm()">Cancel</button>
-            </div>
-
-            <div id="listPage" class="page">
-                <h2 style="margin-bottom:20px;">Account List</h2>
-                <div class="form-group" style="position:relative;"><i class="fas fa-search" style="position:absolute; left:15px; top:12px; color:var(--text-light);"></i><input type="text" id="searchBox" style="padding-left:40px;" onkeyup="renderList()"></div>
-                <div id="gridContainer" class="grid"></div>
-            </div>
-
-            <div id="logPage" class="page">
-                <h2 style="margin-bottom:20px;">Activity Log</h2>
-                <div id="logContainer" style="display:flex; flex-direction:column; gap:10px;"></div>
+    <div class="modal-overlay" id="confirmModal">
+        <div class="modal-box">
+            <div class="modal-title">Warning</div>
+            <div class="modal-text">Delete this item?</div>
+            <div class="modal-actions">
+                <button class="modal-btn btn-cancel" onclick="window.closeConfirmModal()">Cancel</button>
+                <button class="modal-btn btn-confirm" onclick="window.executeDeleteGame()">Delete</button>
             </div>
         </div>
     </div>
 
-    <div class="modal-overlay" id="detailModal">
-        <div class="modal-content">
-            <div id="modalHeaderBg" class="modal-header">
-                <h3 id="modalName" class="privacy-sensitive" style="margin:0;">Name</h3>
-                <span id="modalPlatform" style="opacity:0.8;">Platform</span>
-            </div>
-            <div class="modal-profile-img" id="modalProfile"><i class="fas fa-user"></i></div>
-            <div class="modal-body">
-                <div class="modal-row"><span style="color:var(--text-light);">Number</span><span class="modal-val privacy-sensitive" id="modalNum" onclick="copyText(this.innerText)">-</span></div>
-                <div class="modal-row"><span style="color:var(--text-light);">NRC</span><span class="modal-val privacy-sensitive" id="modalNrc" onclick="copyText(this.innerText)">-</span></div>
-                <div class="modal-row"><span style="color:var(--text-light);">PIN</span><span class="modal-val privacy-sensitive" id="modalPin" onclick="copyText(this.innerText)">-</span></div>
-                <div class="modal-row" style="border:none;"><span style="color:var(--text-light);">Auto No.</span><span class="modal-val privacy-sensitive" id="modalAuto" onclick="copyText(this.innerText)">-</span></div>
-                <p style="text-align:center; font-size:0.8rem; color:var(--text-light);">(Tap values to copy)</p>
-                <div style="display:flex; gap:10px;">
-                    <button class="btn-save" style="background:var(--text-light); margin:0;" onclick="closeModal()">Close</button>
-                    <button class="btn-save" style="margin:0;" onclick="editAccount()">Edit</button>
+    <main class="view-container active" id="view-inventory">
+        <div class="content-scroll">
+            <div class="page-title-row">
+                <h2 id="currentGameTitle">Select Game</h2>
+                <div class="action-btns-group">
+                    <input type="file" id="importCsvInput" accept=".csv" style="display:none;" onchange="window.importCSV(event)">
+                    <button class="btn-secondary" onclick="document.getElementById('importCsvInput').click()">Import CSV</button>
+                    <button class="btn-secondary" onclick="window.exportToCSV()">Export</button>
+                    <button class="btn-primary" onclick="window.addRow()">+ Row</button>
                 </div>
             </div>
+            
+            <div class="tools-row">
+                <div class="search-box">
+                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+                    <input type="text" id="searchInput" placeholder="Search..." onkeyup="window.filterItems()">
+                </div>
+                <label class="switch-wrap"><span>Foreign ($/THB)</span><label class="switch"><input type="checkbox" id="exchangeToggle" onchange="window.toggleExchange()"><span class="slider"></span></label></label>
+                <div id="exchangeWrap" class="switch-wrap" style="display:none;"><input type="number" id="exchangeRate" class="exchange-input active" value="3500" oninput="window.updateRate()"><span>KS</span></div>
+            </div>
+
+            <div class="summary-grid">
+                <div class="summary-box"><span>Total Cost</span><strong id="totalCostVal">0</strong></div>
+                <div class="summary-box"><span>Revenue</span><strong id="totalRevenueVal">0</strong></div>
+                <div class="summary-box highlight"><span>Net Profit</span><strong id="totalProfitVal" style="color:var(--primary-blue)">0</strong></div>
+            </div>
+
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th width="5%" class="col-no text-center">No.</th>
+                            <th width="20%">Item Name</th>
+                            <th width="20%">Redeem Code</th>
+                            <th width="10%" class="text-right col-fcost" id="th-foreign">Cost ($)</th>
+                            <th width="12%" class="text-right">Cost (KS)</th>
+                            <th width="12%" class="text-right">Sell (KS)</th>
+                            <th width="6%" class="text-center">Qty</th>
+                            <th width="10%" class="text-right">Profit (KS)</th>
+                            <th width="5%" class="text-center">Del</th>
+                        </tr>
+                    </thead>
+                    <tbody id="sheetBody"></tbody>
+                </table>
+            </div>
         </div>
-    </div>
+    </main>
+
+    <main class="view-container" id="view-receipt">
+        <div class="content-scroll">
+            <h2 style="font-size:14px; margin-bottom:10px;">Generate Receipt</h2>
+            <div class="receipt-form">
+                <datalist id="customerNamesList"></datalist>
+                <div class="r-group"><input type="text" id="r-name" list="customerNamesList" placeholder="Customer Name" autocomplete="off"></div>
+                <div class="r-group"><input type="text" id="r-id" placeholder="Player ID / Zone"></div>
+                <div class="r-group"><input type="text" id="r-game" placeholder="Game Name"></div>
+                <div class="r-group"><input type="text" id="r-item" placeholder="Item / Amount"></div>
+                <div class="r-group"><input type="number" id="r-price" placeholder="Price (KS)"></div>
+                <button class="btn-primary" onclick="window.showReceiptSlip()" style="width:100%; justify-content:center; padding:10px;">Preview Receipt</button>
+            </div>
+            
+            <div class="receipt-slip-wrapper" id="receiptOutput">
+                <div class="receipt-slip" id="printableReceipt" style="background:#fff; padding:15px; border:1px solid #eee; text-align:center; max-width: 280px; margin: 0 auto;">
+                    <img id="r-logo-img" src="" style="max-height:40px; display:none; margin: 0 auto 5px;">
+                    <h3 id="r-brand-text" style="margin:0; font-size:14px;">Store Manager</h3>
+                    <p id="out-date" style="font-size:9px; color:#888; margin-bottom:10px;"></p>
+                    <div style="text-align:left; font-size: 11px; line-height: 1.6;">
+                        <p><strong>Name:</strong> <span id="out-name"></span></p>
+                        <p><strong>ID:</strong> <span id="out-id"></span></p>
+                        <p><strong>Game:</strong> <span id="out-game"></span></p>
+                        <p><strong>Item:</strong> <span id="out-item"></span></p>
+                    </div>
+                    <h4 style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px; font-size:13px;">Total: <span id="out-price"></span></h4>
+                </div>
+                <button class="btn-primary" style="background:var(--green); margin: 0 auto;" onclick="window.downloadReceiptImage()">Download Image</button>
+            </div>
+        </div>
+    </main>
+
+    <main class="view-container" id="view-replies">
+        <div class="content-scroll">
+            <h2 style="font-size:14px; margin-bottom:10px;">Quick Replies</h2>
+            <div class="add-reply-box">
+                <textarea id="newReplyText" placeholder="Add new reply text..."></textarea>
+                <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="window.addNewReply()">+ Save Reply</button>
+            </div>
+            <div class="replies-grid" id="repliesGrid"></div>
+        </div>
+    </main>
+
+    <main class="view-container" id="view-settings">
+        <div class="content-scroll">
+            <div class="settings-container">
+                <div class="settings-header">Store Settings (Branding)</div>
+                <div class="s-group">
+                    <label>Store Name</label>
+                    <input type="text" id="settingStoreName" placeholder="e.g. My Topup Store">
+                </div>
+                <div class="s-group">
+                    <label>Store Logo</label>
+                    <input type="file" id="settingStoreLogoInput" accept="image/*" style="display:none;" onchange="window.handleStoreLogoUpload(event)">
+                    <label for="settingStoreLogoInput" style="display:inline-block; background:#eee; padding:6px 10px; font-size:11px; cursor:pointer; border-radius:4px; font-weight:bold;">Upload Logo</label>
+                    <div id="logoPreviewBox" style="margin-top:10px; width:60px; height:60px; border:1px dashed #ccc; display:flex; align-items:center; justify-content:center; font-size:9px; color:#888;">No Logo</div>
+                </div>
+                <button class="btn-primary" style="width:100%; justify-content:center; padding:10px;" onclick="window.saveStoreSettings()">Save Settings</button>
+            </div>
+        </div>
+    </main>
 
     <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-app.js";
-        import { getFirestore, collection, addDoc, updateDoc, onSnapshot, query, orderBy, serverTimestamp, doc } from "https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
+        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
+        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
+        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        // *** မိတ်ဆွေ၏ FIREBASE CONFIG အစစ် ***
         const firebaseConfig = {
             apiKey: "AIzaSyBCBimkrfs-TGM-TioINkZfmQiBvIBsp1s",
             authDomain: "atomx-d-project.firebaseapp.com",
@@ -246,300 +395,285 @@
             measurementId: "G-Q8RJF1DPYW"
         };
 
-        // --- FIREBASE SETUP ---
-        let db, accountsRef, logsRef;
-        try {
-            const app = initializeApp(firebaseConfig);
-            db = getFirestore(app);
-            accountsRef = collection(db, "accounts");
-            logsRef = collection(db, "logs");
-            console.log("Connected to Firebase!");
-        } catch (e) {
-            console.error("Firebase Init Error:", e);
-            alert("Connection Error! Please check your internet.");
-        }
+        const app = initializeApp(firebaseConfig);
+        const analytics = getAnalytics(app);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
 
-        // --- GLOBAL VARS ---
-        let localAccounts = []; 
-        let localLogs = [];
-        let currentUser = null;
-        let hapticEnabled = localStorage.getItem('haptic') !== 'false'; 
-        
-        function triggerHaptic(pattern = 30) {
-            if(hapticEnabled && navigator.vibrate) navigator.vibrate(pattern);
-        }
+        // Global State
+        let currentUserUid = null;
+        let storeData = { "Mobile Legends": [] };
+        let activeGame = "Mobile Legends";
+        let userQuickReplies = [];
+        let storeProfile = { name: "Store Manager", logo: "" };
+        let customersData = {};
+        let useExchange = false;
+        let exchangeRate = 3500;
+        let gameToDelete = "";
 
-        // --- 1. LOGIN ---
-        const VALID_USERS = { "Ei Ko Zin": "78521896", "Raycod": "78521896", "Htoo San": "78521896" };
-        
-        window.handleLogin = async function() {
-            const u = document.getElementById('loginUser').value.trim();
-            const p = document.getElementById('loginPass').value.trim();
-            if (VALID_USERS[u] && VALID_USERS[u] === p) {
-                currentUser = u;
-                document.getElementById('dashUser').innerText = u;
-                document.getElementById('dashTime').innerText = new Date().toLocaleTimeString();
-                
-                document.getElementById('loginPage').style.display = 'none';
-                document.getElementById('loadingScreen').style.display = 'flex';
-                
-                await logAction('Login', `User ${u} Logged In`, 'login');
-                startListeners(); // Start syncing
+        const svgTrash = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
+        const svgCopy = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
+        const svgCheck = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+        const svgEdit = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+
+        // Ensure "Loading..." isn't stuck if auth takes time
+        document.getElementById('currentGameTitle').innerText = "Connecting...";
+
+        // ================= AUTHENTICATION =================
+        const showMsg = (msg, isErr) => { const el=document.getElementById('authMsg'); el.innerText=msg; el.style.color=isErr?"var(--red)":"var(--green)"; };
+        window.handleLogin = () => { showMsg("Logging in...", false); signInWithEmailAndPassword(auth, document.getElementById('authEmail').value, document.getElementById('authPassword').value).catch(e => showMsg(e.message, true)); };
+        window.handleRegister = () => { showMsg("Registering...", false); createUserWithEmailAndPassword(auth, document.getElementById('authEmail').value, document.getElementById('authPassword').value).catch(e => showMsg(e.message, true)); };
+        window.handleLogout = () => { signOut(auth); };
+
+        onAuthStateChanged(auth, async (user) => {
+            if (user) {
+                currentUserUid = user.uid;
+                document.getElementById('authScreen').style.display = 'none';
+                await loadDataFromFirebase();
             } else {
-                showToast('Invalid Login!', 'error');
-                triggerHaptic([50, 50, 50]);
+                currentUserUid = null;
+                document.getElementById('authScreen').style.display = 'flex';
+                document.getElementById('currentGameTitle').innerText = "Please Login";
             }
-        };
+        });
 
-        window.togglePass = function() {
-            const p = document.getElementById('loginPass');
-            p.type = p.type === 'password' ? 'text' : 'password';
-        }
-
-        // --- 2. FIREBASE SYNC ---
-        function startListeners() {
-            // Sync Accounts
-            const q = query(accountsRef, orderBy("createdAt", "desc"));
-            onSnapshot(q, (snapshot) => {
-                localAccounts = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                document.getElementById('loadingScreen').style.display = 'none';
-                document.getElementById('mainApp').style.display = 'block';
-                updateStats();
-                if(document.getElementById('listPage').style.display === 'block') renderList();
-            });
-
-            // Sync Logs
-            const logQ = query(logsRef, orderBy("time", "desc"));
-            onSnapshot(logQ, (snapshot) => {
-                localLogs = snapshot.docs.map(doc => ({ id: doc.id, ...doc.data() }));
-                if(document.getElementById('logPage').style.display === 'block') renderLogs();
-            });
-        }
-
-        // --- 3. CRUD ---
-        window.saveData = async function() {
-            const id = document.getElementById('editId').value;
-            const bankNum = document.getElementById('bankNum').value;
-            
-            // Duplicate Check
-            if(localAccounts.some(acc => acc.bankNum === bankNum && acc.id !== id)) {
-                showToast("Number Exists!", 'error'); triggerHaptic(100); return;
-            }
-
-            const data = {
-                name: document.getElementById('name').value,
-                bankNum: bankNum,
-                nrc: document.getElementById('nrc').value,
-                pin: document.getElementById('pin').value,
-                autoNo: document.getElementById('autoNo').value,
-                platform: document.getElementById('platform').value,
-                updatedAt: new Date().toLocaleString(),
-                updatedBy: currentUser
-            };
-
-            if(!data.name || !data.bankNum || !data.platform) { showToast("Missing Info!", 'error'); triggerHaptic(100); return; }
-
+        // ================= FIRESTORE DB =================
+        async function loadDataFromFirebase() {
             try {
-                if(id) {
-                    await updateDoc(doc(db, "accounts", id), data);
-                    await logAction('Edit', `Updated ${data.name} (${data.platform})`, 'edit');
-                    showToast("Updated!", 'success');
+                const docSnap = await getDoc(doc(db, "stores", currentUserUid));
+                if (docSnap.exists()) {
+                    const d = docSnap.data();
+                    storeData = d.inventory || { "Mobile Legends": [] };
+                    userQuickReplies = d.quickReplies || ["Thanks for purchasing!"];
+                    storeProfile = d.profile || { name: "Store Manager", logo: "" };
+                    customersData = d.customers || {};
+                    useExchange = d.useExchange || false;
+                    exchangeRate = d.exchangeRate || 3500;
+                    activeGame = Object.keys(storeData)[0] || "Mobile Legends";
                 } else {
-                    data.createdAt = new Date().toLocaleString();
-                    data.createdBy = currentUser;
-                    await addDoc(accountsRef, data);
-                    await logAction('Create', `Created ${data.name} (${data.platform})`, 'create');
-                    showToast("Created!", 'success');
+                    userQuickReplies = ["Thanks for purchasing!"];
+                    await saveToFirebase(); 
                 }
-                resetForm();
-                triggerHaptic(50);
-            } catch (e) {
-                console.error(e);
-                showToast("Save Error!", 'error');
+                
+                document.getElementById('exchangeToggle').checked = useExchange;
+                document.getElementById('exchangeRate').value = exchangeRate;
+                applyProfileToUI();
+                window.renderSidebar();
+                window.renderTable();
+                window.renderQuickReplies();
+                window.populateCustomerList();
+            } catch (error) {
+                console.error("Load Error:", error);
+                document.getElementById('currentGameTitle').innerText = "Error loading data";
+            }
+        }
+
+        async function saveToFirebase() {
+            if (!currentUserUid) return;
+            try {
+                await setDoc(doc(db, "stores", currentUserUid), {
+                    inventory: storeData, quickReplies: userQuickReplies, profile: storeProfile,
+                    customers: customersData, useExchange: useExchange, exchangeRate: exchangeRate
+                }, { merge: true });
+            } catch (error) { console.error("Save Error:", error); }
+        }
+
+        // ================= GLOBAL EXPORTS (Fixes Loading/Click bugs) =================
+        
+        const applyProfileToUI = () => {
+            document.getElementById('topStoreNameDisplay').innerText = storeProfile.name;
+            document.getElementById('r-brand-text').innerText = storeProfile.name;
+            document.getElementById('settingStoreName').value = storeProfile.name;
+            if(storeProfile.logo) {
+                document.getElementById('logoPreviewBox').innerHTML = `<img src="${storeProfile.logo}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+                document.getElementById('r-logo-img').src = storeProfile.logo;
+                document.getElementById('r-logo-img').style.display = 'block';
             }
         };
 
-        window.renderList = function() {
-            const grid = document.getElementById('gridContainer');
-            grid.innerHTML = '';
-            const q = document.getElementById('searchBox').value.toLowerCase();
-            
-            localAccounts.filter(i => i.name.toLowerCase().includes(q) || i.bankNum.includes(q)).forEach(item => {
-                const div = document.createElement('div');
-                div.className = 'card';
-                div.onclick = () => openModal(item);
-                div.innerHTML = `
-                    <div class="user-icon"><i class="fas fa-user"></i></div>
-                    <div class="card-info">
-                        <div class="card-title privacy-sensitive">${item.name}</div>
-                        <div class="card-sub">${item.platform}</div>
-                        <div class="card-sub privacy-sensitive">${item.bankNum}</div>
-                        <div class="card-time">Created: ${item.createdAt?.split(',')[0] || '-'}</div>
-                    </div>
+        window.saveStoreSettings = () => { storeProfile.name = document.getElementById('settingStoreName').value || "Store"; applyProfileToUI(); saveToFirebase(); alert("Settings saved!"); };
+        window.handleStoreLogoUpload = (e) => {
+            const file = e.target.files[0]; if(!file) return;
+            const r = new FileReader();
+            r.onload = (ev) => {
+                const img = new Image();
+                img.onload = () => {
+                    const c = document.createElement('canvas'); c.width = 100; c.height = 100;
+                    c.getContext('2d').drawImage(img, 0, 0, 100, 100);
+                    storeProfile.logo = c.toDataURL('image/jpeg', 0.8);
+                    document.getElementById('logoPreviewBox').innerHTML = `<img src="${storeProfile.logo}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
+                };
+                img.src = ev.target.result;
+            }; r.readAsDataURL(file);
+        };
+
+        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); };
+        window.switchView = (v) => {
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
+            document.getElementById(`view-${v}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
+            document.getElementById(`nav-${v}`).classList.add('active');
+            if(window.innerWidth < 1024) window.toggleSidebar();
+        };
+
+        window.renderSidebar = () => {
+            const list = document.getElementById('sidebarGameList'); list.innerHTML = '';
+            Object.keys(storeData).forEach((name, i) => {
+                const li = document.createElement('li'); li.className = `game-item ${name === activeGame ? 'active' : ''}`;
+                li.innerHTML = `<span onclick="window.selectSidebarGame('${name}')">${i+1}. ${name}</span> <span><span class="count-badge">${storeData[name].length}</span><button class="btn-del-game" onclick="window.openConfirmModal('${name}', event)">${svgTrash}</button></span>`;
+                list.appendChild(li);
+            });
+        };
+
+        window.selectSidebarGame = (name) => { window.saveCurrentInputs(); activeGame = name; window.renderSidebar(); window.renderTable(); saveToFirebase(); if(window.innerWidth<1024) window.toggleSidebar(); };
+        window.addCategory = () => { const v = document.getElementById('newCategoryInput').value.trim(); if(v && !storeData[v]) { window.saveCurrentInputs(); storeData[v] = []; activeGame = v; window.renderSidebar(); window.renderTable(); saveToFirebase(); document.getElementById('newCategoryInput').value = ''; }};
+        
+        window.openConfirmModal = (name, e) => { e.stopPropagation(); gameToDelete = name; document.getElementById('confirmModal').style.display='flex'; };
+        window.closeConfirmModal = () => { gameToDelete = ""; document.getElementById('confirmModal').style.display='none'; };
+        window.executeDeleteGame = () => { if(gameToDelete && storeData[gameToDelete]) { delete storeData[gameToDelete]; activeGame = Object.keys(storeData)[0] || ""; window.renderSidebar(); window.renderTable(); saveToFirebase(); } window.closeConfirmModal(); };
+
+        window.toggleExchange = () => { useExchange = document.getElementById('exchangeToggle').checked; document.getElementById('exchangeWrap').style.display = useExchange ? 'flex' : 'none'; window.renderTable(); saveToFirebase(); };
+        window.updateRate = () => { exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 3500; window.renderTable(); saveToFirebase(); };
+
+        window.renderTable = () => {
+            if(!activeGame || !storeData[activeGame]) { document.getElementById('currentGameTitle').innerText = "No Game"; return; }
+            document.getElementById('currentGameTitle').innerText = activeGame;
+            document.getElementById('exchangeWrap').style.display = useExchange ? 'flex' : 'none';
+            document.getElementById('th-foreign').style.display = useExchange ? 'block' : 'none';
+
+            const tbody = document.getElementById('sheetBody'); tbody.innerHTML = '';
+            if(storeData[activeGame].length === 0) storeData[activeGame].push({name:'', code:'', fCost:0, cost:'', sell:'', qty:1, isRead:false});
+
+            storeData[activeGame].forEach((item, idx) => {
+                if(useExchange) item.cost = (item.fCost || 0) * exchangeRate;
+                const isR = item.isRead ? 'used' : ''; const iC = item.isRead ? svgCheck : svgCopy;
+                
+                const tr = document.createElement('tr'); tr.className = "data-row";
+                tr.innerHTML = `
+                    <td class="col-name">
+                        <span class="mobile-label">Item Name</span>
+                        <input type="text" class="in-name" value="${item.name||''}" oninput="window.updateItem(${idx}, 'name', this.value)">
+                    </td>
+                    <td class="col-del"><button class="btn-delete" onclick="window.deleteRow(${idx})">${svgTrash}</button></td>
+                    
+                    <td class="col-code">
+                        <span class="mobile-label">Redeem Code</span>
+                        <div class="code-wrapper">
+                            <input type="text" class="code-input ${isR}" id="code-${idx}" value="${item.code||''}" oninput="window.updateItem(${idx}, 'code', this.value)">
+                            <button class="btn-copy ${isR}" onclick="window.copyCode(${idx})" id="cb-${idx}">${iC}</button>
+                        </div>
+                    </td>
+                    
+                    <td class="col-fcost" style="display:${useExchange?'block':'none'}"><span class="mobile-label">Cost ($)</span><input type="number" class="text-right in-fcost" value="${item.fCost||''}" oninput="window.updateItem(${idx}, 'fCost', this.value)"></td>
+                    <td class="col-cost"><span class="mobile-label">Cost (KS)</span><input type="number" class="text-right in-cost" ${useExchange?'readonly':''} value="${item.cost||''}" oninput="window.updateItem(${idx}, 'cost', this.value)"></td>
+                    <td class="col-sell"><span class="mobile-label">Sell (KS)</span><input type="number" class="text-right in-sell" value="${item.sell||''}" oninput="window.updateItem(${idx}, 'sell', this.value)"></td>
+                    <td class="col-qty"><span class="mobile-label">Qty</span><input type="number" class="text-center in-qty" value="${item.qty||1}" oninput="window.updateItem(${idx}, 'qty', this.value)"></td>
+                    <td class="col-profit"><span class="mobile-label">Profit (KS)</span><div class="profit-cell" id="p-${idx}">0</div></td>
                 `;
-                grid.appendChild(div);
+                tbody.appendChild(tr);
             });
+            window.calculate(); window.filterItems();
         };
 
-        async function logAction(action, desc, type) {
-            if(!db) return;
-            const ua = navigator.userAgent;
-            let device = "Desktop";
-            if(/Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua)) device = "Mobile";
-
-            await addDoc(logsRef, {
-                action, desc, type, user: currentUser, device: device,
-                time: serverTimestamp()
-            });
-        }
-
-        window.renderLogs = function() {
-            const container = document.getElementById('logContainer');
-            container.innerHTML = '';
-            localLogs.forEach(log => {
-                const date = log.time ? new Date(log.time.seconds * 1000).toLocaleString() : 'Just now';
-                const div = document.createElement('div');
-                div.className = `log-item ${log.type}`;
-                div.innerHTML = `
-                    <div>
-                        <div style="font-weight:500;">${log.action} <span style="font-weight:normal">- ${log.user} (${log.device || 'N/A'})</span></div>
-                        <div style="font-size:0.75rem; color:#94a3b8; margin-top:2px;">${log.desc}</div>
-                    </div>
-                    <div style="font-size:0.75rem; color:#94a3b8; text-align:right;">${date.split(',')[1]}<br>${date.split(',')[0]}</div>
-                `;
-                container.appendChild(div);
-            });
+        window.updateItem = (idx, f, v) => {
+            let n = parseFloat(v) || 0;
+            if(f==='name' || f==='code') storeData[activeGame][idx][f] = v; else storeData[activeGame][idx][f] = n;
+            if(f==='code') { storeData[activeGame][idx].isRead = false; document.getElementById(`code-${idx}`).classList.remove('used'); document.getElementById(`cb-${idx}`).classList.remove('used'); document.getElementById(`cb-${idx}`).innerHTML = svgCopy; }
+            if(f==='fCost' && useExchange) { storeData[activeGame][idx].cost = n * exchangeRate; const r = document.querySelectorAll('#sheetBody tr.data-row'); if(r[idx]) r[idx].querySelector('.in-cost').value = storeData[activeGame][idx].cost; }
+            window.calculate(); saveToFirebase();
         };
 
-        // --- UTILS ---
-        let currentItem = null;
-        window.openModal = function(item) {
-            currentItem = item;
-            document.getElementById('modalName').innerText = item.name;
-            document.getElementById('modalPlatform').innerText = item.platform;
-            document.getElementById('modalNum').innerText = item.bankNum;
-            document.getElementById('modalNrc').innerText = item.nrc || '-';
-            document.getElementById('modalPin').innerText = item.pin || '-';
-            document.getElementById('modalAuto').innerText = item.autoNo || '-';
+        window.copyCode = (idx) => {
+            const v = storeData[activeGame][idx].code; if(!v) return;
+            navigator.clipboard.writeText(v).then(() => { storeData[activeGame][idx].isRead = true; document.getElementById(`code-${idx}`).classList.add('used'); document.getElementById(`cb-${idx}`).classList.add('used'); document.getElementById(`cb-${idx}`).innerHTML = svgCheck; saveToFirebase(); });
+        };
+
+        window.calculate = () => {
+            let tc=0, tr=0, tp=0;
+            storeData[activeGame].forEach((i, idx) => {
+                let c=(i.cost||0)*(i.qty||0); let s=(i.sell||0)*(i.qty||0); let p=s-c; tc+=c; tr+=s; tp+=p;
+                const pEl = document.getElementById(`p-${idx}`); if(pEl){ pEl.innerText = p.toLocaleString(); pEl.style.color = p>0?'var(--primary-blue)':(p<0?'var(--red)':'var(--text-dark)');}
+            });
+            document.getElementById('totalCostVal').innerText = tc.toLocaleString(); document.getElementById('totalRevenueVal').innerText = tr.toLocaleString(); document.getElementById('totalProfitVal').innerText = tp.toLocaleString(); document.getElementById('totalProfitVal').style.color = tp>0?'var(--primary-blue)':(tp<0?'var(--red)':'inherit');
+        };
+
+        window.saveCurrentInputs = () => {
+            const rows = document.querySelectorAll('#sheetBody tr.data-row'); if(rows.length === 0) return;
+            const up = [];
+            rows.forEach((r, i) => {
+                const n = r.querySelector('.in-name').value; 
+                if(n || r.querySelector('.code-input').value || r.querySelector('.in-sell').value){ 
+                    up.push({ name:n, code:r.querySelector('.code-input').value, isRead:storeData[activeGame][i]?.isRead||false, fCost:parseFloat(r.querySelector('.in-fcost')?.value)||0, cost:parseFloat(r.querySelector('.in-cost').value)||0, sell:parseFloat(r.querySelector('.in-sell').value)||0, qty:parseFloat(r.querySelector('.in-qty').value)||1 });
+                }
+            });
+            if(up.length>0) storeData[activeGame] = up;
+        };
+
+        window.addRow = () => { window.saveCurrentInputs(); storeData[activeGame].push({name:'', code:'', isRead:false, fCost:0, cost:'', sell:'', qty:1}); window.renderTable(); saveToFirebase(); };
+        window.deleteRow = (idx) => { window.saveCurrentInputs(); storeData[activeGame].splice(idx, 1); window.renderTable(); saveToFirebase(); };
+        window.filterItems = () => { const f = document.getElementById('searchInput').value.toLowerCase(); document.querySelectorAll('#sheetBody tr.data-row').forEach(r => { const n=r.querySelector('.in-name').value.toLowerCase(); const c=r.querySelector('.code-input').value.toLowerCase(); r.style.display = (n.includes(f) || c.includes(f)) ? "" : "none"; }); };
+
+        // Export / Import CSV
+        window.exportToCSV = () => {
+            window.saveCurrentInputs(); let csv = "data:text/csv;charset=utf-8,\uFEFFItem,Code,Cost,Sell,Qty,Profit\n";
+            storeData[activeGame].forEach(i => { csv += `"${i.name||''}","${i.code||''}",${i.cost},${i.sell},${i.qty},${(i.sell-i.cost)*i.qty}\n`; });
+            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `${activeGame}.csv`); document.body.appendChild(link); link.click();
+        };
+        window.importCSV = (e) => {
+            const f = e.target.files[0]; if(!f) return;
+            const r = new FileReader();
+            r.onload = (event) => {
+                const rows = event.target.result.split('\n'); let newItems = [];
+                for(let i=1; i<rows.length; i++) {
+                    if(!rows[i].trim()) continue;
+                    const cols = rows[i].replace(/"/g, '').split(',');
+                    newItems.push({ name: cols[0]||'', code: cols[1]||'', isRead: false, fCost: 0, cost: parseFloat(cols[2])||0, sell: parseFloat(cols[3])||0, qty: parseFloat(cols[4])||1 });
+                }
+                if(newItems.length > 0) { window.saveCurrentInputs(); storeData[activeGame] = storeData[activeGame].concat(newItems); saveToFirebase(); window.renderTable(); }
+                document.getElementById('importCsvInput').value = '';
+            }; r.readAsText(f);
+        };
+
+        // Quick Replies
+        window.renderQuickReplies = () => {
+            const g = document.getElementById('repliesGrid'); g.innerHTML = '';
+            userQuickReplies.forEach((t, i) => {
+                const d = document.createElement('div'); d.style.cssText = "background:var(--white); border:1px solid var(--border-color); border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:6px;";
+                d.innerHTML = `<div style="font-size:12px; background:var(--gray-light); padding:8px; border-radius:4px;" id="rt-${i}">${t}</div>
+                <div style="display:flex; justify-content:flex-end; gap:5px;">
+                    <button onclick="window.editReply(${i})" style="background:#eee; padding:5px; border-radius:4px;">${svgEdit}</button>
+                    <button onclick="window.deleteReply(${i})" style="background:#fee2e2; color:red; padding:5px; border-radius:4px;">${svgTrash}</button>
+                    <button onclick="window.copyReplyText(${i}, this)" style="background:var(--primary-blue); color:white; padding:5px 10px; border-radius:4px; font-size:11px; display:flex; gap:4px; align-items:center;">${svgCopy} Copy</button>
+                </div>`;
+                g.appendChild(d);
+            });
+        };
+        window.addNewReply = () => { const t = document.getElementById('newReplyText').value.trim(); if(t){ userQuickReplies.push(t); saveToFirebase(); document.getElementById('newReplyText').value = ''; window.renderQuickReplies(); }};
+        window.editReply = (i) => { const n = prompt("Edit reply:", userQuickReplies[i]); if(n!==null && n.trim()!==""){ userQuickReplies[i]=n.trim(); saveToFirebase(); window.renderQuickReplies(); }};
+        window.deleteReply = (i) => { if(confirm("Delete this reply?")){ userQuickReplies.splice(i, 1); saveToFirebase(); window.renderQuickReplies(); }};
+        window.copyReplyText = (i, btn) => { navigator.clipboard.writeText(document.getElementById(`rt-${i}`).innerText).then(()=>{ const o=btn.innerHTML; btn.innerHTML=`${svgCheck} Copied!`; btn.style.background='var(--green)'; setTimeout(()=>{btn.innerHTML=o; btn.style.background='var(--primary-blue)';}, 2000);});};
+
+        // Receipt Generator
+        window.populateCustomerList = () => { const dl = document.getElementById('customerNamesList'); dl.innerHTML = ''; for(let n in customersData){ const o = document.createElement('option'); o.value = n; dl.appendChild(o); }};
+        document.getElementById('r-name').addEventListener('input', function(){ if(customersData[this.value.trim()]){ document.getElementById('r-id').value = customersData[this.value.trim()]; }});
+
+        window.showReceiptSlip = () => {
+            const n = document.getElementById('r-name').value.trim(); const pid = document.getElementById('r-id').value.trim();
+            if(n && pid){ customersData[n] = pid; saveToFirebase(); window.populateCustomerList(); }
             
-            let color = 'bg-other';
-            let iconColor = '#334155';
-            if(item.platform.includes('KBZ')) { color = 'bg-kpay'; iconColor = '#0056b3'; }
-            if(item.platform.includes('Wave')) { color = 'bg-wave'; iconColor = '#fbbf24'; }
-            if(item.platform.includes('CB')) { color = 'bg-cb'; iconColor = '#000080'; }
-            if(item.platform.includes('UAB')) { color = 'bg-uab'; iconColor = '#000'; }
-            if(item.platform.includes('Yoma')) { color = 'bg-yoma'; iconColor = '#dc2626'; }
-
-            document.getElementById('modalHeaderBg').className = 'modal-header ' + color;
-            document.getElementById('modalProfile').style.color = iconColor;
-            document.getElementById('detailModal').classList.add('active');
-            triggerHaptic(20);
+            document.getElementById('out-date').innerText = new Date().toLocaleString();
+            document.getElementById('out-name').innerText = n || "-";
+            document.getElementById('out-id').innerText = pid || "-";
+            document.getElementById('out-game').innerText = document.getElementById('r-game').value || "-";
+            document.getElementById('out-item').innerText = document.getElementById('r-item').value || "-";
+            document.getElementById('out-price').innerText = (document.getElementById('r-price').value || "0") + " KS";
+            document.getElementById('receiptOutput').style.display = 'flex';
         };
 
-        window.editAccount = function() {
-            window.closeModal();
-            document.getElementById('editId').value = currentItem.id;
-            document.getElementById('name').value = currentItem.name;
-            document.getElementById('bankNum').value = currentItem.bankNum;
-            document.getElementById('nrc').value = currentItem.nrc;
-            document.getElementById('pin').value = currentItem.pin;
-            document.getElementById('autoNo').value = currentItem.autoNo;
-            document.getElementById('platform').value = currentItem.platform;
-            
-            document.getElementById('formTitle').innerText = "Edit Account";
-            document.getElementById('saveBtn').innerText = "Update";
-            document.getElementById('cancelBtn').style.display = 'block';
-            
-            document.querySelectorAll('.chip').forEach(c => {
-                c.classList.remove('active');
-                if(c.innerText === currentItem.platform) c.classList.add('active');
-            });
-            window.navTo('createPage');
+        window.downloadReceiptImage = () => {
+            const s = document.getElementById('printableReceipt'); s.style.boxShadow = 'none'; s.style.border = 'none';
+            html2canvas(s, { scale: 2, backgroundColor: "#ffffff" }).then(c => { const l=document.createElement('a'); l.download=`Receipt.png`; l.href=c.toDataURL('image/png'); l.click(); s.style.boxShadow=''; s.style.border=''; });
         };
-
-        window.navTo = function(page, btn) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.getElementById(page).classList.add('active');
-            if(btn) {
-                document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-                btn.classList.add('active');
-            }
-            if(page === 'listPage') window.renderList();
-            if(page === 'logPage') window.renderLogs();
-            if(document.getElementById('sidebar').classList.contains('active')) window.toggleSidebar();
-        };
-
-        window.setPlatform = function(el, val) {
-            document.getElementById('platform').value = val;
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            el.classList.add('active');
-            triggerHaptic(10);
-        };
-
-        window.updateStats = function() {
-            document.getElementById('totalCount').innerText = localAccounts.length;
-            const today = new Date().toDateString();
-            document.getElementById('todayCount').innerText = localAccounts.filter(i => i.createdAt && new Date(i.createdAt).toDateString() === today).length;
-        };
-
-        window.logout = function() {
-            if(confirm("Log Out?")) window.location.reload();
-        };
-
-        window.toggleSidebar = function() {
-            document.getElementById('sidebar').classList.toggle('active');
-            document.getElementById('overlay').classList.toggle('active');
-            triggerHaptic(15);
-        };
-        window.togglePrivacy = function() {
-            document.body.classList.toggle('privacy-active');
-            triggerHaptic(20);
-        };
-        window.toggleHaptic = function() {
-            hapticEnabled = !hapticEnabled;
-            localStorage.setItem('haptic', hapticEnabled);
-            document.getElementById('hapticSwitch').classList.toggle('toggle-active');
-            if(hapticEnabled) triggerHaptic(50);
-        };
-        if(hapticEnabled) document.getElementById('hapticSwitch').classList.add('toggle-active');
-
-        window.closeModal = function() { document.getElementById('detailModal').classList.remove('active'); };
-        window.toggleFormPin = function() { const p = document.getElementById('pin'); p.type = p.type==='password'?'text':'password'; };
-        window.copyText = function(txt) { if(txt!=='-') { navigator.clipboard.writeText(txt); window.showToast('Copied!', 'success'); triggerHaptic(40); }};
-        window.showToast = function(msg, type) {
-            const t = document.getElementById('toast');
-            document.getElementById('toastMsg').innerText = msg;
-            t.className = 'toast show ' + type;
-            document.getElementById('toastIcon').className = type==='error'?'fas fa-times-circle':'fas fa-check-circle';
-            setTimeout(() => t.classList.remove('show'), 3000);
-        };
-        window.toggleTheme = function() {
-            const b = document.body;
-            b.setAttribute('data-theme', b.getAttribute('data-theme')==='dark'?'':'dark');
-            triggerHaptic(20);
-        };
-        window.resetForm = function() {
-            document.getElementById('editId').value = '';
-            ['name','bankNum','nrc','pin','autoNo'].forEach(id => document.getElementById(id).value = '');
-            document.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
-            document.getElementById('formTitle').innerText = "Create Account";
-            document.getElementById('saveBtn').innerText = "Create Account";
-            document.getElementById('cancelBtn').style.display = 'none';
-        };
-
-        // Connection & Clock
-        function updateNet() {
-            const i = document.getElementById('wifiIcon');
-            i.className = navigator.onLine ? 'fas fa-wifi status-indicator status-online' : 'fas fa-wifi status-indicator status-offline';
-        }
-        window.addEventListener('online', updateNet); window.addEventListener('offline', updateNet); updateNet();
-
-        setInterval(() => {
-            const d = new Date();
-            document.getElementById('clock').innerText = d.toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
-            document.getElementById('date').innerText = d.toLocaleDateString([], {weekday:'short', day:'numeric', month:'short'});
-        }, 1000);
-
     </script>
 </body>
 </html>
