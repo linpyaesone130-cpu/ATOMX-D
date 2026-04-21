@@ -3,676 +3,619 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Game Store Manager Pro</title>
-    <meta name="theme-color" content="#1d4ed8">
+    <title>PCA Store Manager</title>
+    <meta name="theme-color" content="#1877f2">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <style>
-        /* ================= Theme Variables ================= */
+        /* ================= Theme Variables (Facebook Light) ================= */
         :root {
-            --primary-blue: #1d4ed8; --dark-blue: #1e3a8a; --light-blue: #eff6ff; --hover-blue: #2563eb;
-            --bg-color: #f1f5f9; --white: #ffffff; --text-dark: #0f172a; --text-gray: #64748b;
-            --border-color: #cbd5e1; --red: #ef4444; --green: #10b981; --gray-light: #f8fafc;
-            --sidebar-bg: #121212; --sidebar-header: #000000; --sidebar-hover: #222222;
-            --sidebar-border: #333333; --sidebar-text: #e5e7eb;
-            --header-height: 50px;
+            --primary: #1877f2;
+            --primary-hover: #166fe5;
+            --bg-color: #f0f2f5;
+            --card-bg: #ffffff;
+            --text-main: #050505;
+            --text-sec: #65676b;
+            --border: #ced0d4;
+            --hover-bg: #e4e6eb;
+            --danger: #e41e3f;
+            --success: #31a24c;
+            --header-height: 56px;
+            --shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
+            --transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+        }
+
+        /* ================= Theme Variables (Black & Orange Dark) ================= */
+        [data-theme="dark"] {
+            --primary: #ff8c00;
+            --primary-hover: #e07b00;
+            --bg-color: #000000;
+            --card-bg: #1c1c1e;
+            --text-main: #e4e6eb;
+            --text-sec: #b0b3b8;
+            --border: #333333;
+            --hover-bg: #2c2c2e;
+            --danger: #ff4d4d;
+            --success: #00e676;
+            --shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: 'Segoe UI', Tahoma, sans-serif; background: var(--bg-color); color: var(--text-dark); overflow: hidden; height: 100vh; width: 100vw; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-        button { cursor: pointer; border: none; outline: none; background: transparent; }
-        svg { display: block; }
+        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-color); color: var(--text-main); overflow: hidden; height: 100vh; width: 100vw; transition: var(--transition); }
+        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button, select, textarea { outline: none; }
+        button { cursor: pointer; border: none; outline: none; transition: var(--transition); background: transparent; color: inherit; font-family: inherit;}
+        svg { display: block; transition: var(--transition); }
 
-        /* ================= Login Screen ================= */
-        .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 99999; }
-        .auth-box { background: var(--white); padding: 25px 20px; border-radius: 12px; width: 90%; max-width: 320px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); border-top: 4px solid var(--primary-blue); text-align: center; }
-        .auth-box h2 { color: var(--primary-blue); margin-bottom: 5px; font-size: 18px;}
-        .auth-box p { font-size: 11px; color: var(--text-gray); margin-bottom: 15px; }
-        .auth-input { width: 100%; padding: 10px; margin-bottom: 10px; border: 1px solid var(--border-color); border-radius: 6px; font-size: 13px; outline: none; background: var(--gray-light); }
-        .auth-input:focus { border-color: var(--primary-blue); background: var(--white); }
-        .btn-auth { width: 100%; padding: 10px; background: var(--primary-blue); color: white; border-radius: 6px; font-weight: bold; margin-bottom: 10px; font-size: 13px;}
-        .btn-auth-outline { width: 100%; padding: 10px; background: transparent; color: var(--primary-blue); border: 1px solid var(--primary-blue); border-radius: 6px; font-weight: bold; font-size: 13px;}
-        #authMsg { font-size: 11px; margin-top: 10px; font-weight: bold; }
+        /* ================= PCA Loading Effect ================= */
+        #pca-loading { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--card-bg); z-index: 1000000; display: flex; align-items: center; justify-content: center; transition: opacity 0.5s ease;}
+        .pca-text { font-size: 36px; font-weight: 800; color: var(--primary); display: flex; gap: 6px; letter-spacing: 2px;}
+        .pca-text span { animation: bounce 1.2s infinite; opacity: 0;}
+        .pca-text span:nth-child(1) { animation-delay: 0s; }
+        .pca-text span:nth-child(2) { animation-delay: 0.2s; }
+        .pca-text span:nth-child(3) { animation-delay: 0.4s; }
+        @keyframes bounce { 0% { transform: translateY(0); opacity: 0; } 50% { transform: translateY(-20px); opacity: 1; } 100% { transform: translateY(0); opacity: 0; } }
+
+        /* ================= Feedback Toast ================= */
+        #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; width: 90%; max-width: 300px; display: flex; flex-direction: column; gap: 8px;}
+        .toast { background: var(--card-bg); color: var(--text-main); padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--primary); animation: slideDown 0.3s ease;}
+        .toast.success { border-left-color: var(--success); } .toast.error { border-left-color: var(--danger); }
+        .toast span { font-size: 13px; font-weight: 600; }
+        @keyframes slideDown { from { transform:translateY(-20px); opacity:0;} to {transform:translateY(0); opacity:1;} }
 
         /* ================= App Bar ================= */
-        .app-header { height: var(--header-height); background: var(--white); display: flex; align-items: center; justify-content: space-between; padding: 0 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); position: fixed; top: 0; left: 0; width: 100%; z-index: 40; border-bottom: 1px solid var(--border-color); }
-        .header-left { display: flex; align-items: center; gap: 8px; }
-        .menu-btn { color: var(--primary-blue); padding: 5px; display: flex; }
-        .app-title { font-size: 14px; font-weight: bold; color: var(--primary-blue); text-transform: uppercase; letter-spacing: 1px; max-width: 150px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .btn-logout { background: #fee2e2; color: var(--red); padding: 6px 12px; border-radius: 4px; font-size: 11px; font-weight: bold; }
+        .app-header { height: var(--header-height); background: var(--card-bg); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-shadow: var(--shadow); position: fixed; top: 0; left: 0; width: 100%; z-index: 40; }
+        .header-left { display: flex; align-items: center; gap: 12px; }
+        .menu-btn { color: var(--text-main); padding: 8px; background: var(--hover-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; }
+        .app-title { font-size: 16px; font-weight: 700; color: var(--primary); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 
         /* ================= Sidebar ================= */
-        .sidebar { width: 240px; background: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; height: 100vh; position: fixed; left: -250px; top: 0; z-index: 100; transition: 0.3s; box-shadow: 5px 0 15px rgba(0,0,0,0.4); }
-        .sidebar.open { transform: translateX(250px); }
-        .sidebar-header { padding: 0 15px; background: var(--sidebar-header); font-weight: bold; font-size: 13px; display: flex; justify-content: space-between; align-items: center; height: var(--header-height); border-bottom: 1px solid var(--sidebar-border); color: #fff; }
-        .close-btn { color: #fff; font-size: 18px; display: flex;}
+        .sidebar { width: 65vw; max-width: 280px; background: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; position: fixed; left: -100%; top: 0; z-index: 100; transition: left 0.3s cubic-bezier(0.2, 0, 0, 1); box-shadow: 5px 0 15px rgba(0,0,0,0.3); }
+        .sidebar.open { left: 0; }
+        .sidebar-header { padding: 0 16px; background: var(--card-bg); font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; align-items: center; height: var(--header-height); box-shadow: var(--shadow); z-index: 2;}
+        .close-btn { color: var(--text-sec); font-size: 20px; background: var(--hover-bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;}
         
-        .nav-menu { list-style: none; padding: 10px 0; border-bottom: 1px solid var(--sidebar-border); }
-        .nav-item { padding: 10px 15px; cursor: pointer; display: flex; align-items: center; gap: 10px; font-size: 12px; font-weight: bold; color: #aaa; transition: 0.2s; }
-        .nav-item:hover, .nav-item.active { background: var(--sidebar-hover); color: #fff; border-left: 3px solid var(--primary-blue); }
+        .sidebar-scroll { flex-grow: 1; overflow-y: auto; padding: 12px 8px; }
+        .nav-menu { list-style: none; margin-bottom: 15px; }
+        .nav-item { padding: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: var(--text-main); transition: var(--transition); background: var(--card-bg); border-radius: 8px; margin-bottom: 6px; box-shadow: var(--shadow); }
+        .nav-item svg { color: var(--primary); }
+        .nav-item:active, .nav-item.active { background: rgba(24, 119, 242, 0.1); color: var(--primary); }
+        [data-theme="dark"] .nav-item:active, [data-theme="dark"] .nav-item.active { background: rgba(255, 140, 0, 0.15); }
         
-        .sidebar-title { font-size: 10px; color: #666; text-transform: uppercase; padding: 10px 15px 5px; font-weight: bold; letter-spacing: 1px; }
-        .game-list { list-style: none; flex-grow: 1; overflow-y: auto; }
-        .game-item { padding: 8px 15px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: #ccc; border-bottom: 1px solid #1a1a1a;}
-        .game-item:hover, .game-item.active { background: rgba(255,255,255,0.05); color: #fff; }
-        .game-info { display: flex; align-items: center; gap: 8px; overflow: hidden; }
-        .game-no { font-weight: bold; color: #555; font-size: 11px; }
-        .game-actions { display: flex; align-items: center; gap: 5px; }
-        .count-badge { background: #333; padding: 2px 5px; border-radius: 8px; font-size: 10px; }
-        .btn-del-game { color: #ef4444; padding: 3px; border-radius: 4px; display: flex; align-items: center; transition: 0.2s; }
+        .sidebar-title { font-size: 13px; color: var(--text-sec); font-weight: 600; padding: 10px 8px 5px; }
+        .game-list { list-style: none; }
+        .game-item { padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-main); background: var(--card-bg); border-radius: 8px; margin-bottom: 6px; box-shadow: var(--shadow); font-weight: 500;}
+        .game-item.active { border-left: 4px solid var(--primary); }
+        .game-thumb-container { display: flex; align-items: center; gap: 8px; }
+        .sidebar-game-thumb { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; background: var(--hover-bg); border: 1px solid var(--border);}
         
-        .sidebar-footer { padding: 10px; background: var(--sidebar-header); display: flex; flex-direction: column; gap: 6px; border-top: 1px solid var(--sidebar-border); }
-        .sidebar-footer input[type="text"] { width: 100%; padding: 6px 8px; background: #1a1a1a; color: #fff; border: 1px solid var(--sidebar-border); border-radius: 4px; font-size: 12px; outline: none;}
-        .btn-add-game { background: var(--primary-blue); color: white; padding: 8px; border-radius: 4px; font-weight: bold; font-size: 12px; display: flex; align-items: center; justify-content: center; gap: 5px;}
+        .sidebar-footer { padding: 12px; background: var(--card-bg); display: flex; flex-direction: column; gap: 8px; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); }
+        .btn-add-game { background: var(--primary); color: white; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%;}
         
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50; display: none; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50; display: none; backdrop-filter: blur(2px); transition: var(--transition);}
         .overlay.show { display: block; }
 
-        /* ================= View Containers ================= */
+        /* ================= View Containers & Shared ================= */
         .view-container { display: none; padding-top: var(--header-height); height: 100vh; flex-direction: column; }
         .view-container.active { display: flex; }
-        .content-scroll { padding: 8px; overflow-y: auto; flex-grow: 1; padding-bottom: 60px; }
+        .content-scroll { padding: 12px; overflow-y: auto; flex-grow: 1; padding-bottom: 80px; }
         
-        /* Shared Buttons & Tools */
-        .page-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; }
-        .page-title-row h2 { color: var(--primary-blue); font-size: 14px; font-weight: bold; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
-        .action-btns-group { display: flex; gap: 4px; }
-        .btn-secondary { background: var(--white); color: var(--text-dark); border: 1px solid var(--border-color); padding: 5px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; display: flex; align-items: center; gap: 4px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); transition: 0.2s;}
-        .btn-primary { background: var(--primary-blue); color: white; padding: 5px 8px; border-radius: 4px; font-size: 10px; font-weight: bold; box-shadow: 0 1px 2px rgba(29, 78, 216, 0.3); display: flex; align-items: center; gap: 4px;}
-
-        .tools-row { background: var(--white); border: 1px solid var(--border-color); border-radius: 6px; padding: 6px 8px; margin-bottom: 8px; display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 6px;}
-        .search-box { display: flex; align-items: center; gap: 4px; background: var(--gray-light); border: 1px solid var(--border-color); border-radius: 4px; padding: 4px 6px; flex-grow: 1; max-width: 130px; }
-        .search-box input { border: none; background: transparent; outline: none; font-size: 11px; width: 100%; color: var(--text-dark);}
+        .page-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 0 4px;}
+        .page-title-row h2 { color: var(--text-main); font-size: 18px; font-weight: 700;}
+        .btn-primary { background: var(--primary); color: white; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px;}
+        .btn-primary:active { background: var(--primary-hover); transform: scale(0.98); }
         
-        .switch-wrap { display: flex; align-items: center; gap: 4px; font-size: 10px; font-weight: bold; }
-        .switch { position: relative; width: 26px; height: 14px; }
-        .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background: #cbd5e1; transition: .3s; border-radius: 14px; }
-        .slider:before { position: absolute; content: ""; height: 10px; width: 10px; left: 2px; bottom: 2px; background: white; transition: .3s; border-radius: 50%; }
-        input:checked + .slider { background: var(--primary-blue); }
-        input:checked + .slider:before { transform: translateX(12px); }
-        .exchange-input { width: 50px; padding: 2px; border: 1px solid var(--primary-blue); border-radius: 4px; text-align: center; color: var(--primary-blue); font-weight: bold; display: none; font-size: 10px; }
-        .exchange-input.active { display: block; }
+        .m-group { margin-bottom: 16px;}
+        .m-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-sec); }
+        .m-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg-color); color: var(--text-main); transition: var(--transition);}
+        .m-input:focus { border-color: var(--primary); background: var(--card-bg); box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2); }
+        [data-theme="dark"] .m-input:focus { box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
+        select.m-input { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;}
 
-        /* Summary Cards */
-        .summary-grid { display: grid; gap: 4px; margin-bottom: 8px; grid-template-columns: repeat(3, 1fr); }
-        .summary-box { background: var(--white); border: 1px solid var(--border-color); padding: 6px 4px; border-radius: 4px; text-align: center; }
-        .summary-box span { display: block; font-size: 9px; color: var(--text-gray); margin-bottom: 2px; font-weight: bold; }
-        .summary-box strong { font-size: 11px; display: block; color: var(--text-dark); word-break: break-all; }
-        .summary-box.highlight { background: var(--light-blue); border-top: 2px solid var(--primary-blue); }
-        .summary-box.highlight strong { color: var(--primary-blue); }
-
-        /* ================= ULTRA COMPACT GRID (MOBILE OPTIMIZED) ================= */
-        .table-wrapper { width: 100%; }
-        table { width: 100%; border-collapse: collapse; display: block; }
-        thead { display: none; }
-        tbody { display: block; width: 100%; }
+        /* ================= INVENTORY / GAME GRID ================= */
+        .summary-grid { display: grid; gap: 8px; margin-bottom: 16px; grid-template-columns: repeat(3, 1fr); }
+        .summary-box { background: var(--card-bg); border-radius: 10px; padding: 12px 8px; text-align: center; box-shadow: var(--shadow); }
+        .summary-box span { display: block; font-size: 11px; color: var(--text-sec); margin-bottom: 4px; font-weight: 600; }
+        .summary-box strong { font-size: 14px; display: block; color: var(--text-main); }
+        .summary-box.highlight { background: rgba(24, 119, 242, 0.05); border: 1px solid var(--primary); }
+        [data-theme="dark"] .summary-box.highlight { background: rgba(255, 140, 0, 0.1); }
+        .summary-box.highlight strong { color: var(--primary); }
         
-        tr { 
-            display: grid; 
-            grid-template-columns: repeat(4, 1fr); /* 4 Columns Grid */
-            gap: 4px; /* Very tight gap */
-            background: var(--white); 
-            padding: 6px 8px; /* Very tight padding */
-            margin-bottom: 6px; 
-            border-radius: 6px; 
-            border: 1px solid var(--border-color); 
-            box-shadow: 0 1px 2px rgba(0,0,0,0.05); 
-            position: relative;
-        }
-        td { display: block; border: none; padding: 0; }
+        #itemListContainer { display: flex; flex-direction: column; gap: 10px; }
+        .item-card { background: var(--card-bg); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); cursor: pointer;}
         
-        /* Grid Layout mapping */
-        .col-no { display: none; } 
-        .col-name { grid-column: 1 / 4; } /* Name spans 3 columns */
-        .col-del { grid-column: 4 / 5; display: flex; justify-content: flex-end; align-items: flex-start;} /* Del spans 1 column, aligned right */
-        .col-code { grid-column: 1 / 5; } /* Code spans all 4 */
-        .col-fcost { grid-column: 1 / 5; } /* Foreign cost spans all 4 */
-        .col-cost { grid-column: 1 / 3; } /* Cost spans 2 */
-        .col-sell { grid-column: 3 / 5; } /* Sell spans 2 */
-        .col-qty { grid-column: 1 / 2; } /* Qty spans 1 */
-        .col-profit { grid-column: 2 / 5; } /* Profit spans 3 */
-
-        .mobile-label { display: block; font-size: 9px; color: var(--text-gray); margin-bottom: 2px; font-weight: bold; }
+        .card-top-row { display: flex; justify-content: space-between; align-items: center;}
+        .card-left-group { display: flex; align-items: center; gap: 10px;}
+        .serial-no { font-size: 12px; font-weight: bold; color: var(--text-sec); background: var(--hover-bg); padding: 4px 8px; border-radius: 6px;}
+        .item-card-thumb { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: var(--hover-bg); border: 1px solid var(--border);}
+        .item-card-name { font-size: 15px; font-weight: 700; color: var(--text-main);}
         
-        /* Inputs made smaller */
-        td input { width: 100%; padding: 4px; border: 1px solid var(--border-color); border-radius: 4px; background: var(--gray-light); font-size: 11px; font-weight: bold; outline: none; color: var(--text-dark); height: 26px;}
-        td input:focus { border-color: var(--primary-blue); background: var(--white); }
+        .card-price-details { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-sec); font-weight: 500;}
+        .card-cost-span, .card-sell-span { color: var(--text-main); font-weight: 600;}
         
-        .profit-cell { padding: 4px; font-weight: bold; font-size: 11px; background: var(--gray-light); border-radius: 4px; border: 1px solid var(--border-color); text-align: center; height: 26px; display: flex; align-items: center; justify-content: center;}
-        .text-right { text-align: right; } .text-center { text-align: center; }
+        .card-profit-row { display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); padding: 10px; border-radius: 8px;}
+        .profit-label { font-size: 11px; font-weight: 600; color: var(--text-sec);}
+        .card-profit-badge { font-size: 13px; font-weight: 700; color: var(--success); }
+        .card-profit-badge.negative { color: var(--danger); }
         
-        /* Tiny Delete Button */
-        .btn-delete { background: transparent; color: var(--red); padding: 4px; border-radius: 4px; font-size: 11px; display: flex; align-items: center; justify-content: center; border: 1px solid var(--red); height: 26px; width: 26px;}
-        .btn-delete:active { background: #fee2e2; }
-
-        .col-fcost { display: none; }
-        .col-fcost.show { display: block; }
-
-        .code-wrapper { display: flex; align-items: center; gap: 4px; }
-        .code-input { flex-grow: 1; font-family: monospace; letter-spacing: 0.5px; }
-        .code-input.used { color: var(--green); text-decoration: line-through; background: #ecfdf5; border-color: var(--green); }
-        .btn-copy { background: var(--primary-blue); color: white; padding: 0; width: 26px; height: 26px; border-radius: 4px; display: flex; align-items: center; justify-content: center; transition: 0.2s; }
-        .btn-copy.used { background: var(--green); }
-
-        /* ================= Other Views (Receipt, Replies, Settings) ================= */
-        /* Hidden locally to focus on the request, but functionality remains active */
-        .receipt-form { width: 100%; max-width: 400px; background: var(--white); padding: 12px; border-radius: 8px; border: 1px solid var(--border-color); margin: 0 auto 15px;}
-        .r-group { margin-bottom: 8px; }
-        .r-group label { display: block; font-size: 10px; font-weight: bold; margin-bottom: 3px; color: var(--text-gray); }
-        .r-group input { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 12px; outline: none; background: var(--gray-light); }
+        .btn-sell { background: rgba(49, 162, 76, 0.15); color: var(--success); border: 1px solid rgba(49, 162, 76, 0.3); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; transition: 0.2s;}
+        .btn-sell:active { transform: scale(0.95); background: var(--success); color: white; }
         
-        .receipt-slip-wrapper { width: 100%; display: none; flex-direction: column; gap: 10px; align-items: center; }
-        .receipt-slip { width: 100%; max-width: 300px; background: #fff; padding: 15px; border-radius: 4px; border: 1px solid #eee; box-shadow: 0 5px 15px rgba(0,0,0,0.08); font-family: 'Courier New', Courier, monospace; position: relative; }
-        .r-header { text-align: center; border-bottom: 1px dashed #ccc; padding-bottom: 8px; margin-bottom: 10px; }
-        .r-row { display: flex; justify-content: space-between; font-size: 11px; margin-bottom: 6px; color: #333; }
-        .r-row.total { border-top: 1px dashed #ccc; padding-top: 8px; font-weight: bold; font-size: 12px; color: #000; }
+        .floating-add { position: fixed; bottom: 24px; right: 24px; background: var(--primary); color: white; width: 56px; height: 56px; border-radius: 28px; box-shadow: 0 4px 12px rgba(24, 119, 242, 0.4); display: flex; align-items: center; justify-content: center; z-index: 45;}
+        [data-theme="dark"] .floating-add { box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4); }
         
-        .add-reply-box { background: var(--white); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; margin-bottom: 10px; display: flex; flex-direction: column; gap: 6px;}
-        .add-reply-box textarea { width: 100%; padding: 8px; border: 1px solid var(--border-color); border-radius: 4px; font-size: 11px; outline: none; resize: vertical; min-height: 50px; background: var(--gray-light); }
-        .replies-grid { display: grid; grid-template-columns: 1fr; gap: 8px; padding-bottom: 20px; }
-        .reply-card { background: var(--white); border: 1px solid var(--border-color); border-radius: 6px; padding: 10px; display: flex; flex-direction: column; gap: 6px;}
-        .reply-text { font-size: 12px; color: var(--text-dark); line-height: 1.4; background: var(--gray-light); padding: 8px; border-radius: 4px; border: 1px dashed var(--border-color); white-space: pre-wrap;}
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; backdrop-filter: blur(2px); transition: var(--transition);}
+        .modal-box { background: var(--card-bg); width: 100%; max-width: 360px; border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); animation: popIn 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        @keyframes popIn { from { transform: scale(0.9); opacity: 0; } to { transform: scale(1); opacity: 1; } }
 
-        .settings-container { max-width: 400px; margin: 0 auto; background: var(--white); padding: 15px; border-radius: 8px; border: 1px solid var(--border-color); }
-        .settings-header { font-size: 14px; font-weight: bold; margin-bottom: 15px; color: var(--primary-blue); border-bottom: 1px solid var(--border-color); padding-bottom: 8px; }
+        /* ================= VOUCHER & COUPON VIEW ================= */
+        .tab-container { display: flex; gap: 10px; margin-bottom: 20px; background: var(--card-bg); padding: 5px; border-radius: 10px; box-shadow: var(--shadow);}
+        .tab-btn { flex: 1; padding: 10px; text-align: center; font-weight: 600; font-size: 13px; color: var(--text-sec); border-radius: 8px; transition: 0.2s; }
+        .tab-btn.active { background: rgba(24, 119, 242, 0.1); color: var(--primary); }
+        [data-theme="dark"] .tab-btn.active { background: rgba(255, 140, 0, 0.15); }
+        
+        .vc-form { background: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px;}
+        .vc-preview-area { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 10px; }
+        
+        /* Voucher Card Design */
+        .voucher-card { background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 320px; color: #333; position: relative; border: 1px solid #eee;}
+        .voucher-header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 15px; }
+        .v-icon-wrap { width: 48px; height: 48px; background: #eff6ff; color: #1877f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;}
+        .v-store-name { font-size: 18px; font-weight: 800; color: #0f172a; text-transform: uppercase; letter-spacing: 1px;}
+        .v-receipt-text { font-size: 11px; color: #64748b; font-weight: 600; letter-spacing: 2px;}
+        .v-row { display: flex; justify-content: space-between; margin-bottom: 12px; font-size: 13px;}
+        .v-row span:first-child { color: #64748b; font-weight: 500; }
+        .v-row span:last-child { color: #0f172a; font-weight: 700; text-align: right; word-break: break-word;}
+        .v-total-row { display: flex; justify-content: space-between; align-items: center; border-top: 2px dashed #e2e8f0; padding-top: 15px; margin-top: 5px; }
+        .v-total-label { font-size: 14px; font-weight: 800; color: #0f172a; }
+        .v-total-val { font-size: 20px; font-weight: 900; color: #1877f2; }
+        .v-barcode { height: 30px; background: repeating-linear-gradient(90deg, #333 0, #333 2px, transparent 2px, transparent 6px, #333 6px, #333 10px, transparent 10px, transparent 12px); opacity: 0.2; margin-top: 20px;}
 
-        /* Modal */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; }
-        .modal-box { background: #fff; width: 240px; padding: 15px; border-radius: 8px; text-align: center; }
-        .modal-actions { display: flex; gap: 8px; justify-content: center; margin-top: 15px;}
-        .modal-btn { padding: 8px; border-radius: 4px; font-size: 11px; font-weight: bold; width: 100%; }
+        /* Coupon Card Design */
+        .coupon-card { background: linear-gradient(135deg, #ff8c00, #ff4500); border-radius: 16px; padding: 20px; width: 100%; max-width: 340px; color: white; position: relative; box-shadow: 0 10px 25px rgba(255, 140, 0, 0.3); overflow: hidden; }
+        /* Side cutouts */
+        .coupon-card::before, .coupon-card::after { content: ''; position: absolute; top: 50%; width: 24px; height: 24px; background: var(--bg-color); border-radius: 50%; transform: translateY(-50%); z-index: 2;}
+        .coupon-card::before { left: -12px; } .coupon-card::after { right: -12px; }
+        
+        .coupon-inner { border: 2px dashed rgba(255,255,255,0.4); border-radius: 12px; padding: 20px 15px; text-align: center; position: relative; z-index: 1;}
+        .c-store-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 5px;}
+        .c-discount { font-size: 32px; font-weight: 900; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin-bottom: 15px; line-height: 1.1;}
+        .c-code-box { background: white; color: #ff4500; padding: 10px 20px; border-radius: 8px; font-family: monospace; font-size: 18px; font-weight: bold; display: inline-block; letter-spacing: 2px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 10px;}
+        .c-expiry { font-size: 11px; opacity: 0.8; font-weight: 500; }
 
-        /* ================= DESKTOP VIEW ================= */
-        @media (min-width: 768px) {
-            .table-wrapper { background: var(--white); border-radius: 6px; border: 1px solid var(--border-color); }
-            table { display: table; table-layout: fixed; } thead { display: table-header-group; } tbody { display: table-row-group; }
-            tr { display: table-row; margin: 0; padding: 0; border: none; box-shadow: none; border-radius: 0; background: transparent; }
-            th { background: var(--light-blue); color: var(--dark-blue); padding: 6px; text-align: left; border-bottom: 1px solid var(--border-color); font-size: 11px; white-space: nowrap; }
-            td { display: table-cell; border-bottom: 1px solid #f1f5f9; border-right: 1px solid #f1f5f9; padding: 0; vertical-align: middle; }
-            .col-no { display: table-cell; text-align: center; font-weight: bold; font-size: 11px; color: var(--text-gray); }
-            .col-name, .col-code, .col-fcost, .col-cost, .col-sell, .col-qty, .col-profit, .col-del { grid-column: auto; justify-self: auto; align-items: center; }
-            .mobile-label { display: none; } 
-            .col-fcost { display: none; } .col-fcost.show { display: table-cell; }
-            td input { border: none; border-radius: 0; background: transparent; padding: 6px; font-size: 12px; height: auto;}
-            td input:focus { background: var(--light-blue); box-shadow: inset 0 0 0 1px var(--primary-blue); }
-            .profit-cell { border: none; border-radius: 0; text-align: right; background: transparent; padding: 6px; font-size: 12px; height: auto; justify-content: flex-end;}
-            .btn-delete { width: auto; height: auto; padding: 4px 8px; margin: 0 auto; display: block; font-size: 11px; background: transparent; border: none; color: var(--text-gray);}
-            .btn-delete:hover { color: var(--red); }
-            .btn-copy { height: 24px; width: 24px; }
-        }
     </style>
 </head>
 <body>
 
-    <div class="auth-overlay" id="authScreen">
-        <div class="auth-box">
-            <h2>Game Store Manager</h2>
-            <p>Please login to access your store data.</p>
-            <input type="email" id="authEmail" class="auth-input" placeholder="Email ">
-            <input type="password" id="authPassword" class="auth-input" placeholder="Password">
-            <button class="btn-auth" onclick="window.handleLogin()">Login </button>
-            <button class="btn-auth-outline" onclick="window.handleRegister()">Register</button>
-            <div id="authMsg"></div>
+    <div id="pca-loading">
+        <div class="pca-text">
+            <span>P</span>
+            <span>C</span>
+            <span>A</span>
         </div>
     </div>
+
+    <div id="toast-container"></div>
 
     <header class="app-header">
         <div class="header-left">
             <button class="menu-btn" onclick="window.toggleSidebar()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
-            <span class="app-title" id="topStoreNameDisplay">Loading...</span>
+            <span class="app-title" id="topStoreName">PCA Store</span>
         </div>
-        <button class="btn-logout" onclick="window.handleLogout()">Logout</button>
     </header>
 
     <div class="overlay" id="overlay" onclick="window.toggleSidebar()"></div>
     <aside class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <span>Menu</span>
-            <button class="close-btn" onclick="window.toggleSidebar()"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            <button class="close-btn" onclick="window.toggleSidebar()">✕</button>
         </div>
-        <ul class="nav-menu">
-            <li class="nav-item active" id="nav-inventory" onclick="window.switchView('inventory')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect></svg>
-                <span>Game Grid</span>
-            </li>
-            <li class="nav-item" id="nav-receipt" onclick="window.switchView('receipt')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline></svg>
-                <span>Receipt</span>
-            </li>
-            <li class="nav-item" id="nav-replies" onclick="window.switchView('replies')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path></svg>
-                <span>Quick Replies</span>
-            </li>
-            <li class="nav-item" id="nav-settings" onclick="window.switchView('settings')">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"></circle></svg>
-                <span>Settings</span>
-            </li>
-        </ul>
-        <div class="sidebar-title">Categories</div>
-        <ul class="game-list" id="sidebarGameList"></ul>
+        
+        <div class="sidebar-scroll">
+            <ul class="nav-menu">
+                <li class="nav-item active" id="nav-inventory" onclick="window.switchView('inventory')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg><span>Game Grid (Profit)</span></li>
+                <li class="nav-item" id="nav-vouchers" onclick="window.switchView('vouchers')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>Voucher & Coupon</span></li>
+                <li class="nav-item" id="nav-settings" onclick="window.switchView('settings')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>Settings & Theme</span></li>
+            </ul>
+            <div class="sidebar-title">Games Category</div>
+            <ul class="game-list" id="sidebarGameList"></ul>
+        </div>
+        
         <div class="sidebar-footer">
-            <input type="text" id="newCategoryInput" placeholder="New Game...">
-            <button class="btn-add-game" onclick="window.addCategory()">+ Add</button>
+            <button class="btn-add-game" onclick="window.openAddGameModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add Game
+            </button>
         </div>
     </aside>
 
-    <div class="modal-overlay" id="confirmModal">
+    <div class="modal-overlay" id="addGameModal">
         <div class="modal-box">
-            <div class="modal-title">Warning</div>
-            <div class="modal-text">Delete this item?</div>
-            <div class="modal-actions">
-                <button class="modal-btn btn-cancel" onclick="window.closeConfirmModal()">Cancel</button>
-                <button class="modal-btn btn-confirm" onclick="window.executeDeleteGame()">Delete</button>
+            <div class="page-title-row"><h2 style="font-size:16px;">Add New Game</h2><button onclick="window.closeAddGameModal()" style="background:var(--hover-bg); padding:6px; border-radius:50%; color:var(--text-main);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+            
+            <div class="modal-image-row">
+                <img src="" id="m-new-game-preview" class="modal-image-preview">
+            </div>
+            
+            <div class="file-input-wrapper">
+                <label for="m-new-game-image" class="btn-file-upload">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    Choose Icon
+                </label>
+                <input type="file" id="m-new-game-image" accept="image/*" onchange="window.handleModalImage(this)">
+            </div>
+            
+            <div class="m-group"><label>Game Name</label><input type="text" id="m-new-game-name" class="m-input" placeholder="e.g. Mobile Legends"></div>
+            <div style="display:flex; gap:12px; margin-top:24px;">
+                <button class="btn-primary" style="flex:1; background:var(--hover-bg); color:var(--text-main);" onclick="window.closeAddGameModal()">Cancel</button>
+                <button class="btn-primary" style="flex:1;" onclick="window.confirmAddGame()">Save Game</button>
             </div>
         </div>
     </div>
 
     <main class="view-container active" id="view-inventory">
         <div class="content-scroll">
-            <div class="page-title-row">
-                <h2 id="currentGameTitle">Select Game</h2>
-                <div class="action-btns-group">
-                    <input type="file" id="importCsvInput" accept=".csv" style="display:none;" onchange="window.importCSV(event)">
-                    <button class="btn-secondary" onclick="document.getElementById('importCsvInput').click()">Import CSV</button>
-                    <button class="btn-secondary" onclick="window.exportToCSV()">Export</button>
-                    <button class="btn-primary" onclick="window.addRow()">+ Row</button>
-                </div>
-            </div>
+            <div class="page-title-row"><h2 id="currentGameTitle">Select Game</h2></div>
             
-            <div class="tools-row">
-                <div class="search-box">
-                    <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#888" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
-                    <input type="text" id="searchInput" placeholder="Search..." onkeyup="window.filterItems()">
-                </div>
-                <label class="switch-wrap"><span>Foreign ($/THB)</span><label class="switch"><input type="checkbox" id="exchangeToggle" onchange="window.toggleExchange()"><span class="slider"></span></label></label>
-                <div id="exchangeWrap" class="switch-wrap" style="display:none;"><input type="number" id="exchangeRate" class="exchange-input active" value="3500" oninput="window.updateRate()"><span>KS</span></div>
-            </div>
-
             <div class="summary-grid">
                 <div class="summary-box"><span>Total Cost</span><strong id="totalCostVal">0</strong></div>
-                <div class="summary-box"><span>Revenue</span><strong id="totalRevenueVal">0</strong></div>
-                <div class="summary-box highlight"><span>Net Profit</span><strong id="totalProfitVal" style="color:var(--primary-blue)">0</strong></div>
+                <div class="summary-box"><span>Total Revenue</span><strong id="totalRevenueVal">0</strong></div>
+                <div class="summary-box highlight"><span>Net Profit</span><strong id="totalProfitVal">0</strong></div>
             </div>
 
-            <div class="table-wrapper">
-                <table>
-                    <thead>
-                        <tr>
-                            <th width="5%" class="col-no text-center">No.</th>
-                            <th width="20%">Item Name</th>
-                            <th width="20%">Redeem Code</th>
-                            <th width="10%" class="text-right col-fcost" id="th-foreign">Cost ($)</th>
-                            <th width="12%" class="text-right">Cost (KS)</th>
-                            <th width="12%" class="text-right">Sell (KS)</th>
-                            <th width="6%" class="text-center">Qty</th>
-                            <th width="10%" class="text-right">Profit (KS)</th>
-                            <th width="5%" class="text-center">Del</th>
-                        </tr>
-                    </thead>
-                    <tbody id="sheetBody"></tbody>
-                </table>
-            </div>
+            <div id="itemListContainer"></div>
         </div>
+        <button class="floating-add" onclick="window.openModal()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
     </main>
 
-    <main class="view-container" id="view-receipt">
-        <div class="content-scroll">
-            <h2 style="font-size:14px; margin-bottom:10px;">Generate Receipt</h2>
-            <div class="receipt-form">
-                <datalist id="customerNamesList"></datalist>
-                <div class="r-group"><input type="text" id="r-name" list="customerNamesList" placeholder="Customer Name" autocomplete="off"></div>
-                <div class="r-group"><input type="text" id="r-id" placeholder="Player ID / Zone"></div>
-                <div class="r-group"><input type="text" id="r-game" placeholder="Game Name"></div>
-                <div class="r-group"><input type="text" id="r-item" placeholder="Item / Amount"></div>
-                <div class="r-group"><input type="number" id="r-price" placeholder="Price (KS)"></div>
-                <button class="btn-primary" onclick="window.showReceiptSlip()" style="width:100%; justify-content:center; padding:10px;">Preview Receipt</button>
-            </div>
+    <div class="modal-overlay" id="itemModal">
+        <div class="modal-box">
+            <div class="page-title-row"><h2 id="modalTitle">Add Item</h2><button onclick="window.closeModal()" style="background:var(--hover-bg); padding:6px; border-radius:50%; color:var(--text-main);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+            <div class="m-group"><label>Amount / Package</label><input type="text" id="m-name" class="m-input" placeholder="e.g. 86 Diamonds"></div>
+            <div class="m-group"><label>Cost (KS)</label><input type="number" id="m-cost" class="m-input" placeholder="0"></div>
+            <div class="m-group"><label>Sell (KS)</label><input type="number" id="m-sell" class="m-input" placeholder="0"></div>
             
-            <div class="receipt-slip-wrapper" id="receiptOutput">
-                <div class="receipt-slip" id="printableReceipt" style="background:#fff; padding:15px; border:1px solid #eee; text-align:center; max-width: 280px; margin: 0 auto;">
-                    <img id="r-logo-img" src="" style="max-height:40px; display:none; margin: 0 auto 5px;">
-                    <h3 id="r-brand-text" style="margin:0; font-size:14px;">Store Manager</h3>
-                    <p id="out-date" style="font-size:9px; color:#888; margin-bottom:10px;"></p>
-                    <div style="text-align:left; font-size: 11px; line-height: 1.6;">
-                        <p><strong>Name:</strong> <span id="out-name"></span></p>
-                        <p><strong>ID:</strong> <span id="out-id"></span></p>
-                        <p><strong>Game:</strong> <span id="out-game"></span></p>
-                        <p><strong>Item:</strong> <span id="out-item"></span></p>
-                    </div>
-                    <h4 style="margin-top:10px; border-top:1px dashed #ccc; padding-top:10px; font-size:13px;">Total: <span id="out-price"></span></h4>
-                </div>
-                <button class="btn-primary" style="background:var(--green); margin: 0 auto;" onclick="window.downloadReceiptImage()">Download Image</button>
+            <div style="display:flex; gap:12px; margin-top:24px;">
+                <button id="btn-modal-del" style="display:none; background:var(--bg-color); color:var(--danger); padding:12px; border-radius:8px;" onclick="window.itemDelete()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                <button class="btn-primary" style="flex:1; padding:12px; font-size:14px;" onclick="window.itemSave()">Save Item</button>
             </div>
         </div>
-    </main>
+    </div>
 
-    <main class="view-container" id="view-replies">
+    <main class="view-container" id="view-vouchers">
         <div class="content-scroll">
-            <h2 style="font-size:14px; margin-bottom:10px;">Quick Replies</h2>
-            <div class="add-reply-box">
-                <textarea id="newReplyText" placeholder="Add new reply text..."></textarea>
-                <button class="btn-primary" style="width: 100%; justify-content: center;" onclick="window.addNewReply()">+ Save Reply</button>
+            <div class="page-title-row"><h2>Voucher & Coupon</h2></div>
+            
+            <div class="tab-container">
+                <button class="tab-btn active" id="tab-btn-voucher" onclick="window.switchVCTab('voucher')">Receipt Voucher</button>
+                <button class="tab-btn" id="tab-btn-coupon" onclick="window.switchVCTab('coupon')">Gift Coupon</button>
             </div>
-            <div class="replies-grid" id="repliesGrid"></div>
+
+            <div id="vc-section-voucher" style="display:block;">
+                <div class="vc-form">
+                    <div class="m-group"><label>Customer Name</label><input type="text" id="v-name" class="m-input" placeholder="e.g. Aung Aung" oninput="window.updateVoucherPreview()"></div>
+                    <div class="m-group"><label>Player ID / Game</label><input type="text" id="v-game" class="m-input" placeholder="e.g. Mobile Legends (12345)" oninput="window.updateVoucherPreview()"></div>
+                    <div class="m-group"><label>Item / Package</label><input type="text" id="v-item" class="m-input" placeholder="e.g. 86 Diamonds" oninput="window.updateVoucherPreview()"></div>
+                    <div class="m-group"><label>Total Price (KS)</label><input type="number" id="v-price" class="m-input" placeholder="e.g. 1500" oninput="window.updateVoucherPreview()"></div>
+                </div>
+
+                <div class="vc-preview-area">
+                    <div class="voucher-card" id="printableVoucher">
+                        <div class="voucher-header">
+                            <div class="v-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                            <div class="v-store-name" id="v-out-store">PCA Store</div>
+                            <div class="v-receipt-text">PAYMENT RECEIPT</div>
+                        </div>
+                        <div class="v-row"><span>Date:</span><span id="v-out-date"></span></div>
+                        <div class="v-row"><span>Customer:</span><span id="v-out-name">-</span></div>
+                        <div class="v-row"><span>Game/ID:</span><span id="v-out-game">-</span></div>
+                        <div class="v-row"><span>Package:</span><span id="v-out-item">-</span></div>
+                        <div class="v-row"><span>Status:</span><span style="color:#10b981;">Successful</span></div>
+                        <div class="v-total-row">
+                            <span class="v-total-label">Total Amount</span>
+                            <span class="v-total-val" id="v-out-price">0 KS</span>
+                        </div>
+                        <div class="v-barcode"></div>
+                    </div>
+                    <button class="btn-primary" style="width:100%; max-width:320px; padding:12px; background:var(--success);" onclick="window.downloadCard('printableVoucher', 'Voucher')">Download Voucher</button>
+                </div>
+            </div>
+
+            <div id="vc-section-coupon" style="display:none;">
+                <div class="vc-form">
+                    <div class="m-group"><label>Discount Text (e.g. 10% OFF, 5000 KS OFF)</label><input type="text" id="c-discount" class="m-input" placeholder="e.g. 500 KS OFF" oninput="window.updateCouponPreview()"></div>
+                    <div class="m-group"><label>Promo Code</label><input type="text" id="c-code" class="m-input" placeholder="e.g. PCA-NEW-YEAR" oninput="window.updateCouponPreview()" style="text-transform:uppercase;"></div>
+                    <div class="m-group"><label>Valid Until</label><input type="text" id="c-expiry" class="m-input" placeholder="e.g. 31 Dec 2026" oninput="window.updateCouponPreview()"></div>
+                </div>
+
+                <div class="vc-preview-area">
+                    <div class="coupon-card" id="printableCoupon">
+                        <div class="coupon-inner">
+                            <div class="c-store-name" id="c-out-store">PCA STORE</div>
+                            <div class="c-discount" id="c-out-discount">GIFT VOUCHER</div>
+                            <div style="font-size:12px; margin-bottom:8px; font-weight:600;">Use Promo Code:</div>
+                            <div class="c-code-box" id="c-out-code">XXXX-XXXX</div>
+                            <div class="c-expiry">Valid Until: <span id="c-out-expiry">-</span></div>
+                        </div>
+                    </div>
+                    <button class="btn-primary" style="width:100%; max-width:340px; padding:12px; background:#ff8c00;" onclick="window.downloadCard('printableCoupon', 'Coupon')">Download Coupon</button>
+                </div>
+            </div>
+
         </div>
     </main>
 
     <main class="view-container" id="view-settings">
         <div class="content-scroll">
-            <div class="settings-container">
-                <div class="settings-header">Store Settings (Branding)</div>
-                <div class="s-group">
-                    <label>Store Name</label>
-                    <input type="text" id="settingStoreName" placeholder="e.g. My Topup Store">
-                </div>
-                <div class="s-group">
-                    <label>Store Logo</label>
-                    <input type="file" id="settingStoreLogoInput" accept="image/*" style="display:none;" onchange="window.handleStoreLogoUpload(event)">
-                    <label for="settingStoreLogoInput" style="display:inline-block; background:#eee; padding:6px 10px; font-size:11px; cursor:pointer; border-radius:4px; font-weight:bold;">Upload Logo</label>
-                    <div id="logoPreviewBox" style="margin-top:10px; width:60px; height:60px; border:1px dashed #ccc; display:flex; align-items:center; justify-content:center; font-size:9px; color:#888;">No Logo</div>
-                </div>
-                <button class="btn-primary" style="width:100%; justify-content:center; padding:10px;" onclick="window.saveStoreSettings()">Save Settings</button>
+            
+            <div class="theme-switch-wrapper">
+                <span>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    Dark Mode (Black & Orange)
+                </span>
+                <label class="switch">
+                    <input type="checkbox" id="themeToggle" onchange="window.toggleTheme()">
+                    <span class="slider"></span>
+                </label>
             </div>
+
+            <div style="background:var(--card-bg); padding:20px; border-radius:10px; border:1px solid var(--border); margin-bottom:20px; box-shadow:var(--shadow);">
+                <h3 style="font-size:16px; color:var(--primary); margin-bottom:15px; font-weight:700;">Store Information</h3>
+                <div class="m-group">
+                    <label>Store Name</label>
+                    <input type="text" id="settingStoreName" class="m-input">
+                </div>
+                <button class="btn-primary" style="width:100%; padding:12px;" onclick="window.saveStoreSettings()">Save Settings</button>
+            </div>
+            
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAnalytics } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-analytics.js";
-        import { getAuth, signInWithEmailAndPassword, createUserWithEmailAndPassword, onAuthStateChanged, signOut } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
 
-        const firebaseConfig = {
-            apiKey: "AIzaSyBCBimkrfs-TGM-TioINkZfmQiBvIBsp1s",
-            authDomain: "atomx-d-project.firebaseapp.com",
-            projectId: "atomx-d-project",
-            storageBucket: "atomx-d-project.firebasestorage.app",
-            messagingSenderId: "597963995568",
-            appId: "1:597963995568:web:71799d889ea0cf48ebfe75",
-            measurementId: "G-Q8RJF1DPYW"
-        };
+    <script>
+        // State
+        let storeData = null; 
+        let activeGame = "";
+        let storeProfile = { name: "PCA Store" };
+        let editingIdx = -1;
+        let base64ModalImage = ""; 
 
-        const app = initializeApp(firebaseConfig);
-        const analytics = getAnalytics(app);
-        const auth = getAuth(app);
-        const db = getFirestore(app);
+        // Icons
+        const svgTrash = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
 
-        // Global State
-        let currentUserUid = null;
-        let storeData = { "Mobile Legends": [] };
-        let activeGame = "Mobile Legends";
-        let userQuickReplies = [];
-        let storeProfile = { name: "Store Manager", logo: "" };
-        let customersData = {};
-        let useExchange = false;
-        let exchangeRate = 3500;
-        let gameToDelete = "";
-
-        const svgTrash = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
-        const svgCopy = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>`;
-        const svgCheck = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-        const svgEdit = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
-
-        // Ensure "Loading..." isn't stuck if auth takes time
-        document.getElementById('currentGameTitle').innerText = "Connecting...";
-
-        // ================= AUTHENTICATION =================
-        const showMsg = (msg, isErr) => { const el=document.getElementById('authMsg'); el.innerText=msg; el.style.color=isErr?"var(--red)":"var(--green)"; };
-        window.handleLogin = () => { showMsg("Logging in...", false); signInWithEmailAndPassword(auth, document.getElementById('authEmail').value, document.getElementById('authPassword').value).catch(e => showMsg(e.message, true)); };
-        window.handleRegister = () => { showMsg("Registering...", false); createUserWithEmailAndPassword(auth, document.getElementById('authEmail').value, document.getElementById('authPassword').value).catch(e => showMsg(e.message, true)); };
-        window.handleLogout = () => { signOut(auth); };
-
-        onAuthStateChanged(auth, async (user) => {
-            if (user) {
-                currentUserUid = user.uid;
-                document.getElementById('authScreen').style.display = 'none';
-                await loadDataFromFirebase();
-            } else {
-                currentUserUid = null;
-                document.getElementById('authScreen').style.display = 'flex';
-                document.getElementById('currentGameTitle').innerText = "Please Login";
-            }
+        // ================= PCA LOADING EFFECT =================
+        window.addEventListener('DOMContentLoaded', () => {
+            loadLocalDataFallback(); 
+            setTimeout(() => {
+                const loading = document.getElementById('pca-loading');
+                loading.style.opacity = '0'; setTimeout(() => loading.style.display = 'none', 500);
+            }, 1000); 
+            
+            // Set date for voucher preview
+            document.getElementById('v-out-date').innerText = new Date().toLocaleDateString();
         });
 
-        // ================= FIRESTORE DB =================
-        async function loadDataFromFirebase() {
-            try {
-                const docSnap = await getDoc(doc(db, "stores", currentUserUid));
-                if (docSnap.exists()) {
-                    const d = docSnap.data();
-                    storeData = d.inventory || { "Mobile Legends": [] };
-                    userQuickReplies = d.quickReplies || ["Thanks for purchasing!"];
-                    storeProfile = d.profile || { name: "Store Manager", logo: "" };
-                    customersData = d.customers || {};
-                    useExchange = d.useExchange || false;
-                    exchangeRate = d.exchangeRate || 3500;
-                    activeGame = Object.keys(storeData)[0] || "Mobile Legends";
-                } else {
-                    userQuickReplies = ["Thanks for purchasing!"];
-                    await saveToFirebase(); 
-                }
-                
-                document.getElementById('exchangeToggle').checked = useExchange;
-                document.getElementById('exchangeRate').value = exchangeRate;
-                applyProfileToUI();
-                window.renderSidebar();
-                window.renderTable();
-                window.renderQuickReplies();
-                window.populateCustomerList();
-            } catch (error) {
-                console.error("Load Error:", error);
-                document.getElementById('currentGameTitle').innerText = "Error loading data";
-            }
-        }
+        // ================= THEME LOGIC =================
+        window.toggleTheme = () => {
+            const isDark = document.getElementById('themeToggle').checked;
+            if(isDark) { document.documentElement.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); } 
+            else { document.documentElement.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); }
+            window.renderTable(); 
+        };
+        if(localStorage.getItem('theme') === 'dark') { document.getElementById('themeToggle').checked = true; document.documentElement.setAttribute('data-theme', 'dark'); }
 
-        async function saveToFirebase() {
-            if (!currentUserUid) return;
-            try {
-                await setDoc(doc(db, "stores", currentUserUid), {
-                    inventory: storeData, quickReplies: userQuickReplies, profile: storeProfile,
-                    customers: customersData, useExchange: useExchange, exchangeRate: exchangeRate
-                }, { merge: true });
-            } catch (error) { console.error("Save Error:", error); }
-        }
-
-        // ================= GLOBAL EXPORTS (Fixes Loading/Click bugs) =================
-        
-        const applyProfileToUI = () => {
-            document.getElementById('topStoreNameDisplay').innerText = storeProfile.name;
-            document.getElementById('r-brand-text').innerText = storeProfile.name;
-            document.getElementById('settingStoreName').value = storeProfile.name;
-            if(storeProfile.logo) {
-                document.getElementById('logoPreviewBox').innerHTML = `<img src="${storeProfile.logo}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
-                document.getElementById('r-logo-img').src = storeProfile.logo;
-                document.getElementById('r-logo-img').style.display = 'block';
-            }
+        window.showToast = (msg, type = 'success') => {
+            const c = document.getElementById('toast-container');
+            const t = document.createElement('div'); t.className = `toast ${type}`;
+            t.innerHTML = `<span>${msg}</span>`; c.appendChild(t);
+            setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(), 400); }, 2500);
         };
 
-        window.saveStoreSettings = () => { storeProfile.name = document.getElementById('settingStoreName').value || "Store"; applyProfileToUI(); saveToFirebase(); alert("Settings saved!"); };
-        window.handleStoreLogoUpload = (e) => {
-            const file = e.target.files[0]; if(!file) return;
-            const r = new FileReader();
-            r.onload = (ev) => {
-                const img = new Image();
-                img.onload = () => {
-                    const c = document.createElement('canvas'); c.width = 100; c.height = 100;
-                    c.getContext('2d').drawImage(img, 0, 0, 100, 100);
-                    storeProfile.logo = c.toDataURL('image/jpeg', 0.8);
-                    document.getElementById('logoPreviewBox').innerHTML = `<img src="${storeProfile.logo}" style="max-width:100%;max-height:100%;object-fit:contain;">`;
-                };
-                img.src = ev.target.result;
-            }; r.readAsDataURL(file);
+        // ================= DATA LOGIC (Local Storage) =================
+        function loadLocalDataFallback() {
+            const json = localStorage.getItem('pcaStoreData');
+            storeData = json ? JSON.parse(json) : {}; 
+            
+            const profileJson = localStorage.getItem('pcaStoreProfile');
+            if(profileJson) storeProfile = JSON.parse(profileJson);
+
+            const games = Object.keys(storeData);
+            if(games.length > 0) {
+                activeGame = games[0];
+                games.forEach(g => { if(!storeData[g].items) storeData[g] = { image: "", items: [], codes: [] }; });
+            } else { activeGame = ""; }
+            updateUI();
+        }
+
+        function saveLocalData() { 
+            localStorage.setItem('pcaStoreData', JSON.stringify(storeData)); 
+            localStorage.setItem('pcaStoreProfile', JSON.stringify(storeProfile));
+        }
+
+        const updateUI = () => { 
+            document.getElementById('topStoreName').innerText = storeProfile.name; 
+            document.getElementById('settingStoreName').value = storeProfile.name; 
+            
+            // Update Voucher/Coupon Names
+            document.getElementById('v-out-store').innerText = storeProfile.name;
+            document.getElementById('c-out-store').innerText = storeProfile.name;
+
+            window.renderSidebar(); 
+            window.renderTable(); 
         };
 
+        // ================= VIEW & SIDEBAR =================
         window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); };
         window.switchView = (v) => {
-            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active'));
-            document.getElementById(`view-${v}`).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            document.getElementById(`nav-${v}`).classList.add('active');
-            if(window.innerWidth < 1024) window.toggleSidebar();
+            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active')); document.getElementById(`view-${v}`).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); if(document.getElementById(`nav-${v}`)) document.getElementById(`nav-${v}`).classList.add('active');
+            document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show');
+            if(v === 'inventory') window.renderTable();
         };
 
+        // ================= ADD GAME IMAGE & LOGIC =================
+        window.handleModalImage = (inputEl) => {
+            const file = inputEl.files[0];
+            const preview = document.getElementById('m-new-game-preview');
+            if(file) {
+                const reader = new FileReader();
+                reader.onload = (e) => { base64ModalImage = e.target.result; preview.src = base64ModalImage; preview.style.display = 'block'; };
+                reader.readAsDataURL(file);
+            }
+        };
+
+        window.openAddGameModal = () => { 
+            document.getElementById('m-new-game-name').value = ''; 
+            document.getElementById('m-new-game-image').value = ''; 
+            document.getElementById('m-new-game-preview').style.display = 'none'; 
+            base64ModalImage = "";
+            document.getElementById('addGameModal').style.display = 'flex'; 
+            if(window.innerWidth < 1024) { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
+        };
+        window.closeAddGameModal = () => { document.getElementById('addGameModal').style.display = 'none'; };
+        
+        window.confirmAddGame = () => { 
+            const name = document.getElementById('m-new-game-name').value.trim(); 
+            if(!name) return window.showToast("Please enter game name", "error");
+            if(storeData[name]) return window.showToast("Game exists", "error"); 
+            
+            storeData[name] = { image: base64ModalImage, items: [], codes: [] }; 
+            activeGame = name;
+            saveLocalData(); window.showToast("Game added!", "success"); window.closeAddGameModal(); updateUI();
+        };
+        
         window.renderSidebar = () => {
             const list = document.getElementById('sidebarGameList'); list.innerHTML = '';
-            Object.keys(storeData).forEach((name, i) => {
-                const li = document.createElement('li'); li.className = `game-item ${name === activeGame ? 'active' : ''}`;
-                li.innerHTML = `<span onclick="window.selectSidebarGame('${name}')">${i+1}. ${name}</span> <span><span class="count-badge">${storeData[name].length}</span><button class="btn-del-game" onclick="window.openConfirmModal('${name}', event)">${svgTrash}</button></span>`;
+            if(!storeData) return;
+            Object.keys(storeData).forEach((gName) => {
+                const gData = storeData[gName];
+                const li = document.createElement('li'); li.className = `game-item ${gName === activeGame ? 'active' : ''}`;
+                li.innerHTML = `<div class="game-info" onclick="window.selectSidebarGame('${gName}')"><div class="game-thumb-container"><img src="${gData.image || 'data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' fill=\\'none\\' stroke=\\'%23666\\' stroke-width=\\'2\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>'}" class="sidebar-game-thumb"><span class="game-name">${gName}</span></div></div><button class="btn-del-game" onclick="window.deleteGame('${gName}', event)">${svgTrash}</button>`;
                 list.appendChild(li);
             });
         };
+        window.selectSidebarGame = (name) => { activeGame = name; window.renderSidebar(); window.renderTable(); window.toggleSidebar(); };
+        window.deleteGame = (n, e) => { e.stopPropagation(); if(confirm("Delete Game?")){ delete storeData[n]; activeGame=Object.keys(storeData)[0]||""; saveLocalData(); updateUI(); }};
 
-        window.selectSidebarGame = (name) => { window.saveCurrentInputs(); activeGame = name; window.renderSidebar(); window.renderTable(); saveToFirebase(); if(window.innerWidth<1024) window.toggleSidebar(); };
-        window.addCategory = () => { const v = document.getElementById('newCategoryInput').value.trim(); if(v && !storeData[v]) { window.saveCurrentInputs(); storeData[v] = []; activeGame = v; window.renderSidebar(); window.renderTable(); saveToFirebase(); document.getElementById('newCategoryInput').value = ''; }};
-        
-        window.openConfirmModal = (name, e) => { e.stopPropagation(); gameToDelete = name; document.getElementById('confirmModal').style.display='flex'; };
-        window.closeConfirmModal = () => { gameToDelete = ""; document.getElementById('confirmModal').style.display='none'; };
-        window.executeDeleteGame = () => { if(gameToDelete && storeData[gameToDelete]) { delete storeData[gameToDelete]; activeGame = Object.keys(storeData)[0] || ""; window.renderSidebar(); window.renderTable(); saveToFirebase(); } window.closeConfirmModal(); };
-
-        window.toggleExchange = () => { useExchange = document.getElementById('exchangeToggle').checked; document.getElementById('exchangeWrap').style.display = useExchange ? 'flex' : 'none'; window.renderTable(); saveToFirebase(); };
-        window.updateRate = () => { exchangeRate = parseFloat(document.getElementById('exchangeRate').value) || 3500; window.renderTable(); saveToFirebase(); };
-
+        // ================= 1. INVENTORY =================
         window.renderTable = () => {
-            if(!activeGame || !storeData[activeGame]) { document.getElementById('currentGameTitle').innerText = "No Game"; return; }
-            document.getElementById('currentGameTitle').innerText = activeGame;
-            document.getElementById('exchangeWrap').style.display = useExchange ? 'flex' : 'none';
-            document.getElementById('th-foreign').style.display = useExchange ? 'block' : 'none';
-
-            const tbody = document.getElementById('sheetBody'); tbody.innerHTML = '';
-            if(storeData[activeGame].length === 0) storeData[activeGame].push({name:'', code:'', fCost:0, cost:'', sell:'', qty:1, isRead:false});
-
-            storeData[activeGame].forEach((item, idx) => {
-                if(useExchange) item.cost = (item.fCost || 0) * exchangeRate;
-                const isR = item.isRead ? 'used' : ''; const iC = item.isRead ? svgCheck : svgCopy;
-                
-                const tr = document.createElement('tr'); tr.className = "data-row";
-                tr.innerHTML = `
-                    <td class="col-name">
-                        <span class="mobile-label">Item Name</span>
-                        <input type="text" class="in-name" value="${item.name||''}" oninput="window.updateItem(${idx}, 'name', this.value)">
-                    </td>
-                    <td class="col-del"><button class="btn-delete" onclick="window.deleteRow(${idx})">${svgTrash}</button></td>
-                    
-                    <td class="col-code">
-                        <span class="mobile-label">Redeem Code</span>
-                        <div class="code-wrapper">
-                            <input type="text" class="code-input ${isR}" id="code-${idx}" value="${item.code||''}" oninput="window.updateItem(${idx}, 'code', this.value)">
-                            <button class="btn-copy ${isR}" onclick="window.copyCode(${idx})" id="cb-${idx}">${iC}</button>
-                        </div>
-                    </td>
-                    
-                    <td class="col-fcost" style="display:${useExchange?'block':'none'}"><span class="mobile-label">Cost ($)</span><input type="number" class="text-right in-fcost" value="${item.fCost||''}" oninput="window.updateItem(${idx}, 'fCost', this.value)"></td>
-                    <td class="col-cost"><span class="mobile-label">Cost (KS)</span><input type="number" class="text-right in-cost" ${useExchange?'readonly':''} value="${item.cost||''}" oninput="window.updateItem(${idx}, 'cost', this.value)"></td>
-                    <td class="col-sell"><span class="mobile-label">Sell (KS)</span><input type="number" class="text-right in-sell" value="${item.sell||''}" oninput="window.updateItem(${idx}, 'sell', this.value)"></td>
-                    <td class="col-qty"><span class="mobile-label">Qty</span><input type="number" class="text-center in-qty" value="${item.qty||1}" oninput="window.updateItem(${idx}, 'qty', this.value)"></td>
-                    <td class="col-profit"><span class="mobile-label">Profit (KS)</span><div class="profit-cell" id="p-${idx}">0</div></td>
-                `;
-                tbody.appendChild(tr);
-            });
-            window.calculate(); window.filterItems();
-        };
-
-        window.updateItem = (idx, f, v) => {
-            let n = parseFloat(v) || 0;
-            if(f==='name' || f==='code') storeData[activeGame][idx][f] = v; else storeData[activeGame][idx][f] = n;
-            if(f==='code') { storeData[activeGame][idx].isRead = false; document.getElementById(`code-${idx}`).classList.remove('used'); document.getElementById(`cb-${idx}`).classList.remove('used'); document.getElementById(`cb-${idx}`).innerHTML = svgCopy; }
-            if(f==='fCost' && useExchange) { storeData[activeGame][idx].cost = n * exchangeRate; const r = document.querySelectorAll('#sheetBody tr.data-row'); if(r[idx]) r[idx].querySelector('.in-cost').value = storeData[activeGame][idx].cost; }
-            window.calculate(); saveToFirebase();
-        };
-
-        window.copyCode = (idx) => {
-            const v = storeData[activeGame][idx].code; if(!v) return;
-            navigator.clipboard.writeText(v).then(() => { storeData[activeGame][idx].isRead = true; document.getElementById(`code-${idx}`).classList.add('used'); document.getElementById(`cb-${idx}`).classList.add('used'); document.getElementById(`cb-${idx}`).innerHTML = svgCheck; saveToFirebase(); });
-        };
-
-        window.calculate = () => {
-            let tc=0, tr=0, tp=0;
-            storeData[activeGame].forEach((i, idx) => {
-                let c=(i.cost||0)*(i.qty||0); let s=(i.sell||0)*(i.qty||0); let p=s-c; tc+=c; tr+=s; tp+=p;
-                const pEl = document.getElementById(`p-${idx}`); if(pEl){ pEl.innerText = p.toLocaleString(); pEl.style.color = p>0?'var(--primary-blue)':(p<0?'var(--red)':'var(--text-dark)');}
-            });
-            document.getElementById('totalCostVal').innerText = tc.toLocaleString(); document.getElementById('totalRevenueVal').innerText = tr.toLocaleString(); document.getElementById('totalProfitVal').innerText = tp.toLocaleString(); document.getElementById('totalProfitVal').style.color = tp>0?'var(--primary-blue)':(tp<0?'var(--red)':'inherit');
-        };
-
-        window.saveCurrentInputs = () => {
-            const rows = document.querySelectorAll('#sheetBody tr.data-row'); if(rows.length === 0) return;
-            const up = [];
-            rows.forEach((r, i) => {
-                const n = r.querySelector('.in-name').value; 
-                if(n || r.querySelector('.code-input').value || r.querySelector('.in-sell').value){ 
-                    up.push({ name:n, code:r.querySelector('.code-input').value, isRead:storeData[activeGame][i]?.isRead||false, fCost:parseFloat(r.querySelector('.in-fcost')?.value)||0, cost:parseFloat(r.querySelector('.in-cost').value)||0, sell:parseFloat(r.querySelector('.in-sell').value)||0, qty:parseFloat(r.querySelector('.in-qty').value)||1 });
-                }
-            });
-            if(up.length>0) storeData[activeGame] = up;
-        };
-
-        window.addRow = () => { window.saveCurrentInputs(); storeData[activeGame].push({name:'', code:'', isRead:false, fCost:0, cost:'', sell:'', qty:1}); window.renderTable(); saveToFirebase(); };
-        window.deleteRow = (idx) => { window.saveCurrentInputs(); storeData[activeGame].splice(idx, 1); window.renderTable(); saveToFirebase(); };
-        window.filterItems = () => { const f = document.getElementById('searchInput').value.toLowerCase(); document.querySelectorAll('#sheetBody tr.data-row').forEach(r => { const n=r.querySelector('.in-name').value.toLowerCase(); const c=r.querySelector('.code-input').value.toLowerCase(); r.style.display = (n.includes(f) || c.includes(f)) ? "" : "none"; }); };
-
-        // Export / Import CSV
-        window.exportToCSV = () => {
-            window.saveCurrentInputs(); let csv = "data:text/csv;charset=utf-8,\uFEFFItem,Code,Cost,Sell,Qty,Profit\n";
-            storeData[activeGame].forEach(i => { csv += `"${i.name||''}","${i.code||''}",${i.cost},${i.sell},${i.qty},${(i.sell-i.cost)*i.qty}\n`; });
-            const link = document.createElement("a"); link.setAttribute("href", encodeURI(csv)); link.setAttribute("download", `${activeGame}.csv`); document.body.appendChild(link); link.click();
-        };
-        window.importCSV = (e) => {
-            const f = e.target.files[0]; if(!f) return;
-            const r = new FileReader();
-            r.onload = (event) => {
-                const rows = event.target.result.split('\n'); let newItems = [];
-                for(let i=1; i<rows.length; i++) {
-                    if(!rows[i].trim()) continue;
-                    const cols = rows[i].replace(/"/g, '').split(',');
-                    newItems.push({ name: cols[0]||'', code: cols[1]||'', isRead: false, fCost: 0, cost: parseFloat(cols[2])||0, sell: parseFloat(cols[3])||0, qty: parseFloat(cols[4])||1 });
-                }
-                if(newItems.length > 0) { window.saveCurrentInputs(); storeData[activeGame] = storeData[activeGame].concat(newItems); saveToFirebase(); window.renderTable(); }
-                document.getElementById('importCsvInput').value = '';
-            }; r.readAsText(f);
-        };
-
-        // Quick Replies
-        window.renderQuickReplies = () => {
-            const g = document.getElementById('repliesGrid'); g.innerHTML = '';
-            userQuickReplies.forEach((t, i) => {
-                const d = document.createElement('div'); d.style.cssText = "background:var(--white); border:1px solid var(--border-color); border-radius:6px; padding:10px; display:flex; flex-direction:column; gap:6px;";
-                d.innerHTML = `<div style="font-size:12px; background:var(--gray-light); padding:8px; border-radius:4px;" id="rt-${i}">${t}</div>
-                <div style="display:flex; justify-content:flex-end; gap:5px;">
-                    <button onclick="window.editReply(${i})" style="background:#eee; padding:5px; border-radius:4px;">${svgEdit}</button>
-                    <button onclick="window.deleteReply(${i})" style="background:#fee2e2; color:red; padding:5px; border-radius:4px;">${svgTrash}</button>
-                    <button onclick="window.copyReplyText(${i}, this)" style="background:var(--primary-blue); color:white; padding:5px 10px; border-radius:4px; font-size:11px; display:flex; gap:4px; align-items:center;">${svgCopy} Copy</button>
-                </div>`;
-                g.appendChild(d);
-            });
-        };
-        window.addNewReply = () => { const t = document.getElementById('newReplyText').value.trim(); if(t){ userQuickReplies.push(t); saveToFirebase(); document.getElementById('newReplyText').value = ''; window.renderQuickReplies(); }};
-        window.editReply = (i) => { const n = prompt("Edit reply:", userQuickReplies[i]); if(n!==null && n.trim()!==""){ userQuickReplies[i]=n.trim(); saveToFirebase(); window.renderQuickReplies(); }};
-        window.deleteReply = (i) => { if(confirm("Delete this reply?")){ userQuickReplies.splice(i, 1); saveToFirebase(); window.renderQuickReplies(); }};
-        window.copyReplyText = (i, btn) => { navigator.clipboard.writeText(document.getElementById(`rt-${i}`).innerText).then(()=>{ const o=btn.innerHTML; btn.innerHTML=`${svgCheck} Copied!`; btn.style.background='var(--green)'; setTimeout(()=>{btn.innerHTML=o; btn.style.background='var(--primary-blue)';}, 2000);});};
-
-        // Receipt Generator
-        window.populateCustomerList = () => { const dl = document.getElementById('customerNamesList'); dl.innerHTML = ''; for(let n in customersData){ const o = document.createElement('option'); o.value = n; dl.appendChild(o); }};
-        document.getElementById('r-name').addEventListener('input', function(){ if(customersData[this.value.trim()]){ document.getElementById('r-id').value = customersData[this.value.trim()]; }});
-
-        window.showReceiptSlip = () => {
-            const n = document.getElementById('r-name').value.trim(); const pid = document.getElementById('r-id').value.trim();
-            if(n && pid){ customersData[n] = pid; saveToFirebase(); window.populateCustomerList(); }
+            const gNameText = activeGame || "Select Game";
+            const gData = storeData[activeGame]; 
+            const listCon = document.getElementById('itemListContainer'); listCon.innerHTML = '';
             
-            document.getElementById('out-date').innerText = new Date().toLocaleString();
-            document.getElementById('out-name').innerText = n || "-";
-            document.getElementById('out-id').innerText = pid || "-";
-            document.getElementById('out-game').innerText = document.getElementById('r-game').value || "-";
-            document.getElementById('out-item').innerText = document.getElementById('r-item').value || "-";
-            document.getElementById('out-price').innerText = (document.getElementById('r-price').value || "0") + " KS";
-            document.getElementById('receiptOutput').style.display = 'flex';
+            if(!activeGame || !gData) { document.getElementById('currentGameTitle').innerText = gNameText; return; }
+            document.getElementById('currentGameTitle').innerText = gNameText;
+
+            let tc=0, tr=0;
+            gData.items.forEach((itm, idx) => {
+                let cost = parseFloat(itm.cost) || 0; 
+                let sell = parseFloat(itm.sell) || 0; 
+                let profit = sell - cost; 
+                tc += cost; tr += sell;
+                
+                let pColor = profit < 0 ? 'var(--danger)' : 'var(--success)';
+                let pBg = profit < 0 ? 'rgba(228, 30, 63, 0.1)' : 'rgba(49, 162, 76, 0.1)';
+                let pBorder = profit < 0 ? '#fca5a5' : '#d1fae5';
+                let pSign = profit <= 0 ? '' : '+';
+
+                const card = document.createElement('div'); card.className = 'item-card'; card.onclick = () => window.openModal(idx);
+                card.innerHTML = `
+                    <div class="card-top-row">
+                        <div class="card-left-group">
+                            <span class="serial-no">${idx + 1}</span>
+                            <img src="${gData.image || 'data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\'></svg>'}" class="item-card-thumb">
+                            <span class="item-card-name">${itm.name}</span>
+                        </div>
+                    </div>
+                    <div class="card-price-details">
+                        Cost <span class="card-cost-span">${cost}KS</span>
+                        Sell <span class="card-sell-span">${sell}KS</span>
+                    </div>
+                    <div class="card-profit-row">
+                        <span class="profit-label">Net Profit (KS)</span>
+                        <span class="card-profit-badge" style="color:${pColor}; background:${pBg}; border:1px solid ${pBorder}; padding:4px 8px; border-radius:6px;">${pSign}${profit}</span>
+                    </div>
+                `;
+                listCon.appendChild(card);
+            });
+            document.getElementById('totalCostVal').innerText = tc; document.getElementById('totalRevenueVal').innerText = tr; document.getElementById('totalProfitVal').innerText = tr-tc;
+            
+            const tP = tr-tc;
+            document.getElementById('totalProfitVal').style.color = tP < 0 ? 'var(--danger)' : 'var(--primary)';
         };
 
-        window.downloadReceiptImage = () => {
-            const s = document.getElementById('printableReceipt'); s.style.boxShadow = 'none'; s.style.border = 'none';
-            html2canvas(s, { scale: 2, backgroundColor: "#ffffff" }).then(c => { const l=document.createElement('a'); l.download=`Receipt.png`; l.href=c.toDataURL('image/png'); l.click(); s.style.boxShadow=''; s.style.border=''; });
+        window.openModal = (idx = -1) => {
+            editingIdx = idx; document.getElementById('itemModal').style.display = 'flex';
+            if(idx > -1) {
+                const i = storeData[activeGame].items[idx]; document.getElementById('modalTitle').innerText="Edit Item"; document.getElementById('m-name').value=i.name; document.getElementById('m-cost').value=i.cost; document.getElementById('m-sell').value=i.sell; document.getElementById('btn-modal-del').style.display='block';
+            } else {
+                if(!activeGame) { window.showToast("Add a game first", "error"); window.closeModal(); return; }
+                document.getElementById('modalTitle').innerText="Add Item"; document.getElementById('m-name').value=''; document.getElementById('m-cost').value=''; document.getElementById('m-sell').value=''; document.getElementById('btn-modal-del').style.display='none';
+            }
+        };
+        window.closeModal = () => document.getElementById('itemModal').style.display='none';
+        
+        window.itemSave = () => {
+            const ni = { name: document.getElementById('m-name').value, cost: parseFloat(document.getElementById('m-cost').value)||0, sell: parseFloat(document.getElementById('m-sell').value)||0 };
+            if(editingIdx > -1) storeData[activeGame].items[editingIdx] = ni; else storeData[activeGame].items.push(ni);
+            saveLocalData(); window.renderTable(); window.closeModal();
+        };
+        window.itemDelete = () => { if(confirm("Delete?")) { storeData[activeGame].items.splice(editingIdx, 1); saveLocalData(); window.renderTable(); window.closeModal(); } };
+
+        // ================= 2. VOUCHER & COUPON LOGIC =================
+        window.switchVCTab = (tab) => {
+            document.getElementById('tab-btn-voucher').classList.remove('active');
+            document.getElementById('tab-btn-coupon').classList.remove('active');
+            document.getElementById('vc-section-voucher').style.display = 'none';
+            document.getElementById('vc-section-coupon').style.display = 'none';
+            
+            document.getElementById(`tab-btn-${tab}`).classList.add('active');
+            document.getElementById(`vc-section-${tab}`).style.display = 'block';
+        };
+
+        // Live preview for Voucher
+        window.updateVoucherPreview = () => {
+            document.getElementById('v-out-name').innerText = document.getElementById('v-name').value || "-";
+            document.getElementById('v-out-game').innerText = document.getElementById('v-game').value || "-";
+            document.getElementById('v-out-item').innerText = document.getElementById('v-item').value || "-";
+            document.getElementById('v-out-price').innerText = (document.getElementById('v-price').value || "0") + " KS";
+        };
+
+        // Live preview for Coupon
+        window.updateCouponPreview = () => {
+            document.getElementById('c-out-discount').innerText = document.getElementById('c-discount').value || "GIFT VOUCHER";
+            document.getElementById('c-out-code').innerText = document.getElementById('c-code').value.toUpperCase() || "XXXX-XXXX";
+            document.getElementById('c-out-expiry').innerText = document.getElementById('c-expiry').value || "-";
+        };
+
+        // Download Image Function (Using html2canvas)
+        window.downloadCard = (elementId, filename) => {
+            const elm = document.getElementById(elementId);
+            
+            // Backup styling in case dark mode affects download box-shadow
+            const originalShadow = elm.style.boxShadow;
+            elm.style.boxShadow = 'none'; 
+            
+            window.showToast("Generating image...");
+            
+            html2canvas(elm, { scale: 3, backgroundColor: null }).then(canvas => {
+                const link = document.createElement('a');
+                link.download = `${storeProfile.name}_${filename}_${Date.now()}.png`;
+                link.href = canvas.toDataURL('image/png');
+                link.click();
+                elm.style.boxShadow = originalShadow;
+                window.showToast("Image Downloaded!", "success");
+            }).catch(err => {
+                elm.style.boxShadow = originalShadow;
+                window.showToast("Failed to generate image", "error");
+            });
+        };
+
+        // Settings
+        window.saveStoreSettings = () => { 
+            storeProfile.name = document.getElementById('settingStoreName').value || "PCA Store"; 
+            saveLocalData(); updateUI(); window.showToast("Settings Saved"); 
         };
     </script>
 </body>
