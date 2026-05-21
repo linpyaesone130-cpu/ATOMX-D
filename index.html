@@ -5,58 +5,48 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>PCA Store Manager</title>
     <meta name="theme-color" content="#1877f2">
+    
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+
     <style>
         /* ================= Theme Variables (Facebook Light) ================= */
         :root {
-            --primary: #1877f2;
-            --primary-hover: #166fe5;
-            --bg-color: #f0f2f5;
-            --card-bg: #ffffff;
-            --text-main: #050505;
-            --text-sec: #65676b;
-            --border: #ced0d4;
-            --hover-bg: #e4e6eb;
-            --danger: #e41e3f;
-            --success: #31a24c;
-            --header-height: 56px;
+            --primary: #1877f2; --primary-hover: #166fe5; --bg-color: #f0f2f5; --card-bg: #ffffff;
+            --text-main: #050505; --text-sec: #65676b; --border: #ced0d4; --hover-bg: #e4e6eb;
+            --danger: #e41e3f; --success: #31a24c; --header-height: 56px;
             --shadow: 0 1px 2px rgba(0, 0, 0, 0.1);
-            --transition: all 0.25s cubic-bezier(0.25, 0.8, 0.25, 1);
+            --transition: all 0.2s ease;
         }
 
-        /* ================= Theme Variables (Dark Mode) ================= */
+        /* ================= Theme Variables (Black & Orange Dark) ================= */
         [data-theme="dark"] {
-            --primary: #ff8c00;
-            --primary-hover: #e07b00;
-            --bg-color: #000000;
-            --card-bg: #1c1c1e;
-            --text-main: #e4e6eb;
-            --text-sec: #b0b3b8;
-            --border: #333333;
-            --hover-bg: #2c2c2e;
-            --danger: #ff4d4d;
-            --success: #00e676;
-            --shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
+            --primary: #ff8c00; --primary-hover: #e07b00; --bg-color: #000000; --card-bg: #1c1c1e;
+            --text-main: #e4e6eb; --text-sec: #b0b3b8; --border: #333333; --hover-bg: #2c2c2e;
+            --danger: #ff4d4d; --success: #00e676; --shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; }
-        body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg-color); color: var(--text-main); overflow: hidden; height: 100vh; width: 100vw; transition: background 0.3s ease, color 0.3s ease; }
-        input::-webkit-outer-spin-button, input::-webkit-inner-spin-button, select, textarea { outline: none; }
-        button { cursor: pointer; border: none; outline: none; background: transparent; color: inherit; font-family: inherit;}
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg-color); color: var(--text-main); overflow: hidden; height: 100vh; width: 100vw; transition: background 0.3s, color 0.3s; }
+        input, select, textarea { outline: none; }
+        button { cursor: pointer; border: none; outline: none; background: transparent; color: inherit;}
         svg { display: block; }
 
         /* ================= PCA Loading Effect ================= */
-        #pca-loading { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--card-bg); z-index: 1000000; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s ease;}
-        .pca-text { font-size: 36px; font-weight: 800; color: var(--primary); display: flex; gap: 6px; letter-spacing: 2px;}
-        .pca-text span { animation: bounce 1.2s infinite; opacity: 0;}
+        #pca-loading { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--card-bg); z-index: 1000000; display: flex; align-items: center; justify-content: center; opacity: 1; transition: opacity 0.3s ease-out; pointer-events: auto;}
+        .pca-text { font-size: 38px; font-weight: 900; color: var(--primary); display: flex; gap: 8px; letter-spacing: 3px;}
+        .pca-text span { animation: bounce 1s ease-in-out infinite; }
         .pca-text span:nth-child(1) { animation-delay: 0s; }
-        .pca-text span:nth-child(2) { animation-delay: 0.2s; }
-        .pca-text span:nth-child(3) { animation-delay: 0.4s; }
-        @keyframes bounce { 0% { transform: translateY(0); opacity: 0; } 50% { transform: translateY(-20px); opacity: 1; } 100% { transform: translateY(0); opacity: 0; } }
+        .pca-text span:nth-child(2) { animation-delay: 0.15s; }
+        .pca-text span:nth-child(3) { animation-delay: 0.3s; }
+        @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-15px); } }
 
         /* ================= Feedback Toast ================= */
         #toast-container { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); z-index: 100000; width: 90%; max-width: 300px; display: flex; flex-direction: column; gap: 8px; pointer-events: none;}
-        .toast { background: var(--card-bg); color: var(--text-main); padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.15); display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--primary); animation: slideDown 0.3s cubic-bezier(0.2, 0, 0, 1);}
+        .toast { background: var(--card-bg); color: var(--text-main); padding: 12px 16px; border-radius: 8px; box-shadow: 0 4px 12px rgba(0,0,0,0.2); display: flex; align-items: center; gap: 10px; border-left: 4px solid var(--primary); animation: slideDown 0.3s cubic-bezier(0.2, 0, 0, 1);}
         .toast.success { border-left-color: var(--success); } .toast.error { border-left-color: var(--danger); }
         .toast span { font-size: 13px; font-weight: 600; }
         @keyframes slideDown { from { transform:translateY(-20px); opacity:0;} to {transform:translateY(0); opacity:1;} }
@@ -64,125 +54,118 @@
         /* ================= App Bar ================= */
         .app-header { height: var(--header-height); background: var(--card-bg); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-shadow: var(--shadow); position: fixed; top: 0; left: 0; width: 100%; z-index: 40; }
         .header-left { display: flex; align-items: center; gap: 12px; }
-        .menu-btn { color: var(--text-main); padding: 8px; background: var(--hover-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: var(--transition);}
+        .menu-btn { color: var(--text-main); padding: 8px; background: var(--hover-bg); border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: transform 0.1s;}
         .menu-btn:active { transform: scale(0.9); }
-        .app-title { font-size: 16px; font-weight: 700; color: var(--primary); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
+        .app-title { font-size: 17px; font-weight: 800; color: var(--primary); max-width: 200px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;}
 
-        /* ================= Sidebar (Smooth 60fps Animation) ================= */
-        .sidebar { width: 65vw; max-width: 280px; background: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; transform: translateX(-100%); will-change: transform; transition: transform 0.3s cubic-bezier(0.2, 0, 0, 1); box-shadow: 5px 0 15px rgba(0,0,0,0.3); }
-        .sidebar.open { transform: translateX(0); }
+        /* ================= Sidebar (GPU Accelerated Smooth 60fps) ================= */
+        .sidebar { width: 70vw; max-width: 300px; background: var(--bg-color); color: var(--text-main); display: flex; flex-direction: column; height: 100vh; position: fixed; left: 0; top: 0; z-index: 100; transform: translate3d(-100%, 0, 0); will-change: transform; transition: transform 0.3s cubic-bezier(0.0, 0, 0.2, 1); box-shadow: 5px 0 20px rgba(0,0,0,0.4); }
+        .sidebar.open { transform: translate3d(0, 0, 0); }
         .sidebar-header { padding: 0 16px; background: var(--card-bg); font-weight: bold; font-size: 16px; display: flex; justify-content: space-between; align-items: center; height: var(--header-height); box-shadow: var(--shadow); z-index: 2;}
-        .close-btn { color: var(--text-sec); font-size: 20px; background: var(--hover-bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; transition: var(--transition);}
-        .close-btn:active { transform: scale(0.9); }
+        .close-btn { color: var(--text-sec); font-size: 20px; background: var(--hover-bg); width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center;}
         
-        .sidebar-scroll { flex-grow: 1; overflow-y: auto; padding: 12px 8px; }
+        .sidebar-scroll { flex-grow: 1; overflow-y: auto; padding: 12px 10px; }
         .nav-menu { list-style: none; margin-bottom: 15px; }
-        .nav-item { padding: 12px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 600; color: var(--text-main); background: var(--card-bg); border-radius: 8px; margin-bottom: 6px; box-shadow: var(--shadow); transition: var(--transition);}
+        .nav-item { padding: 12px 16px; cursor: pointer; display: flex; align-items: center; gap: 12px; font-size: 14px; font-weight: 700; color: var(--text-main); background: var(--card-bg); border-radius: 10px; margin-bottom: 8px; box-shadow: var(--shadow); transition: transform 0.1s; }
         .nav-item svg { color: var(--primary); }
-        .nav-item:active, .nav-item.active { background: rgba(24, 119, 242, 0.1); color: var(--primary); transform: scale(0.98);}
-        [data-theme="dark"] .nav-item:active, [data-theme="dark"] .nav-item.active { background: rgba(255, 140, 0, 0.15); }
+        .nav-item:active { transform: scale(0.98); }
+        .nav-item.active { border: 1px solid var(--primary); background: rgba(24, 119, 242, 0.05); color: var(--primary);}
+        [data-theme="dark"] .nav-item.active { background: rgba(255, 140, 0, 0.1); border-color: var(--primary); }
         
-        .sidebar-title { font-size: 13px; color: var(--text-sec); font-weight: 600; padding: 10px 8px 5px; }
+        .sidebar-title { font-size: 13px; color: var(--text-sec); font-weight: 700; padding: 10px 8px 8px; text-transform: uppercase;}
         .game-list { list-style: none; }
-        .game-item { padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-main); background: var(--card-bg); border-radius: 8px; margin-bottom: 6px; box-shadow: var(--shadow); font-weight: 500; transition: var(--transition);}
-        .game-item:active { transform: scale(0.98); }
+        .game-item { padding: 10px 12px; cursor: pointer; display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text-main); background: var(--card-bg); border-radius: 10px; margin-bottom: 8px; box-shadow: var(--shadow); font-weight: 600;}
         .game-item.active { border-left: 4px solid var(--primary); }
-        .game-thumb-container { display: flex; align-items: center; gap: 8px; }
-        .sidebar-game-thumb { width: 24px; height: 24px; border-radius: 4px; object-fit: cover; background: var(--hover-bg); border: 1px solid var(--border);}
+        .game-thumb-container { display: flex; align-items: center; gap: 10px; }
+        .sidebar-game-thumb { width: 28px; height: 28px; border-radius: 6px; object-fit: cover; background: var(--hover-bg); border: 1px solid var(--border);}
         
-        .sidebar-footer { padding: 12px; background: var(--card-bg); display: flex; flex-direction: column; gap: 8px; box-shadow: 0 -2px 5px rgba(0,0,0,0.05); }
-        .btn-add-game { background: var(--primary); color: white; padding: 12px; border-radius: 8px; font-weight: bold; font-size: 13px; display: flex; align-items: center; justify-content: center; gap: 6px; width: 100%; transition: var(--transition);}
+        .sidebar-footer { padding: 16px; background: var(--card-bg); display: flex; flex-direction: column; gap: 8px; box-shadow: 0 -2px 10px rgba(0,0,0,0.05); }
+        .btn-add-game { background: var(--primary); color: white; padding: 12px; border-radius: 8px; font-weight: 700; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 8px; width: 100%; transition: transform 0.1s;}
         .btn-add-game:active { transform: scale(0.96); }
         
-        .overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); z-index: 50; opacity: 0; pointer-events: none; backdrop-filter: blur(2px); transition: opacity 0.3s ease;}
+        .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); z-index: 50; opacity: 0; pointer-events: none; backdrop-filter: blur(3px); transition: opacity 0.3s ease;}
         .overlay.show { opacity: 1; pointer-events: auto; }
 
-        /* ================= View Containers & Shared ================= */
-        .view-container { display: none; padding-top: var(--header-height); height: 100vh; flex-direction: column; animation: fadeIn 0.2s ease;}
+        /* ================= View Containers ================= */
+        .view-container { display: none; padding-top: var(--header-height); height: 100vh; flex-direction: column; animation: fadeIn 0.3s ease;}
         .view-container.active { display: flex; }
         @keyframes fadeIn { from{opacity:0;} to{opacity:1;} }
-        .content-scroll { padding: 12px; overflow-y: auto; flex-grow: 1; padding-bottom: 80px; }
+        .content-scroll { padding: 16px; overflow-y: auto; flex-grow: 1; padding-bottom: 100px; }
         
-        .page-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; padding: 0 4px;}
-        .page-title-row h2 { color: var(--text-main); font-size: 18px; font-weight: 700;}
-        .btn-primary { background: var(--primary); color: white; padding: 8px 16px; border-radius: 6px; font-size: 13px; font-weight: 600; display: flex; align-items: center; justify-content: center; gap: 6px; transition: var(--transition);}
-        .btn-primary:active { background: var(--primary-hover); transform: scale(0.96); }
+        .page-title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;}
+        .page-title-row h2 { color: var(--text-main); font-size: 20px; font-weight: 800;}
+        .btn-primary { background: var(--primary); color: white; padding: 10px 16px; border-radius: 8px; font-size: 13px; font-weight: 700; display: flex; align-items: center; justify-content: center; gap: 8px; transition: transform 0.1s;}
+        .btn-primary:active { transform: scale(0.96); }
         
-        .m-group { margin-bottom: 16px; position: relative;}
-        .m-group label { display: block; font-size: 12px; font-weight: 600; margin-bottom: 6px; color: var(--text-sec); }
-        .m-input { width: 100%; padding: 12px; border: 1px solid var(--border); border-radius: 8px; font-size: 14px; background: var(--bg-color); color: var(--text-main); transition: var(--transition);}
-        .m-input:focus { border-color: var(--primary); background: var(--card-bg); box-shadow: 0 0 0 2px rgba(24, 119, 242, 0.2); }
-        [data-theme="dark"] .m-input:focus { box-shadow: 0 0 0 2px rgba(255, 140, 0, 0.2); }
-        select.m-input { appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='currentColor' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3e%3cpolyline points='6 9 12 15 18 9'%3e%3c/polyline%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 12px center; background-size: 16px; padding-right: 40px;}
+        .m-group { margin-bottom: 16px;}
+        .m-group label { display: block; font-size: 13px; font-weight: 700; margin-bottom: 6px; color: var(--text-sec); }
+        .m-input { width: 100%; padding: 14px; border: 1px solid var(--border); border-radius: 10px; font-size: 14px; background: var(--bg-color); color: var(--text-main); font-weight: 500; transition: box-shadow 0.2s;}
+        .m-input:focus { border-color: var(--primary); background: var(--card-bg); box-shadow: 0 0 0 3px rgba(24, 119, 242, 0.2); }
+        [data-theme="dark"] .m-input:focus { box-shadow: 0 0 0 3px rgba(255, 140, 0, 0.2); }
 
-        /* ================= Auth Screen (Google Log In Only) ================= */
+        /* ================= Auth Screen ================= */
         .auth-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg-color); display: flex; align-items: center; justify-content: center; z-index: 99999; flex-direction: column; gap: 20px;}
-        .auth-box { background: var(--card-bg); padding: 30px 24px; border-radius: 12px; width: 90%; max-width: 360px; box-shadow: var(--shadow); text-align: center;}
+        .auth-box { background: var(--card-bg); padding: 32px 24px; border-radius: 16px; width: 90%; max-width: 360px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); text-align: center;}
         .auth-header { margin-bottom: 24px; }
-        .auth-header h2 { color: var(--primary); font-size: 24px; margin-bottom: 6px; font-weight: 800; letter-spacing: 1px;}
-        .auth-header p { font-size: 13px; color: var(--text-sec); font-weight: 500;}
+        .auth-header h2 { color: var(--primary); font-size: 28px; margin-bottom: 6px; font-weight: 900;}
+        .auth-header p { font-size: 14px; color: var(--text-sec); font-weight: 600;}
         
-        .btn-google { width: 100%; padding: 12px; background: white; color: #333; border: 1px solid #ddd; border-radius: 8px; font-weight: 600; font-size: 14px; display: flex; align-items: center; justify-content: center; gap: 10px; transition: var(--transition); cursor: pointer; box-shadow: 0 1px 2px rgba(0,0,0,0.05);}
-        .btn-google:active { background: #f1f3f4; transform: scale(0.96);}
+        .btn-google { width: 100%; padding: 14px; background: white; color: #333; border: 1px solid #ddd; border-radius: 10px; font-weight: 700; font-size: 15px; display: flex; align-items: center; justify-content: center; gap: 12px; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.05); transition: transform 0.1s;}
+        .btn-google:active { background: #f8f9fa; transform: scale(0.97);}
 
         /* ================= INVENTORY / GAME GRID ================= */
-        .summary-grid { display: grid; gap: 8px; margin-bottom: 16px; grid-template-columns: repeat(3, 1fr); }
-        .summary-box { background: var(--card-bg); border-radius: 10px; padding: 12px 8px; text-align: center; box-shadow: var(--shadow); }
-        .summary-box span { display: block; font-size: 11px; color: var(--text-sec); margin-bottom: 4px; font-weight: 600; }
-        .summary-box strong { font-size: 14px; display: block; color: var(--text-main); font-weight: 700;}
+        .summary-grid { display: grid; gap: 10px; margin-bottom: 20px; grid-template-columns: repeat(3, 1fr); }
+        .summary-box { background: var(--card-bg); border-radius: 12px; padding: 14px 8px; text-align: center; box-shadow: var(--shadow); }
+        .summary-box span { display: block; font-size: 11px; color: var(--text-sec); margin-bottom: 4px; font-weight: 700; }
+        .summary-box strong { font-size: 15px; display: block; color: var(--text-main); font-weight: 800;}
         .summary-box.highlight { background: rgba(24, 119, 242, 0.05); border: 1px solid var(--primary); }
-        [data-theme="dark"] .summary-box.highlight { background: rgba(255, 140, 0, 0.1); }
+        [data-theme="dark"] .summary-box.highlight { background: rgba(255, 140, 0, 0.1); border-color: var(--primary);}
         .summary-box.highlight strong { color: var(--primary); }
         
-        #itemListContainer { display: flex; flex-direction: column; gap: 10px; }
-        .item-card { background: var(--card-bg); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 10px; box-shadow: var(--shadow); transition: var(--transition);}
+        #itemListContainer { display: flex; flex-direction: column; gap: 12px; }
+        .item-card { background: var(--card-bg); border-radius: 12px; padding: 16px; display: flex; flex-direction: column; gap: 12px; box-shadow: var(--shadow); transition: transform 0.1s;}
         .item-card:active { transform: scale(0.99); }
         
         .card-top-row { display: flex; justify-content: space-between; align-items: center;}
-        .card-left-group { display: flex; align-items: center; gap: 10px; flex-grow: 1; cursor: pointer;}
-        .serial-no { font-size: 12px; font-weight: bold; color: var(--text-sec); background: var(--hover-bg); padding: 4px 8px; border-radius: 6px;}
-        .item-card-thumb { width: 32px; height: 32px; border-radius: 6px; object-fit: cover; background: var(--hover-bg); border: 1px solid var(--border);}
-        .item-card-name { font-size: 15px; font-weight: 700; color: var(--text-main);}
+        .card-left-group { display: flex; align-items: center; gap: 12px; flex-grow: 1; cursor: pointer;}
+        .serial-no { font-size: 13px; font-weight: 800; color: var(--text-sec); background: var(--hover-bg); padding: 4px 10px; border-radius: 6px;}
+        .item-card-thumb { width: 36px; height: 36px; border-radius: 8px; object-fit: cover; background: var(--hover-bg); border: 1px solid var(--border);}
+        .item-card-name { font-size: 16px; font-weight: 800; color: var(--text-main);}
         
-        .card-price-details { display: flex; align-items: center; gap: 12px; font-size: 12px; color: var(--text-sec); font-weight: 500;}
-        .card-cost-span, .card-sell-span { color: var(--text-main); font-weight: 600;}
+        .card-price-details { display: flex; align-items: center; gap: 16px; font-size: 13px; color: var(--text-sec); font-weight: 600;}
+        .card-cost-span, .card-sell-span { color: var(--text-main); font-weight: 700;}
         
-        .card-profit-row { display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); padding: 10px; border-radius: 8px;}
-        .profit-label { font-size: 11px; font-weight: 600; color: var(--text-sec);}
-        .card-profit-badge { font-size: 13px; font-weight: 700; color: var(--success); }
+        .card-profit-row { display: flex; justify-content: space-between; align-items: center; background: var(--bg-color); padding: 12px; border-radius: 8px;}
+        .profit-label { font-size: 12px; font-weight: 700; color: var(--text-sec);}
+        .card-profit-badge { font-size: 15px; font-weight: 800; color: var(--success); }
         .card-profit-badge.negative { color: var(--danger); }
         
-        .btn-sell { background: rgba(49, 162, 76, 0.15); color: var(--success); border: 1px solid rgba(49, 162, 76, 0.3); padding: 8px 12px; border-radius: 8px; font-size: 12px; font-weight: 700; display: flex; align-items: center; gap: 4px; transition: var(--transition);}
-        .btn-sell:active { transform: scale(0.9); background: var(--success); color: white; }
-        
-        .floating-add { position: fixed; bottom: 24px; right: 24px; background: var(--primary); color: white; width: 56px; height: 56px; border-radius: 28px; box-shadow: 0 4px 12px rgba(24, 119, 242, 0.4); display: flex; align-items: center; justify-content: center; z-index: 45; transition: var(--transition);}
+        .floating-add { position: fixed; bottom: 24px; right: 24px; background: var(--primary); color: white; width: 60px; height: 60px; border-radius: 30px; box-shadow: 0 4px 15px rgba(24, 119, 242, 0.5); display: flex; align-items: center; justify-content: center; z-index: 45; transition: transform 0.1s;}
         .floating-add:active { transform: scale(0.9); }
-        [data-theme="dark"] .floating-add { box-shadow: 0 4px 12px rgba(255, 140, 0, 0.4); }
+        [data-theme="dark"] .floating-add { box-shadow: 0 4px 15px rgba(255, 140, 0, 0.5); }
         
-        /* ================= Modals ================= */
-        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.2s ease;}
+        /* Modals */
+        .modal-overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.6); display: none; align-items: center; justify-content: center; z-index: 10000; padding: 20px; backdrop-filter: blur(2px); opacity: 0; transition: opacity 0.25s ease; pointer-events: auto;}
         .modal-overlay.show { display: flex; opacity: 1; }
-        .modal-box { background: var(--card-bg); width: 100%; max-width: 360px; border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.3); transform: scale(0.9); transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
+        .modal-box { background: var(--card-bg); width: 100%; max-width: 360px; border-radius: 16px; padding: 24px; box-shadow: 0 10px 40px rgba(0,0,0,0.4); transform: scale(0.95); transition: transform 0.25s cubic-bezier(0.175, 0.885, 0.32, 1.275); }
         .modal-overlay.show .modal-box { transform: scale(1); }
         
-        .modal-image-row { display: flex; justify-content: center; margin-bottom: 15px; flex-direction: column; align-items: center; gap: 10px;}
-        .modal-image-preview { width: 80px; height: 80px; border-radius: 10px; background: var(--bg-color); object-fit: cover; display: none; border: 2px dashed var(--border);}
+        .modal-image-row { display: flex; justify-content: center; margin-bottom: 16px; flex-direction: column; align-items: center; gap: 10px;}
+        .modal-image-preview { width: 80px; height: 80px; border-radius: 12px; background: var(--bg-color); object-fit: cover; display: none; border: 2px dashed var(--border);}
         
         .file-input-wrapper { display: flex; justify-content: center; width: 100%;}
-        .btn-file-upload { background: var(--bg-color); color: var(--text-main); font-size: 13px; font-weight: 600; padding: 10px 16px; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; border: 1px solid var(--border); transition: var(--transition); width: 100%;}
-        .btn-file-upload:active { transform: scale(0.98); background: var(--hover-bg); }
+        .btn-file-upload { background: var(--bg-color); color: var(--text-main); font-size: 14px; font-weight: 700; padding: 12px; border-radius: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; border: 2px dashed var(--border); width: 100%;}
         input[type="file"] { display: none; }
 
         /* ================= VOUCHER & COUPON VIEW ================= */
-        .tab-container { display: flex; gap: 10px; margin-bottom: 20px; background: var(--card-bg); padding: 5px; border-radius: 10px; box-shadow: var(--shadow);}
-        .tab-btn { flex: 1; padding: 10px; text-align: center; font-weight: 600; font-size: 13px; color: var(--text-sec); border-radius: 8px; transition: 0.2s; }
+        .tab-container { display: flex; gap: 10px; margin-bottom: 20px; background: var(--card-bg); padding: 6px; border-radius: 12px; box-shadow: var(--shadow);}
+        .tab-btn { flex: 1; padding: 12px; text-align: center; font-weight: 700; font-size: 14px; color: var(--text-sec); border-radius: 8px;}
         .tab-btn.active { background: rgba(24, 119, 242, 0.1); color: var(--primary); }
         [data-theme="dark"] .tab-btn.active { background: rgba(255, 140, 0, 0.15); }
         
         .vc-form { background: var(--card-bg); border-radius: 12px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px;}
-        .vc-preview-area { display: flex; flex-direction: column; align-items: center; gap: 15px; margin-top: 10px; }
+        .vc-preview-area { display: flex; flex-direction: column; align-items: center; gap: 16px; margin-top: 16px; }
         
-        /* Voucher Card Design */
         .voucher-card { background: #ffffff; border-radius: 12px; padding: 24px; box-shadow: 0 10px 30px rgba(0,0,0,0.08); width: 100%; max-width: 320px; color: #333; position: relative; border: 1px solid #eee;}
         .voucher-header { display: flex; flex-direction: column; align-items: center; border-bottom: 2px dashed #e2e8f0; padding-bottom: 15px; margin-bottom: 15px; }
         .v-icon-wrap { width: 48px; height: 48px; background: #eff6ff; color: #1877f2; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-bottom: 10px;}
@@ -196,26 +179,24 @@
         .v-total-val { font-size: 20px; font-weight: 900; color: #1877f2; }
         .v-barcode { height: 30px; background: repeating-linear-gradient(90deg, #333 0, #333 2px, transparent 2px, transparent 6px, #333 6px, #333 10px, transparent 10px, transparent 12px); opacity: 0.2; margin-top: 20px;}
 
-        /* Coupon Card Design */
         .coupon-card { background: linear-gradient(135deg, #ff8c00, #ff4500); border-radius: 16px; padding: 20px; width: 100%; max-width: 340px; color: white; position: relative; box-shadow: 0 10px 25px rgba(255, 140, 0, 0.3); overflow: hidden; }
         .coupon-card::before, .coupon-card::after { content: ''; position: absolute; top: 50%; width: 24px; height: 24px; background: var(--bg-color); border-radius: 50%; transform: translateY(-50%); z-index: 2;}
         .coupon-card::before { left: -12px; } .coupon-card::after { right: -12px; }
-        
         .coupon-inner { border: 2px dashed rgba(255,255,255,0.4); border-radius: 12px; padding: 20px 15px; text-align: center; position: relative; z-index: 1;}
-        .c-store-name { font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 5px;}
+        .c-store-name { font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 5px;}
         .c-discount { font-size: 32px; font-weight: 900; text-shadow: 2px 2px 4px rgba(0,0,0,0.2); margin-bottom: 15px; line-height: 1.1;}
         .c-code-box { background: white; color: #ff4500; padding: 10px 20px; border-radius: 8px; font-family: monospace; font-size: 18px; font-weight: bold; display: inline-block; letter-spacing: 2px; box-shadow: inset 0 2px 4px rgba(0,0,0,0.1); margin-bottom: 10px;}
-        .c-expiry { font-size: 11px; opacity: 0.8; font-weight: 500; }
+        .c-expiry { font-size: 11px; opacity: 0.8; font-weight: 600; }
 
         /* Settings Toggle Switch */
-        .theme-switch-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--card-bg); border-radius: 10px; box-shadow: var(--shadow); margin-bottom: 20px;}
-        .theme-switch-wrapper span { font-size: 14px; font-weight: 600; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
-        .switch { position: relative; display: inline-block; width: 44px; height: 24px; }
+        .theme-switch-wrapper { display: flex; align-items: center; justify-content: space-between; padding: 16px; background: var(--card-bg); border-radius: 12px; box-shadow: var(--shadow); margin-bottom: 20px;}
+        .theme-switch-wrapper span { font-size: 15px; font-weight: 700; color: var(--text-main); display: flex; align-items: center; gap: 8px;}
+        .switch { position: relative; display: inline-block; width: 48px; height: 26px; }
         .switch input { opacity: 0; width: 0; height: 0; }
-        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 24px; }
-        .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
+        .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 26px; }
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 3px; bottom: 3px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 4px rgba(0,0,0,0.2);}
         input:checked + .slider { background-color: var(--primary); }
-        input:checked + .slider:before { transform: translateX(20px); }
+        input:checked + .slider:before { transform: translateX(22px); }
 
     </style>
 </head>
@@ -228,28 +209,42 @@
             <span>A</span>
         </div>
     </div>
+    
+    <script>
+        // Dismiss loading screen completely and clear blocker layers
+        window.dismissLoadingScreen = function() {
+            var loading = document.getElementById('pca-loading');
+            if(loading) {
+                loading.style.opacity = '0';
+                setTimeout(function(){ 
+                    if(loading.parentNode) {
+                        loading.parentNode.removeChild(loading); // Remove DOM element completely
+                    }
+                }, 300);
+            }
+        };
+    </script>
 
     <div id="toast-container"></div>
 
-    <div class="auth-overlay" id="authScreen">
+    <div class="auth-overlay" id="authScreen" style="display:none;">
         <div class="auth-box">
             <div class="auth-header">
-                <h2>PCA</h2>
-                <p>Welcome to PCA Store Manager</p>
+                <h2>PCA STORE</h2>
+                <p>Manager Dashboard Login</p>
             </div>
             
             <button class="btn-google" onclick="window.loginWithGoogle()">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
                 Continue with Google
             </button>
-            <div style="font-size:11px; color:var(--text-sec); margin-top:15px;">* Make sure to add your domain (e.g. atomxd.netlify.app) to Firebase Authorized Domains for Google Login to work.</div>
         </div>
     </div>
 
     <header class="app-header">
         <div class="header-left">
             <button class="menu-btn" onclick="window.toggleSidebar()">
-                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
             </button>
             <span class="app-title" id="topStoreName">PCA Store</span>
         </div>
@@ -264,9 +259,9 @@
         
         <div class="sidebar-scroll">
             <ul class="nav-menu">
-                <li class="nav-item active" id="nav-inventory" onclick="window.switchView('inventory')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg><span>Game Grid (Profit)</span></li>
-                <li class="nav-item" id="nav-vouchers" onclick="window.switchView('vouchers')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>Voucher & Coupon</span></li>
-                <li class="nav-item" id="nav-settings" onclick="window.switchView('settings')"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>Settings & Theme</span></li>
+                <li class="nav-item active" id="nav-inventory" onclick="window.switchView('inventory')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg><span>Game Grid (Profit)</span></li>
+                <li class="nav-item" id="nav-vouchers" onclick="window.switchView('vouchers')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg><span>Voucher & Coupon</span></li>
+                <li class="nav-item" id="nav-settings" onclick="window.switchView('settings')"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg><span>Settings & Theme</span></li>
             </ul>
             <div class="sidebar-title">Games Category</div>
             <ul class="game-list" id="sidebarGameList"></ul>
@@ -274,7 +269,7 @@
         
         <div class="sidebar-footer">
             <button class="btn-add-game" onclick="window.openAddGameModal()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
                 Add Game
             </button>
         </div>
@@ -282,16 +277,16 @@
 
     <div class="modal-overlay" id="addGameModal">
         <div class="modal-box">
-            <div class="page-title-row"><h2 style="font-size:16px;">Add New Game</h2><button onclick="window.closeModalById('addGameModal')" style="padding:6px; border-radius:50%; color:var(--text-main);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+            <div class="page-title-row"><h2 style="font-size:18px;">Add Game</h2><button onclick="window.closeModalById('addGameModal')" style="padding:6px; border-radius:50%; color:var(--text-main);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
             
             <div class="modal-image-row">
                 <img src="" id="m-new-game-preview" class="modal-image-preview">
-                <span id="upload-status" style="font-size:11px; color:var(--primary); font-weight:bold; display:none; margin-top:5px;">Uploading to Storage...</span>
+                <span id="upload-status" style="font-size:12px; color:var(--primary); font-weight:bold; display:none; margin-top:5px;">Uploading...</span>
             </div>
             
             <div class="file-input-wrapper">
                 <label for="m-new-game-image" class="btn-file-upload">
-                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><circle cx="8.5" cy="8.5" r="1.5"></circle><polyline points="21 15 16 10 5 21"></polyline></svg>
                     Choose Icon
                 </label>
                 <input type="file" id="m-new-game-image" accept="image/*" onchange="window.handleModalImage(this)">
@@ -300,7 +295,7 @@
             <div class="m-group"><label>Game Name</label><input type="text" id="m-new-game-name" class="m-input" placeholder="e.g. Mobile Legends"></div>
             <div style="display:flex; gap:12px; margin-top:24px;">
                 <button class="btn-primary" style="flex:1; background:var(--hover-bg); color:var(--text-main);" onclick="window.closeModalById('addGameModal')">Cancel</button>
-                <button class="btn-primary" style="flex:1;" onclick="window.confirmAddGame()">Save Game</button>
+                <button class="btn-primary" style="flex:1;" onclick="window.confirmAddGame()">Save</button>
             </div>
         </div>
     </div>
@@ -317,19 +312,19 @@
 
             <div id="itemListContainer"></div>
         </div>
-        <button class="floating-add" onclick="window.openItemModal()"><svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
+        <button class="floating-add" onclick="window.openItemModal()"><svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg></button>
     </main>
 
     <div class="modal-overlay" id="itemModal">
         <div class="modal-box">
-            <div class="page-title-row"><h2 id="modalTitle">Add Item</h2><button onclick="window.closeModalById('itemModal')" style="padding:6px; border-radius:50%; color:var(--text-main);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
+            <div class="page-title-row"><h2 id="modalTitle">Add Item</h2><button onclick="window.closeModalById('itemModal')" style="padding:6px; border-radius:50%; color:var(--text-main);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button></div>
             <div class="m-group"><label>Amount / Package</label><input type="text" id="m-name" class="m-input" placeholder="e.g. 86 Diamonds"></div>
             <div class="m-group"><label>Cost (KS)</label><input type="number" id="m-cost" class="m-input" placeholder="0"></div>
             <div class="m-group"><label>Sell (KS)</label><input type="number" id="m-sell" class="m-input" placeholder="0"></div>
             
             <div style="display:flex; gap:12px; margin-top:24px;">
-                <button id="btn-modal-del" style="display:none; background:var(--bg-color); color:var(--danger); padding:12px; border-radius:8px;" onclick="window.itemDelete()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
-                <button class="btn-primary" style="flex:1; padding:12px; font-size:14px;" onclick="window.itemSave()">Save Item</button>
+                <button id="btn-modal-del" style="display:none; background:var(--bg-color); color:var(--danger); padding:12px; border-radius:8px;" onclick="window.itemDelete()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                <button class="btn-primary" style="flex:1; padding:14px; font-size:15px;" onclick="window.itemSave()">Save</button>
             </div>
         </div>
     </div>
@@ -354,7 +349,7 @@
                 <div class="vc-preview-area">
                     <div class="voucher-card" id="printableVoucher">
                         <div class="voucher-header">
-                            <div class="v-icon-wrap"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
+                            <div class="v-icon-wrap"><svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"></polyline></svg></div>
                             <div class="v-store-name" id="v-out-store">PCA Store</div>
                             <div class="v-receipt-text">PAYMENT RECEIPT</div>
                         </div>
@@ -369,13 +364,13 @@
                         </div>
                         <div class="v-barcode"></div>
                     </div>
-                    <button class="btn-primary" style="width:100%; max-width:320px; padding:12px; background:var(--success);" onclick="window.downloadCard('printableVoucher', 'Voucher')">Download Voucher</button>
+                    <button class="btn-primary" style="width:100%; max-width:320px; padding:14px; background:var(--success);" onclick="window.downloadCard('printableVoucher', 'Voucher')">Download Voucher</button>
                 </div>
             </div>
 
             <div id="vc-section-coupon" style="display:none;">
                 <div class="vc-form">
-                    <div class="m-group"><label>Discount Text (e.g. 10% OFF, 5000 KS OFF)</label><input type="text" id="c-discount" class="m-input" placeholder="e.g. 500 KS OFF" oninput="window.updateCouponPreview()"></div>
+                    <div class="m-group"><label>Discount Text</label><input type="text" id="c-discount" class="m-input" placeholder="e.g. 500 KS OFF" oninput="window.updateCouponPreview()"></div>
                     <div class="m-group"><label>Promo Code</label><input type="text" id="c-code" class="m-input" placeholder="e.g. PCA-NEW-YEAR" oninput="window.updateCouponPreview()" style="text-transform:uppercase;"></div>
                     <div class="m-group"><label>Valid Until</label><input type="text" id="c-expiry" class="m-input" placeholder="e.g. 31 Dec 2026" oninput="window.updateCouponPreview()"></div>
                 </div>
@@ -385,12 +380,12 @@
                         <div class="coupon-inner">
                             <div class="c-store-name" id="c-out-store">PCA STORE</div>
                             <div class="c-discount" id="c-out-discount">GIFT VOUCHER</div>
-                            <div style="font-size:12px; margin-bottom:8px; font-weight:600;">Use Promo Code:</div>
+                            <div style="font-size:13px; margin-bottom:8px; font-weight:700;">Use Promo Code:</div>
                             <div class="c-code-box" id="c-out-code">XXXX-XXXX</div>
                             <div class="c-expiry">Valid Until: <span id="c-out-expiry">-</span></div>
                         </div>
                     </div>
-                    <button class="btn-primary" style="width:100%; max-width:340px; padding:12px; background:#ff8c00;" onclick="window.downloadCard('printableCoupon', 'Coupon')">Download Coupon</button>
+                    <button class="btn-primary" style="width:100%; max-width:340px; padding:14px; background:#ff8c00;" onclick="window.downloadCard('printableCoupon', 'Coupon')">Download Coupon</button>
                 </div>
             </div>
         </div>
@@ -398,11 +393,12 @@
 
     <main class="view-container" id="view-settings">
         <div class="content-scroll">
+            <div class="page-title-row"><h2>Settings</h2></div>
             
             <div class="theme-switch-wrapper">
                 <span>
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
-                    Dark Mode (Black & Orange)
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path></svg>
+                    Dark Mode
                 </span>
                 <label class="switch">
                     <input type="checkbox" id="themeToggle" onchange="window.toggleTheme()">
@@ -410,29 +406,25 @@
                 </label>
             </div>
 
-            <div style="background:var(--card-bg); padding:20px; border-radius:10px; border:1px solid var(--border); margin-bottom:20px; box-shadow:var(--shadow);">
-                <h3 style="font-size:16px; color:var(--primary); margin-bottom:15px; font-weight:700;">Store Information</h3>
+            <div style="background:var(--card-bg); padding:24px; border-radius:12px; border:1px solid var(--border); margin-bottom:24px; box-shadow:var(--shadow);">
+                <h3 style="font-size:18px; color:var(--primary); margin-bottom:16px; font-weight:800;">Store Information</h3>
                 <div class="m-group">
                     <label>Store Name</label>
                     <input type="text" id="settingStoreName" class="m-input" placeholder="e.g. PCA Store">
                 </div>
-                <button class="btn-primary" style="width:100%; padding:12px;" onclick="window.saveStoreSettings()">Save Settings</button>
+                <button class="btn-primary" style="width:100%; padding:14px; font-size:15px;" onclick="window.saveStoreSettings()">Save Settings</button>
             </div>
             
-            <button style="width:100%; padding:12px; border-radius:8px; font-weight:700; font-size:14px; background:rgba(228, 30, 63, 0.1); color:var(--danger); border:1px solid var(--danger); display:flex; align-items:center; justify-content:center; gap:8px;" onclick="window.handleLogout()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
-                Sign Out / Logout
+            <button style="width:100%; padding:14px; border-radius:10px; font-weight:800; font-size:15px; background:rgba(228, 30, 63, 0.1); color:var(--danger); border:1px solid var(--danger); display:flex; align-items:center; justify-content:center; gap:10px;" onclick="window.handleLogout()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+                Logout
             </button>
         </div>
     </main>
 
-    <script type="module">
-        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-app.js";
-        import { getAuth, GoogleAuthProvider, signInWithPopup, onAuthStateChanged, signOut, setPersistence, browserLocalPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-auth.js";
-        import { getFirestore, doc, getDoc, setDoc, enableIndexedDbPersistence } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore.js";
-        import { getStorage, ref, uploadBytesResumable, getDownloadURL } from "https://www.gstatic.com/firebasejs/10.8.1/firebase-storage.js";
 
-        // ================= FIREBASE CONFIG =================
+    <script>
+        // Firebase Configuration Details
         const firebaseConfig = {
             apiKey: "AIzaSyBCBimkrfs-TGM-TioINkZfmQiBvIBsp1s",
             authDomain: "atomx-d-project.firebaseapp.com",
@@ -442,110 +434,92 @@
         
         let app, auth, db, storage, googleProvider;
         try {
-            app = initializeApp(firebaseConfig);
-            auth = getAuth(app);
-            db = getFirestore(app);
-            storage = getStorage(app);
-            googleProvider = new GoogleAuthProvider();
-            try { enableIndexedDbPersistence(db).catch(e=>{}); } catch(e) {}
-        } catch(e) { console.error("Firebase Init Error:", e); }
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            storage = firebase.storage();
+            googleProvider = new firebase.auth.GoogleAuthProvider();
+            try { db.enablePersistence().catch(function(err){}); } catch(e){}
+        } catch(e) { console.log("Firebase Load Fallback Active."); }
 
-        // ================= STATE =================
+        // Application Global States
         let currentUserUid = null;
-        let storeData = null; 
+        let storeData = {}; 
         let activeGame = "";
         let storeProfile = { name: "PCA Store" };
         let editingIdx = -1;
         let uploadedImageUrl = ""; 
 
-        // ================= PCA LOADING EFFECT =================
-        const hideLoading = () => {
-            const loading = document.getElementById('pca-loading');
-            if(loading && loading.style.display !== 'none') {
-                loading.style.opacity = '0'; 
-                setTimeout(() => loading.style.display = 'none', 300);
-            }
-        };
+        const svgTrash = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
 
-        // Timeout fallback just in case Firebase hangs
-        setTimeout(hideLoading, 5000); 
+        // ================= AUTH OBSERVER LOGIC =================
+        if(auth) {
+            auth.onAuthStateChanged(function(user) {
+                if (user) { 
+                    currentUserUid = user.uid; 
+                    document.getElementById('authScreen').style.display = 'none'; 
+                    loadCloudData();
+                } else { 
+                    currentUserUid = null; 
+                    document.getElementById('authScreen').style.display = 'flex'; 
+                    loadLocalDataFallback(); 
+                }
+                window.dismissLoadingScreen(); // Dismiss layer trigger
+            });
+        } else {
+            document.getElementById('authScreen').style.display = 'flex';
+            loadLocalDataFallback();
+            window.dismissLoadingScreen();
+        }
 
-        // ================= UTILS =================
-        window.showToast = (msg, type = 'success') => {
-            const c = document.getElementById('toast-container');
-            const t = document.createElement('div'); t.className = `toast ${type}`;
-            t.innerHTML = `<span>${msg}</span>`; c.appendChild(t);
-            setTimeout(() => { t.style.opacity='0'; setTimeout(()=>t.remove(), 400); }, 2500);
-        };
-
-        // ================= AUTH FLOW =================
-        window.loginWithGoogle = async () => {
-            if(!auth) return window.showToast("Firebase Config Error!", "error");
-            try {
-                await setPersistence(auth, browserLocalPersistence);
-                const result = await signInWithPopup(auth, googleProvider);
+        // ================= GOOGLE AUTHENTICATION =================
+        window.loginWithGoogle = function() {
+            if(!auth) return window.showToast("Firebase init configuration error", "error");
+            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(function() {
+                return auth.signInWithPopup(googleProvider);
+            }).then(function(result) {
                 currentUserUid = result.user.uid;
-                window.showToast("Logged in with Google!");
-            } catch(e) { window.showToast("Google Auth Error: " + e.message, "error"); }
+                window.showToast("Welcome Back!");
+            }).catch(function(e) {
+                window.showToast("Authentication interrupted", "error");
+            });
         };
 
-        window.handleLogout = () => { 
-            if(confirm("Sign out and clear local cache?")) {
-                if(auth) signOut(auth);
+        window.handleLogout = function() { 
+            if(confirm("Are you sure you want to sign out?")) {
+                if(auth) auth.signOut();
                 localStorage.removeItem('pcaStoreData');
                 location.reload();
             }
         };
 
-        if(auth) {
-            onAuthStateChanged(auth, async (user) => {
-                if (user) { 
-                    currentUserUid = user.uid; 
-                    document.getElementById('authScreen').style.display = 'none'; 
-                    await loadCloudData();
-                } 
-                else { 
-                    currentUserUid = null; 
-                    document.getElementById('authScreen').style.display = 'flex'; 
-                    loadLocalDataFallback(); // Load offline if not logged in just in case
-                }
-                hideLoading(); // Hide loading screen when auth state is resolved
-            });
-        } else {
-            document.getElementById('authScreen').style.display = 'none';
-            loadLocalDataFallback();
-            hideLoading();
-        }
-
-        // ================= DATA LOGIC =================
+        // ================= DATA RECOVERY & STORAGE LOGIC =================
         function loadLocalDataFallback() {
-            const json = localStorage.getItem('pcaStoreData');
+            var json = localStorage.getItem('pcaStoreData');
             storeData = json ? JSON.parse(json) : {}; 
-            
-            const profileJson = localStorage.getItem('pcaStoreProfile');
+            var profileJson = localStorage.getItem('pcaStoreProfile');
             if(profileJson) storeProfile = JSON.parse(profileJson);
 
-            const games = Object.keys(storeData);
+            var games = Object.keys(storeData);
             if(games.length > 0) {
                 activeGame = games[0];
-                games.forEach(g => { if(!storeData[g].items) storeData[g] = { image: "", items: [], codes: [] }; });
+                games.forEach(function(g) { if(!storeData[g].items) storeData[g] = { image: "", items: [] }; });
             } else { activeGame = ""; }
             updateUI();
         }
 
-        async function loadCloudData() {
-            try {
-                const snap = await getDoc(doc(db, "stores", currentUserUid));
-                if(snap.exists()) {
-                    const d = snap.data();
-                    if(d.inventory) { storeData = d.inventory; }
-                    storeProfile = d.profile || { name: "PCA Store" };
-                    const games = Object.keys(storeData);
+        function loadCloudData() {
+            db.collection("stores").doc(currentUserUid).get().then(function(snap) {
+                if(snap.exists) {
+                    var d = snap.data();
+                    if(d.inventory) storeData = d.inventory;
+                    if(d.profile) storeProfile = d.profile;
+                    var games = Object.keys(storeData);
                     if(games.length > 0) activeGame = games[0];
                     saveLocalData(); 
                 }
                 updateUI();
-            } catch(e) { console.error(e); }
+            }).catch(function(e) { loadLocalDataFallback(); });
         }
 
         function saveLocalData() { 
@@ -553,214 +527,180 @@
             localStorage.setItem('pcaStoreProfile', JSON.stringify(storeProfile));
         }
         
-        async function saveData() {
+        function saveData() {
             saveLocalData();
             if(auth && currentUserUid) {
-                try { await setDoc(doc(db, "stores", currentUserUid), { inventory: storeData, profile: storeProfile }, {merge: true}); } catch(e){}
+                db.collection("stores").doc(currentUserUid).set({ inventory: storeData, profile: storeProfile }, {merge: true}).catch(function(e){});
             }
         }
 
-        const updateUI = () => { 
+        function updateUI() { 
             document.getElementById('topStoreName').innerText = storeProfile.name; 
             document.getElementById('settingStoreName').value = storeProfile.name; 
-            
             document.getElementById('v-out-store').innerText = storeProfile.name;
             document.getElementById('c-out-store').innerText = storeProfile.name;
-            document.getElementById('v-out-date').innerText = new Date().toLocaleDateString();
-
             window.renderSidebar(); 
             window.renderTable(); 
-        };
+        }
 
-        // ================= VIEW & SIDEBAR =================
-        window.toggleSidebar = () => { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); };
-        window.switchView = (v) => {
-            document.querySelectorAll('.view-container').forEach(el => el.classList.remove('active')); document.getElementById(`view-${v}`).classList.add('active');
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active')); if(document.getElementById(`nav-${v}`)) document.getElementById(`nav-${v}`).classList.add('active');
-            document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show');
+        // ================= SIDEBAR ANIMATION INTERACTION =================
+        window.toggleSidebar = function() { 
+            var sidebar = document.getElementById('sidebar');
+            var overlay = document.getElementById('overlay');
+            sidebar.classList.toggle('open');
+            overlay.classList.toggle('show');
+        };
+        
+        window.switchView = function(v) {
+            document.querySelectorAll('.view-container').forEach(function(el) { el.classList.remove('active'); }); 
+            document.getElementById('view-' + v).classList.add('active');
+            document.querySelectorAll('.nav-item').forEach(function(el) { el.classList.remove('active'); }); 
+            if(document.getElementById('nav-' + v)) document.getElementById('nav-' + v).classList.add('active');
+            
+            document.getElementById('sidebar').classList.remove('open'); 
+            document.getElementById('overlay').classList.remove('show');
             if(v === 'inventory') window.renderTable();
         };
 
-        // ================= GAME MANAGMENT =================
-        window.handleModalImage = async (inputEl) => {
-            const file = inputEl.files[0];
-            const preview = document.getElementById('m-new-game-preview');
-            const statusTxt = document.getElementById('upload-status');
+        // ================= BUCKET MEDIA UPLOAD =================
+        window.handleModalImage = function(inputEl) {
+            var file = inputEl.files[0];
+            var preview = document.getElementById('m-new-game-preview');
+            var statusTxt = document.getElementById('upload-status');
             
             if(file) {
                 preview.style.display = 'block';
-                
-                // If Firebase Storage is connected, use it. Else base64 fallback.
                 if(storage && currentUserUid) {
-                    statusTxt.style.display = 'block';
-                    statusTxt.innerText = "Uploading...";
-                    const storageRef = ref(storage, `game_icons/${currentUserUid}_${Date.now()}_${file.name}`);
-                    try {
-                        const snapshot = await uploadBytesResumable(storageRef, file);
-                        uploadedImageUrl = await getDownloadURL(snapshot.ref);
+                    statusTxt.style.display = 'block'; statusTxt.innerText = "Uploading Icon...";
+                    var storageRef = storage.ref("game_icons/" + currentUserUid + "_" + Date.now() + "_" + file.name);
+                    storageRef.put(file).then(function(snapshot) {
+                        return snapshot.ref.getDownloadURL();
+                    }).then(function(url) {
+                        uploadedImageUrl = url;
                         preview.src = uploadedImageUrl;
-                        statusTxt.innerText = "Upload Success!";
+                        statusTxt.innerText = "Upload Complete!";
                         statusTxt.style.color = "var(--success)";
-                    } catch(e) {
-                        statusTxt.innerText = "Upload Failed";
+                    }).catch(function() {
+                        statusTxt.innerText = "Error Uploading";
                         statusTxt.style.color = "var(--danger)";
-                    }
+                    });
                 } else {
-                    // Offline fallback
-                    const reader = new FileReader();
-                    reader.onload = (e) => { uploadedImageUrl = e.target.result; preview.src = uploadedImageUrl; };
+                    var reader = new FileReader();
+                    reader.onload = function(e) { uploadedImageUrl = e.target.result; preview.src = uploadedImageUrl; };
                     reader.readAsDataURL(file);
                 }
             }
         };
 
-        window.openAddGameModal = () => { 
+        window.openAddGameModal = function() { 
             document.getElementById('m-new-game-name').value = ''; 
             document.getElementById('m-new-game-image').value = ''; 
             document.getElementById('m-new-game-preview').style.display = 'none'; 
             document.getElementById('upload-status').style.display = 'none'; 
             uploadedImageUrl = "";
             document.getElementById('addGameModal').classList.add('show'); 
-            if(window.innerWidth < 1024) { document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show'); }
         };
         
-        window.closeModalById = (id) => { document.getElementById(id).classList.remove('show'); };
+        window.closeModalById = function(id) { document.getElementById(id).classList.remove('show'); };
         
-        window.confirmAddGame = () => { 
-            const name = document.getElementById('m-new-game-name').value.trim(); 
+        window.confirmAddGame = function() { 
+            var name = document.getElementById('m-new-game-name').value.trim(); 
             if(!name) return window.showToast("Please enter game name", "error");
-            if(storeData[name]) return window.showToast("Game exists", "error"); 
+            if(storeData[name]) return window.showToast("Game structure duplicated", "error"); 
             
-            storeData[name] = { image: uploadedImageUrl, items: [], codes: [] }; 
+            storeData[name] = { image: uploadedImageUrl, items: [] }; 
             activeGame = name;
-            saveData(); window.showToast("Game added!", "success"); window.closeModalById('addGameModal'); updateUI();
+            saveData(); window.showToast("Game Added Successfully!", "success"); window.closeModalById('addGameModal'); updateUI();
         };
-        
-        window.deleteGame = (n, e) => { e.stopPropagation(); if(confirm("Delete Game?")){ delete storeData[n]; activeGame=Object.keys(storeData)[0]||""; saveData(); updateUI(); }};
 
-        window.renderSidebar = () => {
-            const list = document.getElementById('sidebarGameList'); list.innerHTML = '';
-            if(!storeData) return;
-            Object.keys(storeData).forEach((gName) => {
-                const gData = storeData[gName];
-                const li = document.createElement('li'); li.className = `game-item ${gName === activeGame ? 'active' : ''}`;
-                li.innerHTML = `<div class="game-info" onclick="window.selectSidebarGame('${gName}')"><div class="game-thumb-container"><img src="${gData.image || 'data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' fill=\\'none\\' stroke=\\'%23666\\' stroke-width=\\'2\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>'}" class="sidebar-game-thumb"><span class="game-name">${gName}</span></div></div><button class="btn-del-game" onclick="window.deleteGame('${gName}', event)"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>`;
+        window.renderSidebar = function() {
+            var list = document.getElementById('sidebarGameList'); list.innerHTML = '';
+            Object.keys(storeData).forEach(function(gName) {
+                var gData = storeData[gName];
+                var li = document.createElement('li'); li.className = 'game-item ' + (gName === activeGame ? 'active' : '');
+                li.innerHTML = '<div class="game-info" onclick="window.selectSidebarGame(\\'' + gName + '\\')"><div class="game-thumb-container"><img src="' + (gData.image || 'data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\' fill=\\'none\\' stroke=\\'%23666\\' stroke-width=\\'2\\'><rect width=\\'100%\\' height=\\'100%\\'/></svg>') + '" class="sidebar-game-thumb"><span class="game-name">' + gName + '</span></div></div><button class="btn-del-game" onclick="window.deleteGame(\\'' + gName + '\\', event)">' + svgTrash + '</button>';
                 list.appendChild(li);
             });
         };
-        window.selectSidebarGame = (name) => { activeGame = name; window.renderSidebar(); window.renderTable(); window.toggleSidebar(); };
+        window.selectSidebarGame = function(name) { activeGame = name; window.renderSidebar(); window.renderTable(); window.toggleSidebar(); };
+        window.deleteGame = function(n, e) { e.stopPropagation(); if(confirm("Delete Game?")){ delete storeData[n]; activeGame = Object.keys(storeData)[0] || ""; saveData(); updateUI(); }};
 
-        // ================= 1. INVENTORY =================
-        window.renderTable = () => {
-            const gNameText = activeGame || "Select Game";
-            const gData = storeData[activeGame]; 
-            const listCon = document.getElementById('itemListContainer'); listCon.innerHTML = '';
+        // ================= GRID GRAPH RENDER =================
+        window.renderTable = function() {
+            var gNameText = activeGame || "Select Game";
+            var gData = storeData[activeGame]; 
+            var listCon = document.getElementById('itemListContainer'); listCon.innerHTML = '';
             
             if(!activeGame || !gData) { document.getElementById('currentGameTitle').innerText = gNameText; return; }
             document.getElementById('currentGameTitle').innerText = gNameText;
 
-            let tc=0, tr=0;
-            gData.items.forEach((itm, idx) => {
-                let cost = parseFloat(itm.cost) || 0; 
-                let sell = parseFloat(itm.sell) || 0; 
-                let profit = sell - cost; 
+            var tc=0, tr=0;
+            gData.items.forEach(function(itm, idx) {
+                var cost = parseFloat(itm.cost) || 0; var sell = parseFloat(itm.sell) || 0; var profit = sell - cost; 
                 tc += cost; tr += sell;
                 
-                let pColor = profit < 0 ? 'var(--danger)' : 'var(--success)';
-                let pBg = profit < 0 ? 'rgba(228, 30, 63, 0.1)' : 'rgba(49, 162, 76, 0.1)';
-                let pBorder = profit < 0 ? '#fca5a5' : '#d1fae5';
-                let pSign = profit <= 0 ? '' : '+';
+                var pColor = profit < 0 ? 'var(--danger)' : 'var(--success)';
+                var pBg = profit < 0 ? 'rgba(228, 30, 63, 0.1)' : 'rgba(49, 162, 76, 0.1)';
+                var pBorder = profit < 0 ? '#fca5a5' : '#d1fae5';
+                var pSign = profit <= 0 ? '' : '+';
 
-                const card = document.createElement('div'); card.className = 'item-card'; card.onclick = () => window.openItemModal(idx);
-                card.innerHTML = `
-                    <div class="card-top-row">
-                        <div class="card-left-group">
-                            <span class="serial-no">${idx + 1}</span>
-                            <img src="${gData.image || 'data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\'></svg>'}" class="item-card-thumb">
-                            <span class="item-card-name">${itm.name}</span>
-                        </div>
-                    </div>
-                    <div class="card-price-details">
-                        Cost <span class="card-cost-span">${cost}KS</span>
-                        Sell <span class="card-sell-span">${sell}KS</span>
-                    </div>
-                    <div class="card-profit-row">
-                        <span class="profit-label">Net Profit (KS)</span>
-                        <span class="card-profit-badge" style="color:${pColor}; background:${pBg}; border:1px solid ${pBorder}; padding:4px 8px; border-radius:6px;">${pSign}${profit}</span>
-                    </div>
-                `;
+                var card = document.createElement('div'); card.className = 'item-card'; card.onclick = function() { window.openItemModal(idx); };
+                card.innerHTML = '<div class="card-top-row"><div class="card-left-group"><span class="serial-no">' + (idx + 1) + '</span><img src="' + (gData.image || 'data:image/svg+xml;utf8,<svg xmlns=\\'http://www.w3.org/2000/svg\\'></svg>') + '" class="item-card-thumb"><span class="item-card-name">' + itm.name + '</span></div></div><div class="card-price-details">Cost <span class="card-cost-span">' + cost + 'KS</span>Sell <span class="card-sell-span">' + sell + 'KS</span></div><div class="card-profit-row"><span class="profit-label">Net Profit (KS)</span><span class="card-profit-badge" style="color:' + pColor + '; background:' + pBg + '; border:1px solid ' + pBorder + '; padding:4px 10px; border-radius:8px;">' + pSign + profit + '</span></div>';
                 listCon.appendChild(card);
             });
             document.getElementById('totalCostVal').innerText = tc; document.getElementById('totalRevenueVal').innerText = tr; document.getElementById('totalProfitVal').innerText = tr-tc;
-            
-            const tP = tr-tc;
-            document.getElementById('totalProfitVal').style.color = tP < 0 ? 'var(--danger)' : 'var(--primary)';
+            document.getElementById('totalProfitVal').style.color = (tr-tc) < 0 ? 'var(--danger)' : 'var(--primary)';
         };
 
-        window.openItemModal = (idx = -1) => {
-            editingIdx = idx; document.getElementById('itemModal').classList.add('show');
+        window.openItemModal = function(idx) {
+            idx = idx !== undefined ? idx : -1; editingIdx = idx; 
+            document.getElementById('itemModal').classList.add('show');
             if(idx > -1) {
-                const i = storeData[activeGame].items[idx]; document.getElementById('modalTitle').innerText="Edit Item"; document.getElementById('m-name').value=i.name; document.getElementById('m-cost').value=i.cost; document.getElementById('m-sell').value=i.sell; document.getElementById('btn-modal-del').style.display='block';
+                var i = storeData[activeGame].items[idx]; document.getElementById('modalTitle').innerText="Edit Item"; document.getElementById('m-name').value=i.name; document.getElementById('m-cost').value=i.cost; document.getElementById('m-sell').value=i.sell; document.getElementById('btn-modal-del').style.display='block';
             } else {
                 if(!activeGame) { window.showToast("Add a game first", "error"); window.closeModalById('itemModal'); return; }
                 document.getElementById('modalTitle').innerText="Add Item"; document.getElementById('m-name').value=''; document.getElementById('m-cost').value=''; document.getElementById('m-sell').value=''; document.getElementById('btn-modal-del').style.display='none';
             }
         };
-        
-        window.itemSave = () => {
-            const ni = { name: document.getElementById('m-name').value, cost: parseFloat(document.getElementById('m-cost').value)||0, sell: parseFloat(document.getElementById('m-sell').value)||0 };
+        window.itemSave = function() {
+            var ni = { name: document.getElementById('m-name').value, cost: parseFloat(document.getElementById('m-cost').value)||0, sell: parseFloat(document.getElementById('m-sell').value)||0 };
             if(editingIdx > -1) storeData[activeGame].items[editingIdx] = ni; else storeData[activeGame].items.push(ni);
             saveData(); window.renderTable(); window.closeModalById('itemModal');
         };
-        window.itemDelete = () => { if(confirm("Delete?")) { storeData[activeGame].items.splice(editingIdx, 1); saveData(); window.renderTable(); window.closeModalById('itemModal'); } };
+        window.itemDelete = function() { if(confirm("Delete?")) { storeData[activeGame].items.splice(editingIdx, 1); saveData(); window.renderTable(); window.closeModalById('itemModal'); } };
 
-        // ================= VOUCHER & COUPON LOGIC =================
-        window.switchVCTab = (tab) => {
-            document.getElementById('tab-btn-voucher').classList.remove('active');
-            document.getElementById('tab-btn-coupon').classList.remove('active');
-            document.getElementById('vc-section-voucher').style.display = 'none';
-            document.getElementById('vc-section-coupon').style.display = 'none';
-            
-            document.getElementById(`tab-btn-${tab}`).classList.add('active');
-            document.getElementById(`vc-section-${tab}`).style.display = 'block';
+        // ================= PRINT RECEIPT ACTIONS =================
+        window.switchVCTab = function(tab) {
+            document.getElementById('tab-btn-voucher').classList.remove('active'); document.getElementById('tab-btn-coupon').classList.remove('active');
+            document.getElementById('vc-section-voucher').style.display = 'none'; document.getElementById('vc-section-coupon').style.display = 'none';
+            document.getElementById('tab-btn-' + tab).classList.add('active'); document.getElementById('vc-section-' + tab).style.display = 'block';
         };
-
-        window.updateVoucherPreview = () => {
+        window.updateVoucherPreview = function() {
             document.getElementById('v-out-name').innerText = document.getElementById('v-name').value || "-";
             document.getElementById('v-out-game').innerText = document.getElementById('v-game').value || "-";
             document.getElementById('v-out-item').innerText = document.getElementById('v-item').value || "-";
             document.getElementById('v-out-price').innerText = (document.getElementById('v-price').value || "0") + " KS";
         };
-
-        window.updateCouponPreview = () => {
+        window.updateCouponPreview = function() {
             document.getElementById('c-out-discount').innerText = document.getElementById('c-discount').value || "GIFT VOUCHER";
             document.getElementById('c-out-code').innerText = document.getElementById('c-code').value.toUpperCase() || "XXXX-XXXX";
             document.getElementById('c-out-expiry').innerText = document.getElementById('c-expiry').value || "-";
         };
-
-        window.downloadCard = (elementId, filename) => {
-            const elm = document.getElementById(elementId);
-            const originalShadow = elm.style.boxShadow;
-            elm.style.boxShadow = 'none'; 
-            window.showToast("Generating image...");
-            html2canvas(elm, { scale: 3, backgroundColor: null }).then(canvas => {
-                const link = document.createElement('a');
-                link.download = `${storeProfile.name}_${filename}_${Date.now()}.png`;
-                link.href = canvas.toDataURL('image/png');
-                link.click();
-                elm.style.boxShadow = originalShadow;
-                window.showToast("Image Downloaded!", "success");
-            }).catch(err => {
-                elm.style.boxShadow = originalShadow;
-                window.showToast("Failed to generate image", "error");
-            });
+        window.downloadCard = function(elementId, filename) {
+            var elm = document.getElementById(elementId); var originalShadow = elm.style.boxShadow; elm.style.boxShadow = 'none'; window.showToast("Generating image...");
+            html2canvas(elm, { scale: 3, backgroundColor: null }).then(function(canvas) {
+                var link = document.createElement('a'); link.download = storeProfile.name + "_" + filename + "_" + Date.now() + ".png"; link.href = canvas.toDataURL('image/png'); link.click();
+                elm.style.boxShadow = originalShadow; window.showToast("Image Downloaded!", "success");
+            }).catch(function() { elm.style.boxShadow = originalShadow; window.showToast("Failed to generate image", "error"); });
         };
 
-        // Settings
-        window.saveStoreSettings = () => { 
-            storeProfile.name = document.getElementById('settingStoreName').value || "PCA Store"; 
-            saveData(); updateUI(); window.showToast("Settings Saved"); 
+        window.toggleTheme = function() {
+            const isDark = document.getElementById('themeToggle').checked;
+            if(isDark) { document.documentElement.setAttribute('data-theme', 'dark'); localStorage.setItem('theme', 'dark'); } 
+            else { document.documentElement.removeAttribute('data-theme'); localStorage.setItem('theme', 'light'); }
+            window.renderTable(); 
         };
+        window.saveStoreSettings = function() { storeProfile.name = document.getElementById('settingStoreName').value || "PCA Store"; saveData(); updateUI(); window.showToast("Settings Saved", "success"); };
     </script>
 </body>
 </html>
