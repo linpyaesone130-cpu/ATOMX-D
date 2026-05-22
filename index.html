@@ -25,13 +25,13 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; width: 100vw; font-size: var(--font-size); }
+        body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; width: 100vw; font-size: var(--font-size); transition: background 0.3s, color 0.3s;}
         input, select, textarea { outline: none; }
-        button { cursor: pointer; border: none; background: transparent; color: inherit; }
+        button { cursor: pointer; border: none; background: transparent; color: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 6px;}
         svg { display: block; }
 
         /* ================= TOAST ================= */
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 100000; font-weight: 600; font-size: 13px; transition: 0.3s; opacity: 0; }
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 100000; font-weight: 600; font-size: 13px; transition: 0.3s; opacity: 0; text-align: center; max-width: 90%;}
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
         /* ================= LAYOUT ================= */
@@ -53,7 +53,8 @@
         .view.active { display: block; padding: 80px 20px 100px; }
         .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        .btn { background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
+        .btn { background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;}
+        .btn:active { transform: scale(0.96); }
         .input-group { margin-bottom: 16px; }
         .input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sec); margin-bottom: 6px; }
         .input-field { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 15px; font-weight: 600;}
@@ -64,14 +65,12 @@
         .stat-box { background: var(--card); padding: 16px 10px; text-align: center; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
         .stat-box span { font-size: 11px; color: var(--text-sec); font-weight: 700; display: block; margin-bottom: 4px; text-transform: uppercase;}
         
-        /* Mobile Cards List */
         .mobile-item-card { background: var(--card); padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
         .item-header { display: flex; justify-content: space-between; align-items: center;}
         .combo-badge { background: var(--bg); color: var(--text-sec); font-size: 11px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); font-weight: 700;}
         .item-prices { display: flex; gap: 12px; font-size: 13px; color: var(--text-sec); background: var(--bg); padding: 10px; border-radius: 8px; font-weight: 600;}
         .item-profit-row { display: flex; justify-content: space-between; background: var(--bg); padding: 12px; border-radius: 8px; align-items: center;}
 
-        /* Desktop Table Layout Style (Clean Floating Row) */
         .desktop-table-wrapper { width: 100%; overflow-x: auto; display: none;}
         table { width: 100%; border-collapse: separate; border-spacing: 0 10px; text-align: left; }
         th { padding: 0 16px; color: var(--text-sec); font-size: 12px; font-weight: 700; text-transform: uppercase; }
@@ -80,7 +79,8 @@
         td:first-child { border-radius: 12px 0 0 12px; border-left: 1px solid var(--border); }
         td:last-child { border-radius: 0 12px 12px 0; border-right: 1px solid var(--border); }
 
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 64 height: 64px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 40; width: 64px; height: 64px;}
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 64px; height: 64px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 40; transition: 0.2s;}
+        .fab:active { transform: scale(0.9); }
         
         /* Modals */
         .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 9999; }
@@ -89,7 +89,7 @@
         
         /* Vouchers */
         .vc-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .vc-tab { flex: 1; padding: 12px; text-align: center; background: var(--card); font-weight: 700; border-radius: 10px; border: 1px solid var(--border); color: var(--text-sec);}
+        .vc-tab { flex: 1; padding: 12px; text-align: center; background: var(--card); font-weight: 700; border-radius: 10px; border: 1px solid var(--border); color: var(--text-sec); cursor: pointer;}
         .vc-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
         .receipt-card { background: #fff; padding: 24px; border-radius: 12px; color: #111; max-width: 340px; margin: 0 auto; border: 1px solid #e2e8f0; }
         .coupon-card { background: linear-gradient(135deg, #ff8c00, #ff4500); padding: 24px; border-radius: 16px; color: #fff; text-align: center; max-width: 340px; margin: 0 auto; }
@@ -101,6 +101,7 @@
         .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(22px); }
+
         #auth-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
     </style>
 </head>
@@ -111,44 +112,74 @@
     <div id="auth-screen">
         <div class="card" style="width: 90%; max-width: 360px; text-align: center; padding: 40px 24px;">
             <h1 style="color: var(--primary); margin-bottom: 8px; font-weight: 900; font-size: 32px;">PCA STORE</h1>
-            <p style="font-size: 14px; color: var(--text-sec); margin-bottom: 40px; font-weight: 600;">Manager Dashboard</p>
-            <button class="btn" style="width: 100%; background: var(--card); color: var(--text); border: 1px solid var(--border); margin-bottom: 10px; padding: 14px;" onclick="loginGoogle()">Continue with Google</button>
+            <p style="font-size: 14px; color: var(--text-sec); margin-bottom: 40px; font-weight: 600;">Manager Dashboard Login</p>
+            
+            <button class="btn" style="width: 100%; background: var(--card); color: var(--text); border: 1px solid var(--border); margin-bottom: 10px; padding: 14px;" onclick="window.loginGoogle()">
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/>
+                    <path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/>
+                    <path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/>
+                    <path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/>
+                </svg>
+                Continue with Google
+            </button>
+            <p style="font-size: 11px; color: var(--text-sec); margin-top: 15px;">Secure authentication required to sync data.</p>
         </div>
     </div>
 
     <header class="header">
         <div style="display: flex; align-items: center; gap: 16px;">
-            <button onclick="toggleSidebar()">
+            <button onclick="window.toggleSidebar()">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="18" x2="15" y2="18"></line></svg>
             </button>
             <span id="ui-store-name" style="font-weight: 800; font-size: 18px; color: var(--primary);">PCA Store</span>
         </div>
     </header>
 
-    <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
+    <div class="overlay" id="overlay" onclick="window.toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
             <span>Menu</span>
-            <button onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            <button onclick="window.toggleSidebar()">
+                <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </button>
         </div>
         <div style="flex-grow: 1; overflow-y: auto; padding: 15px 0;">
-            <div class="menu-item active" id="nav-inventory" onclick="switchView('inventory')">Game Grid</div>
-            <div class="menu-item" id="nav-sales" onclick="switchView('sales')">Daily Sales</div>
-            <div class="menu-item" id="nav-vc" onclick="switchView('vc')">Voucher & Coupon</div>
-            <div class="menu-item" id="nav-settings" onclick="switchView('settings')">Settings</div>
+            <div class="menu-item active" id="nav-inventory" onclick="window.switchView('inventory')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
+                Game Grid
+            </div>
+            <div class="menu-item" id="nav-sales" onclick="window.switchView('sales')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+                Daily Sales
+            </div>
+            <div class="menu-item" id="nav-vc" onclick="window.switchView('vc')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
+                Voucher & Coupon
+            </div>
+            <div class="menu-item" id="nav-settings" onclick="window.switchView('settings')">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
+                Settings
+            </div>
             
             <div style="padding: 20px 20px 8px; font-size: 11px; color: var(--text-sec); font-weight: 800; letter-spacing: 1px;">GAMES CATEGORY</div>
             <div id="sidebar-games-list"></div>
         </div>
         <div style="padding: 20px; border-top: 1px solid var(--border);">
-            <button class="btn" style="width: 100%;" onclick="openGameModal()">Add New Game</button>
+            <button class="btn" style="width: 100%;" onclick="window.openGameModal()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+                Add New Game
+            </button>
         </div>
-    </div>
+    </aside>
 
     <main class="view active" id="view-inventory">
         <div class="title-row">
             <h2 id="inv-game-title">Select Game</h2>
-            <button class="btn" style="background: var(--green);" onclick="copyPriceList()">Copy List</button>
+            <button class="btn" style="background: var(--green);" onclick="window.copyPriceList()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                Copy List
+            </button>
         </div>
         
         <div class="stats-grid">
@@ -165,7 +196,7 @@
             </table>
         </div>
 
-        <button class="fab" onclick="openItemModal()">
+        <button class="fab" onclick="window.openItemModal()">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
     </main>
@@ -174,8 +205,13 @@
         <div class="title-row">
             <h2>Daily Sales Tracker</h2>
             <div style="display:flex; gap:10px;">
-                <button class="btn" style="background: #0088cc;" onclick="sendTelegram()">Send Telegram</button>
-                <button class="btn" style="background: var(--card); color: var(--red); border: 1px solid var(--border);" onclick="confirmClearSales()">Clear</button>
+                <button class="btn" style="background: #0088cc;" onclick="window.sendTelegram()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                    Send Report
+                </button>
+                <button class="btn" style="background: var(--card); color: var(--red); border: 1px solid var(--border);" onclick="window.confirmClearSales()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                </button>
             </div>
         </div>
         <div class="card" style="display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--green);">
@@ -191,16 +227,16 @@
     <main class="view" id="view-vc">
         <div class="title-row"><h2>Voucher & Coupon</h2></div>
         <div class="vc-tabs">
-            <div class="vc-tab active" id="tab-v" onclick="switchVCTab('v')">Receipt Voucher</div>
-            <div class="vc-tab" id="tab-c" onclick="switchVCTab('c')">Gift Coupon</div>
+            <div class="vc-tab active" id="tab-v" onclick="window.switchVCTab('v')">Receipt Voucher</div>
+            <div class="vc-tab" id="tab-c" onclick="window.switchVCTab('c')">Gift Coupon</div>
         </div>
 
         <div id="sec-v" style="display:block;">
             <div class="card">
-                <div class="input-group"><label>Customer Name</label><input type="text" class="input-field" id="v-name" oninput="updateV()"></div>
-                <div class="input-group"><label>Game / Player ID</label><input type="text" class="input-field" id="v-game" oninput="updateV()"></div>
-                <div class="input-group"><label>Package</label><input type="text" class="input-field" id="v-item" oninput="updateV()"></div>
-                <div class="input-group"><label>Total Amount (KS)</label><input type="number" class="input-field" id="v-price" oninput="updateV()"></div>
+                <div class="input-group"><label>Customer Name</label><input type="text" class="input-field" id="v-name" oninput="window.updateV()"></div>
+                <div class="input-group"><label>Game / Player ID</label><input type="text" class="input-field" id="v-game" oninput="window.updateV()"></div>
+                <div class="input-group"><label>Package</label><input type="text" class="input-field" id="v-item" oninput="window.updateV()"></div>
+                <div class="input-group"><label>Total Amount (KS)</label><input type="number" class="input-field" id="v-price" oninput="window.updateV()"></div>
             </div>
             <div class="receipt-card" id="print-v">
                 <div style="text-align: center; border-bottom: 2px dashed #cbd5e1; padding-bottom: 15px; margin-bottom: 15px; color:#111;">
@@ -217,14 +253,14 @@
                     <span style="font-weight: 900; font-size: 20px; color: #1877f2;" id="vo-price">0 KS</span>
                 </div>
             </div>
-            <button class="btn" style="width: 100%; margin-top: 20px; background:var(--green);" onclick="downloadImage('print-v', 'Voucher')">Download Voucher Image</button>
+            <button class="btn" style="width: 100%; margin-top: 20px; background:var(--green);" onclick="window.downloadImage('print-v', 'Voucher')">Download Voucher Image</button>
         </div>
 
         <div id="sec-c" style="display:none;">
             <div class="card">
-                <div class="input-group"><label>Discount Text</label><input type="text" class="input-field" id="c-desc" oninput="updateC()"></div>
-                <div class="input-group"><label>Promo Code</label><input type="text" class="input-field" id="c-code" oninput="updateC()" style="text-transform:uppercase;"></div>
-                <div class="input-group"><label>Expiry Date</label><input type="text" class="input-field" id="c-exp" oninput="updateC()"></div>
+                <div class="input-group"><label>Discount Text</label><input type="text" class="input-field" id="c-desc" oninput="window.updateC()"></div>
+                <div class="input-group"><label>Promo Code</label><input type="text" class="input-field" id="c-code" oninput="window.updateC()" style="text-transform:uppercase;"></div>
+                <div class="input-group"><label>Expiry Date</label><input type="text" class="input-field" id="c-exp" oninput="window.updateC()"></div>
             </div>
             <div class="coupon-card" id="print-c">
                 <div class="coupon-inner">
@@ -234,7 +270,7 @@
                     <div style="font-size: 11px;">Valid Until: <span id="co-exp">-</span></div>
                 </div>
             </div>
-            <button class="btn" style="width: 100%; margin-top: 20px; background: #ff8c00;" onclick="downloadImage('print-c', 'Coupon')">Download Coupon Image</button>
+            <button class="btn" style="width: 100%; margin-top: 20px; background: #ff8c00;" onclick="window.downloadImage('print-c', 'Coupon')">Download Coupon Image</button>
         </div>
     </main>
 
@@ -243,17 +279,17 @@
         
         <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
             <span style="font-weight: 700;">Dark Mode</span>
-            <label class="toggle-switch"><input type="checkbox" id="theme-toggle" onchange="toggleTheme()"><span class="slider"></span></label>
+            <label class="toggle-switch"><input type="checkbox" id="theme-toggle" onchange="window.toggleTheme()"><span class="slider"></span></label>
         </div>
 
         <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
             <span style="font-weight: 700;">Desktop View (Table Layout)</span>
-            <label class="toggle-switch"><input type="checkbox" id="view-toggle" onchange="toggleViewMode()"><span class="slider"></span></label>
+            <label class="toggle-switch"><input type="checkbox" id="view-toggle" onchange="window.toggleViewMode()"><span class="slider"></span></label>
         </div>
 
         <div class="card">
             <h3 style="font-size: 15px; font-weight: 700; margin-bottom:10px;">Interface Font Size</h3>
-            <input type="range" id="font-slider" min="12" max="20" value="14" oninput="changeFontSize(this.value)" style="width:100%;">
+            <input type="range" id="font-slider" min="12" max="20" value="14" oninput="window.changeFontSize(this.value)" style="width:100%;">
             <span id="font-value" style="font-size:12px; font-weight:700; color:var(--text-sec)">14px</span>
         </div>
 
@@ -265,27 +301,30 @@
             <div class="input-group"><label>Bot Token</label><input type="password" class="input-field" id="set-tg-token"></div>
             <div class="input-group"><label>Chat ID</label><input type="text" class="input-field" id="set-tg-chat"></div>
             
-            <button class="btn" style="width: 100%; margin-top: 10px;" onclick="saveSettings()">Save Configuration</button>
+            <button class="btn" style="width: 100%; margin-top: 10px;" onclick="window.saveSettings()">Save Configuration</button>
         </div>
 
-        <button class="btn" style="width: 100%; background: transparent; color: var(--red); border: 2px solid var(--red);" onclick="confirmLogoutOnly()">Log Out Only (Keep Local Data)</button>
+        <button class="btn" style="width: 100%; background: transparent; color: var(--red); border: 2px solid var(--red);" onclick="window.confirmLogoutOnly()">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>
+            Log Out Only (Keep Local Data)
+        </button>
     </main>
 
     <div class="modal" id="modal-game">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3 id="game-modal-title">Add New Game</h3>
-                <button onclick="closeModal('modal-game')">
+                <button onclick="window.closeModal('modal-game')">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
             <img src="" id="mg-img-preview" style="display:none; width:80px; height:80px; border-radius:16px; margin: 0 auto 15px; object-fit:cover;">
             <div style="margin-bottom: 20px; border: 2px dashed var(--border); padding: 15px; text-align: center; border-radius: 12px; cursor: pointer;" onclick="document.getElementById('mg-file').click()">
                 <span style="font-size:13px; font-weight:700; color:var(--primary);">Upload Icon Photo</span>
-                <input type="file" id="mg-file" accept="image/*" style="display:none;" onchange="previewGameImage(this)">
+                <input type="file" id="mg-file" accept="image/*" style="display:none;" onchange="window.previewGameImage(this)">
             </div>
             <div class="input-group"><label>Game Name</label><input type="text" class="input-field" id="mg-name"></div>
-            <button class="btn" style="width: 100%; margin-top:10px;" onclick="saveGame()">Save Game</button>
+            <button class="btn" style="width: 100%; margin-top:10px;" onclick="window.saveGame()">Save Game</button>
         </div>
     </div>
 
@@ -293,7 +332,7 @@
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
                 <h3 id="mi-title">Add Item</h3>
-                <button onclick="closeModal('modal-item')">
+                <button onclick="window.closeModal('modal-item')">
                     <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
             </div>
@@ -305,8 +344,8 @@
             </div>
             <div class="input-group"><label>Sell (MMK)</label><input type="number" class="input-field" id="mi-sell"></div>
             <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button class="btn" id="mi-btn-del" style="background: var(--bg); color: var(--red); border: 1px solid var(--border); display: none;" onclick="confirmDeleteItem()">Delete</button>
-                <button class="btn" style="flex: 1;" onclick="saveItem()">Save Item</button>
+                <button class="btn" id="mi-btn-del" style="background: var(--bg); color: var(--red); border: 1px solid var(--border); display: none;" onclick="window.confirmDeleteItem()">Delete</button>
+                <button class="btn" style="flex: 1;" onclick="window.saveItem()">Save Item</button>
             </div>
         </div>
     </div>
@@ -316,7 +355,7 @@
             <h3 id="confirm-title" style="margin-bottom:10px; font-size:18px;">Are you sure?</h3>
             <p id="confirm-msg" style="font-size:14px; color:var(--text-sec); margin-bottom:24px; font-weight:600;">Action description.</p>
             <div style="display:flex; gap:12px;">
-                <button class="btn" style="flex:1; background:var(--bg); color:var(--text); border:1px solid var(--border);" onclick="closeConfirm()">Cancel</button>
+                <button class="btn" style="flex:1; background:var(--bg); color:var(--text); border:1px solid var(--border);" onclick="window.closeConfirm()">Cancel</button>
                 <button class="btn" id="confirm-yes-btn" style="flex:1; background:var(--red);">Confirm</button>
             </div>
         </div>
@@ -329,23 +368,77 @@
         };
         let tempEditIdx = -1; let tempBase64Image = ""; let confirmActionCallback = null; let isEditingGame = false; let editingGameOriginalName = "";
 
+        // SVGs for dynamic injection
         const svgTrash = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
-        const svgCart = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`;
-        const svgEdit = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
+        const svgCart = `<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`;
+        const svgEdit = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
         const defaultImg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e2e8f0'><rect width='24' height='24' rx='6'/></svg>`;
 
-        function showToast(msg, type = 'success') {
+        // Exposing utilities safely
+        window.showToast = function(msg, type = 'success') {
             const toast = document.getElementById('toast'); toast.innerText = msg;
             toast.style.borderLeftColor = type === 'error' ? 'var(--red)' : 'var(--primary)';
             toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500);
-        }
-        document.getElementById('confirm-yes-btn').onclick = () => { if(confirmActionCallback) confirmActionCallback(); closeConfirm(); };
-        function openModal(id) { document.getElementById(id).classList.add('show'); }
-        function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-        function showConfirm(title, msg, onConfirm) { document.getElementById('confirm-title').innerText = title; document.getElementById('confirm-msg').innerText = msg; confirmActionCallback = onConfirm; openModal('modal-confirm'); }
-        function closeConfirm() { closeModal('modal-confirm'); confirmActionCallback = null; }
+        };
+        
+        document.getElementById('confirm-yes-btn').onclick = () => { if(confirmActionCallback) confirmActionCallback(); window.closeConfirm(); };
+        window.openModal = function(id) { document.getElementById(id).classList.add('show'); };
+        window.closeModal = function(id) { document.getElementById(id).classList.remove('show'); };
+        window.showConfirm = function(title, msg, onConfirm) { document.getElementById('confirm-title').innerText = title; document.getElementById('confirm-msg').innerText = msg; confirmActionCallback = onConfirm; window.openModal('modal-confirm'); };
+        window.closeConfirm = function() { window.closeModal('modal-confirm'); confirmActionCallback = null; };
 
-        // ================= DATA LOADING & SYNC =================
+        // ================= FIREBASE CONFIG & AUTH LOGIC =================
+        const firebaseConfig = {
+            apiKey: "AIzaSyBCBimkrfs-TGM-TioINkZfmQiBvIBsp1s",
+            authDomain: "atomx-d-project.firebaseapp.com",
+            projectId: "atomx-d-project",
+            storageBucket: "atomx-d-project.appspot.com"
+        };
+        
+        let app, auth, db, storage, googleProvider;
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            storage = firebase.storage();
+            googleProvider = new firebase.auth.GoogleAuthProvider();
+            try { db.enablePersistence().catch(e=>{}); } catch(e){}
+        } catch(e) { console.log("Firebase Load Fallback Active."); }
+
+        window.loginGoogle = function() {
+            if(!auth) { window.showToast("Firebase initialization error. Refresh page.", "error"); return; }
+            window.showToast("Loading Google Login...");
+            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => {
+                return auth.signInWithPopup(googleProvider);
+            }).then(result => {
+                state.uid = result.user.uid;
+                document.getElementById('auth-screen').style.display = 'none';
+                window.showToast("Login Successful!");
+                loadCloudData();
+            }).catch(error => {
+                window.showToast("Login Failed: " + error.message, "error");
+            });
+        };
+
+        window.onload = () => {
+            if(auth) {
+                auth.onAuthStateChanged(user => {
+                    if (user) { 
+                        state.uid = user.uid; 
+                        document.getElementById('auth-screen').style.display = 'none'; 
+                        loadCloudData();
+                    } else { 
+                        state.uid = null; 
+                        document.getElementById('auth-screen').style.display = 'flex'; 
+                    }
+                });
+            } else {
+                document.getElementById('auth-screen').style.display = 'flex';
+                window.showToast("Cannot connect to server.", "error");
+            }
+        };
+
+        // ================= DATA LOGIC =================
         function loadLocalDataFallback() {
             try {
                 var json = localStorage.getItem('pcaData'); if(json) state.data = JSON.parse(json);
@@ -353,14 +446,15 @@
                 var salesJson = localStorage.getItem('pcaSalesData'); if(salesJson) state.sales = JSON.parse(salesJson);
                 var sTheme = localStorage.getItem('pcaTheme'); if(sTheme) { state.theme = sTheme; document.documentElement.setAttribute('data-theme', sTheme); document.getElementById('theme-toggle').checked = (sTheme==='dark');}
                 var sView = localStorage.getItem('pcaViewMode'); if(sView) { state.viewMode = sView; document.getElementById('view-toggle').checked = (sView==='desktop'); }
-                var sFont = localStorage.getItem('pcaFontSize'); if(sFont) { state.fontSize = parseInt(sFont); changeFontSize(state.fontSize); }
+                var sFont = localStorage.getItem('pcaFontSize'); if(sFont) { state.fontSize = parseInt(sFont); window.changeFontSize(state.fontSize); }
                 var games = Object.keys(state.data); if(games.length > 0) state.activeGame = games[0];
             } catch(e) {}
             applyGlobalUI();
         }
 
         function loadCloudData() {
-            db.collection("stores").doc(state.uid).get().then(function(snap) {
+            if(!db || !state.uid) return loadLocalDataFallback();
+            db.collection("stores").doc(state.uid).get().then(snap => {
                 if(snap.exists) {
                     var d = snap.data();
                     if(d.data) state.data = d.data;
@@ -372,7 +466,7 @@
                     localStorage.setItem('pcaSalesData', JSON.stringify(state.sales));
                 }
                 applyGlobalUI();
-            }).catch(function(e) { loadLocalDataFallback(); });
+            }).catch(e => { loadLocalDataFallback(); });
         }
 
         function saveDataToCloud() {
@@ -385,7 +479,7 @@
         }
 
         function applyGlobalUI() {
-            document.getElementById('topStoreName').innerText = state.profile.name;
+            document.getElementById('ui-store-name').innerText = state.profile.name;
             document.getElementById('set-name').value = state.profile.name;
             document.getElementById('set-tg-token').value = state.profile.tgToken || "";
             document.getElementById('set-tg-chat').value = state.profile.tgChatId || "";
@@ -394,71 +488,71 @@
             document.getElementById('vo-date').innerText = new Date().toLocaleDateString();
             if(state.viewMode === 'desktop') { document.getElementById('inv-mobile-container').style.display = 'none'; document.getElementById('inv-desktop-container').style.display = 'block'; } 
             else { document.getElementById('inv-mobile-container').style.display = 'block'; document.getElementById('inv-desktop-container').style.display = 'none'; }
-            renderSidebarGames(); renderInventory(); renderSales();
+            window.renderSidebarGames(); window.renderInventory(); window.renderSales();
         }
 
         // ================= CONFIGURATION =================
-        function toggleTheme() { state.theme = document.getElementById('theme-toggle').checked ? 'dark' : 'light'; if(state.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme'); localStorage.setItem('pcaTheme', state.theme); }
-        function toggleViewMode() { state.viewMode = document.getElementById('view-toggle').checked ? 'desktop' : 'mobile'; localStorage.setItem('pcaViewMode', state.viewMode); applyGlobalUI(); }
-        function changeFontSize(val) { state.fontSize = val; document.documentElement.style.setProperty('--font-size', val + 'px'); document.getElementById('font-slider').value = val; document.getElementById('font-value').innerText = val + "px"; localStorage.setItem('pcaFontSize', val); }
-        function saveSettings() { state.profile.name = document.getElementById('set-name').value || "PCA Store"; state.profile.tgToken = document.getElementById('set-tg-token').value.trim(); state.profile.tgChatId = document.getElementById('set-tg-chat').value.trim(); saveDataToCloud(); applyGlobalUI(); showToast("Settings Configured!"); }
+        window.toggleTheme = function() { state.theme = document.getElementById('theme-toggle').checked ? 'dark' : 'light'; if(state.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme'); localStorage.setItem('pcaTheme', state.theme); };
+        window.toggleViewMode = function() { state.viewMode = document.getElementById('view-toggle').checked ? 'desktop' : 'mobile'; localStorage.setItem('pcaViewMode', state.viewMode); applyGlobalUI(); };
+        window.changeFontSize = function(val) { state.fontSize = val; document.documentElement.style.setProperty('--font-size', val + 'px'); document.getElementById('font-slider').value = val; document.getElementById('font-value').innerText = val + "px"; localStorage.setItem('pcaFontSize', val); };
+        window.saveSettings = function() { state.profile.name = document.getElementById('set-name').value || "PCA Store"; state.profile.tgToken = document.getElementById('set-tg-token').value.trim(); state.profile.tgChatId = document.getElementById('set-tg-chat').value.trim(); saveDataToCloud(); applyGlobalUI(); window.showToast("Settings Configured!"); };
 
-        function confirmLogoutOnly() { showConfirm("Logout Only", "Are you sure you want to log out? Your local catalog data will remain safe on this device.", () => { if(auth) auth.signOut(); state.uid = null; document.getElementById('auth-screen').style.display = 'flex'; showToast("Logged out"); }); }
+        window.confirmLogoutOnly = function() { window.showConfirm("Logout Only", "Are you sure you want to log out? Your local catalog data will remain safe on this device.", () => { if(auth) auth.signOut(); state.uid = null; document.getElementById('auth-screen').style.display = 'flex'; window.showToast("Logged out"); }); };
 
-        // ================= SIDEBAR & NAVIGATION =================
+        // ================= SIDEBAR =================
         window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); };
         window.switchView = function(v) {
-            document.querySelectorAll('.view').forEach(function(el) { el.classList.remove('active'); }); document.getElementById('view-' + v).classList.add('active');
-            document.querySelectorAll('.menu-item').forEach(function(el) { el.classList.remove('active'); }); if(document.getElementById('nav-' + v)) document.getElementById('nav-' + v).classList.add('active');
+            document.querySelectorAll('.view').forEach(el => el.classList.remove('active')); document.getElementById('view-' + v).classList.add('active');
+            document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); if(document.getElementById('nav-' + v)) document.getElementById('nav-' + v).classList.add('active');
             document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show');
-            if(v === 'inventory') renderInventory(); if(v === 'sales') renderSales();
+            if(v === 'inventory') window.renderInventory(); if(v === 'sales') window.renderSales();
         };
 
-        // ================= GAME MANAGMENT (Add & Edit) =================
-        function renderSidebarGames() {
+        // ================= GAME MANAGMENT =================
+        window.renderSidebarGames = function() {
             const list = document.getElementById('sidebar-games-list'); list.innerHTML = '';
             Object.keys(state.data).forEach(gName => {
                 const img = state.data[gName].image || defaultImg; const isActive = gName === state.activeGame ? 'active' : '';
                 list.innerHTML += `<div class="game-item ${isActive}">
-                        <div style="display:flex; align-items:center; gap:12px; flex-grow:1;" onclick="selectGame('${gName}')"><img src="${img}" style="width:28px; height:28px; border-radius:8px; object-fit:cover;"><span>${gName}</span></div>
+                        <div style="display:flex; align-items:center; gap:12px; flex-grow:1;" onclick="window.selectGame('${gName}')"><img src="${img}" style="width:28px; height:28px; border-radius:8px; object-fit:cover;"><span>${gName}</span></div>
                         <div style="display:flex; gap:4px;">
-                            <button onclick="openEditGameModal('${gName}', event)" style="padding:6px; color:var(--primary);">${svgEdit}</button>
-                            <button onclick="confirmDeleteGame('${gName}', event)" style="padding:6px; color:var(--red);">${svgTrash}</button>
+                            <button onclick="window.openEditGameModal('${gName}', event)" style="padding:6px; color:var(--primary);">${svgEdit}</button>
+                            <button onclick="window.confirmDeleteGame('${gName}', event)" style="padding:6px; color:var(--red);">${svgTrash}</button>
                         </div>
                     </div>`;
             });
-        }
-        function selectGame(name) { state.activeGame = name; renderSidebarGames(); renderInventory(); toggleSidebar(); }
-        function confirmDeleteGame(name, e) { e.stopPropagation(); showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { delete state.data[name]; state.activeGame = Object.keys(state.data)[0] || ''; saveDataToCloud(); applyGlobalUI(); }); }
+        };
+        window.selectGame = function(name) { state.activeGame = name; window.renderSidebarGames(); window.renderInventory(); window.toggleSidebar(); };
+        window.confirmDeleteGame = function(name, e) { e.stopPropagation(); window.showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { delete state.data[name]; state.activeGame = Object.keys(state.data)[0] || ''; saveDataToCloud(); applyGlobalUI(); }); };
         
-        function openEditGameModal(name, e) {
+        window.openEditGameModal = function(name, e) {
             if(e) e.stopPropagation();
             isEditingGame = true; editingGameOriginalName = name;
-            document.getElementById('game-modal-title').innerText = "Edit Game Configuration";
+            document.getElementById('game-modal-title').innerText = "Edit Game";
             document.getElementById('mg-name').value = name;
             tempBase64Image = state.data[name].image || "";
             if(tempBase64Image) { document.getElementById('mg-img-preview').src = tempBase64Image; document.getElementById('mg-img-preview').style.display = 'block'; }
             else { document.getElementById('mg-img-preview').style.display = 'none'; }
-            openModal('modal-game');
-        }
+            window.openModal('modal-game');
+        };
 
-        function openGameModal() { isEditingGame = false; document.getElementById('game-modal-title').innerText = "Add New Game"; document.getElementById('mg-name').value = ''; document.getElementById('mg-file').value = ''; document.getElementById('mg-img-preview').style.display = 'none'; tempBase64Image = ""; openModal('modal-game'); }
-        function previewGameImage(input) { if(input.files && input.files[0]) { const reader = new FileReader(); reader.onload = e => { tempBase64Image = e.target.result; document.getElementById('mg-img-preview').src = tempBase64Image; document.getElementById('mg-img-preview').style.display = 'block'; }; reader.readAsDataURL(input.files[0]); } }
+        window.openGameModal = function() { isEditingGame = false; document.getElementById('game-modal-title').innerText = "Add New Game"; document.getElementById('mg-name').value = ''; document.getElementById('mg-file').value = ''; document.getElementById('mg-img-preview').style.display = 'none'; tempBase64Image = ""; window.openModal('modal-game'); };
+        window.previewGameImage = function(input) { if(input.files && input.files[0]) { const reader = new FileReader(); reader.onload = e => { tempBase64Image = e.target.result; document.getElementById('mg-img-preview').src = tempBase64Image; document.getElementById('mg-img-preview').style.display = 'block'; }; reader.readAsDataURL(input.files[0]); } };
         
-        function saveGame() {
-            const name = document.getElementById('mg-name').value.trim(); if(!name) return showToast("Enter game name", "error");
+        window.saveGame = function() {
+            const name = document.getElementById('mg-name').value.trim(); if(!name) return window.showToast("Enter game name", "error");
             if(isEditingGame) {
                 if(name !== editingGameOriginalName) { state.data[name] = state.data[editingGameOriginalName]; delete state.data[editingGameOriginalName]; }
-                state.data[name].image = tempBase64Image; state.activeGame = name; showToast("Game updated!");
+                state.data[name].image = tempBase64Image; state.activeGame = name; window.showToast("Game updated!");
             } else {
-                if(state.data[name]) return showToast("Game already exists", "error");
-                state.data[name] = { image: tempBase64Image, items: [] }; state.activeGame = name; showToast("Game Added Successfully!");
+                if(state.data[name]) return window.showToast("Game already exists", "error");
+                state.data[name] = { image: tempBase64Image, items: [] }; state.activeGame = name; window.showToast("Game Added!");
             }
-            isEditingGame = false; saveDataToCloud(); applyGlobalUI(); closeModal('modal-game');
-        }
+            isEditingGame = false; saveDataToCloud(); applyGlobalUI(); window.closeModal('modal-game');
+        };
 
         // ================= INVENTORY GRID =================
-        function renderInventory() {
+        window.renderInventory = function() {
             const titleEl = document.getElementById('inv-game-title'); const mobileCon = document.getElementById('inv-mobile-container'); const desktopBody = document.getElementById('inv-table-body');
             mobileCon.innerHTML = ''; desktopBody.innerHTML = '';
             
@@ -484,58 +578,58 @@
 
                     mobileCon.innerHTML += `<div class="card" style="padding:16px; margin-bottom:12px; border-radius:14px; display:flex; flex-direction:column; gap:12px;">
                             <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-weight:800; font-size:16px; cursor:pointer;" onclick="openItemModal(${idx})">
+                                <span style="font-weight:800; font-size:16px; cursor:pointer;" onclick="window.openItemModal(${idx})">
                                     <span style="background:var(--bg); padding:4px 10px; border-radius:6px; font-size:13px; color:var(--text-sec); border:1px solid var(--border); margin-right:6px;">${idx+1}</span>
                                     ${itm.name} ${comboBadgeMobile}
                                 </span>
-                                <button onclick="recordSale(${idx}, event)" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 12px; border-radius:8px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px;">${svgCart} Sell</button>
+                                <button onclick="window.recordSale(${idx}, event)" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 12px; border-radius:8px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px;">${svgCart} Sell</button>
                             </div>
-                            <div style="display:flex; gap:15px; font-size:13px; color:var(--text-sec); background:var(--bg); padding:10px; border-radius:8px; font-weight:600;" onclick="openItemModal(${idx})"><span>Cost: <strong style="color:var(--text);">${costString}</strong></span> <span>Sell: <strong style="color:var(--text);">${sell} KS</strong></span></div>
-                            <div style="display:flex; justify-content:space-between; background:var(--bg); padding:12px; border-radius:8px; align-items:center;" onclick="openItemModal(${idx})"><span style="font-size:12px; font-weight:700; color:var(--text-sec); text-transform:uppercase;">Net Profit</span><strong style="color:${color}; font-size:16px;">${sign}${profit} KS</strong></div>
+                            <div style="display:flex; gap:15px; font-size:13px; color:var(--text-sec); background:var(--bg); padding:10px; border-radius:8px; font-weight:600;" onclick="window.openItemModal(${idx})"><span>Cost: <strong style="color:var(--text);">${costString}</strong></span> <span>Sell: <strong style="color:var(--text);">${sell} KS</strong></span></div>
+                            <div style="display:flex; justify-content:space-between; background:var(--bg); padding:12px; border-radius:8px; align-items:center;" onclick="window.openItemModal(${idx})"><span style="font-size:12px; font-weight:700; color:var(--text-sec); text-transform:uppercase;">Net Profit</span><strong style="color:${color}; font-size:16px;">${sign}${profit} KS</strong></div>
                         </div>`;
                     
                     desktopBody.innerHTML += `<tr>
                             <td style="color:var(--text-sec); font-weight:bold;">${idx+1}</td>
-                            <td style="font-weight:800; cursor:pointer;" onclick="openItemModal(${idx})">${itm.name} ${comboBadgeDesktop}</td>
-                            <td onclick="openItemModal(${idx})" style="cursor:pointer;">${costDesktop}</td>
-                            <td onclick="openItemModal(${idx})" style="font-weight:bold; cursor:pointer;">${sell} KS</td>
+                            <td style="font-weight:800; cursor:pointer;" onclick="window.openItemModal(${idx})">${itm.name} ${comboBadgeDesktop}</td>
+                            <td onclick="window.openItemModal(${idx})" style="cursor:pointer;">${costDesktop}</td>
+                            <td onclick="window.openItemModal(${idx})" style="font-weight:bold; cursor:pointer;">${sell} KS</td>
                             <td style="color:${color}; font-weight:900; font-size:16px;">${sign}${profit}</td>
-                            <td><button onclick="recordSale(${idx}, event)" style="color:var(--primary); font-weight:800; background:rgba(24,119,242,0.1); padding:8px 14px; border-radius:8px; display:flex; align-items:center; gap:6px;">${svgCart} Sell</button></td>
+                            <td><button onclick="window.recordSale(${idx}, event)" style="color:var(--primary); font-weight:800; background:rgba(24,119,242,0.1); padding:8px 14px; border-radius:8px; display:flex; align-items:center; gap:6px;">${svgCart} Sell</button></td>
                         </tr>`;
                 });
             }
             document.getElementById('stat-cost').innerText = tc + " KS"; document.getElementById('stat-rev').innerText = tr + " KS"; document.getElementById('stat-prof').innerText = (tr-tc) + " KS"; document.getElementById('stat-prof').style.color = (tr-tc) < 0 ? 'var(--red)' : 'var(--primary)';
-        }
+        };
 
-        function openItemModal(idx = -1) {
+        window.openItemModal = function(idx = -1) {
             tempEditIdx = idx;
             if(idx > -1) {
                 const itm = state.data[state.activeGame].items[idx]; document.getElementById('mi-title').innerText = "Edit Item Details"; document.getElementById('mi-name').value = itm.name; document.getElementById('mi-combo').value = itm.combo || ''; document.getElementById('mi-cost-rs').value = itm.costRS || ''; document.getElementById('mi-cost-mmk').value = itm.costMMK !== undefined ? itm.costMMK : (itm.cost || ''); document.getElementById('mi-sell').value = itm.sell; document.getElementById('mi-btn-del').style.display = 'block';
             } else {
-                if(!state.activeGame) return showToast("Add a game first", "error");
+                if(!state.activeGame) return window.showToast("Add a game first", "error");
                 document.getElementById('mi-title').innerText = "Add Package Item"; document.getElementById('mi-name').value = ''; document.getElementById('mi-combo').value = ''; document.getElementById('mi-cost-rs').value = ''; document.getElementById('mi-cost-mmk').value = ''; document.getElementById('mi-sell').value = ''; document.getElementById('mi-btn-del').style.display = 'none';
             }
-            openModal('modal-item');
-        }
+            window.openModal('modal-item');
+        };
 
-        function saveItem() {
+        window.saveItem = function() {
             const ni = { name: document.getElementById('mi-name').value.trim(), combo: document.getElementById('mi-combo').value.trim(), costRS: parseFloat(document.getElementById('mi-cost-rs').value)||0, costMMK: parseFloat(document.getElementById('mi-cost-mmk').value)||0, sell: parseFloat(document.getElementById('mi-sell').value)||0 };
-            if(!ni.name) return showToast("Enter Package Name", "error"); if(!state.data[state.activeGame].items) state.data[state.activeGame].items = [];
+            if(!ni.name) return window.showToast("Enter Package Name", "error"); if(!state.data[state.activeGame].items) state.data[state.activeGame].items = [];
             if(tempEditIdx > -1) state.data[state.activeGame].items[tempEditIdx] = ni; else state.data[state.activeGame].items.push(ni);
-            saveDataToCloud(); renderInventory(); closeModal('modal-item');
-        }
-        function confirmDeleteItem() { showConfirm("Delete Item", "Are you sure you want to delete this package?", () => { state.data[state.activeGame].items.splice(tempEditIdx, 1); saveDataToCloud(); renderInventory(); closeModal('modal-item'); }); }
-        function copyPriceList() { if(!state.activeGame || !state.data[state.activeGame] || !state.data[state.activeGame].items || state.data[state.activeGame].items.length === 0) return showToast("No items found", "error"); let str = `*${state.activeGame}*\n`; state.data[state.activeGame].items.forEach(i => str += `${i.name} - ${i.sell} KS\n`); navigator.clipboard.writeText(str).then(() => showToast("Price list copied!")); }
+            saveDataToCloud(); window.renderInventory(); window.closeModal('modal-item');
+        };
+        window.confirmDeleteItem = function() { window.showConfirm("Delete Item", "Are you sure you want to delete this package?", () => { state.data[state.activeGame].items.splice(tempEditIdx, 1); saveDataToCloud(); window.renderInventory(); window.closeModal('modal-item'); }); };
+        window.copyPriceList = function() { if(!state.activeGame || !state.data[state.activeGame] || !state.data[state.activeGame].items || state.data[state.activeGame].items.length === 0) return window.showToast("No items found", "error"); let str = `*${state.activeGame}*\n`; state.data[state.activeGame].items.forEach(i => str += `${i.name} - ${i.sell} KS\n`); navigator.clipboard.writeText(str).then(() => window.showToast("Price list copied!")); };
 
         // ================= SALES TRACKER =================
-        function recordSale(idx, e) {
+        window.recordSale = function(idx, e) {
             if(e) e.stopPropagation();
             const itm = state.data[state.activeGame].items[idx]; let cMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
             state.sales.push({ date: new Date().toLocaleDateString(), game: state.activeGame, name: itm.name, profit: (itm.sell||0)-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-            saveDataToCloud(); showToast(`Sold 1x ${itm.name}`); renderSales();
-        }
+            saveDataToCloud(); window.showToast(`Sold 1x ${itm.name}`); window.renderSales();
+        };
 
-        function renderSales() {
+        window.renderSales = function() {
             const today = new Date().toLocaleDateString(); let todayItems = state.sales.filter(s => s.date === today); let profit = 0;
             const con = document.getElementById('sales-list-container'); if(!con) return; con.innerHTML = '';
             
@@ -551,52 +645,45 @@
                 });
             }
             document.getElementById('sales-total-items').innerText = todayItems.length; document.getElementById('sales-total-profit').innerText = profit + " KS"; document.getElementById('sales-total-profit').style.color = profit < 0 ? 'var(--red)' : 'var(--text)';
-        }
+        };
 
-        function confirmClearSales() { showConfirm("Clear Sales", "Reset daily transaction history for today?", () => { state.sales = state.sales.filter(s => s.date !== new Date().toLocaleDateString()); saveDataToCloud(); renderSales(); showToast("Cleared"); }); }
+        window.confirmClearSales = function() { window.showConfirm("Clear Sales", "Reset daily transaction history for today?", () => { state.sales = state.sales.filter(s => s.date !== new Date().toLocaleDateString()); saveDataToCloud(); window.renderSales(); window.showToast("Cleared"); }); };
 
-        // ================= TELEGRAM (FIXED HTML PARSING) =================
-        async function sendTelegram() {
+        // ================= TELEGRAM (HTML PARSING BUG FIX) =================
+        window.sendTelegram = async function() {
             var token = state.profile.tgToken; var chatId = state.profile.tgChatId;
-            if(!token || !chatId) { switchView('settings'); return showToast("Set Telegram Keys in Settings", "error"); }
-            var todayStr = new Date().toLocaleDateString(); var todayItems = state.sales.filter(function(s) { return s.date === todayStr; });
-            if(todayItems.length === 0) return showToast("No sales to report today", "error");
+            if(!token || !chatId) { window.switchView('settings'); return window.showToast("Set Telegram Keys in Settings", "error"); }
+            var todayStr = new Date().toLocaleDateString(); var todayItems = state.sales.filter(s => s.date === todayStr);
+            if(todayItems.length === 0) return window.showToast("No sales to report today", "error");
 
             var totalProfit = 0; var details = "";
-            todayItems.slice().reverse().forEach(function(s) { totalProfit += s.profit; var sign = s.profit <= 0 ? '' : '+'; details += "• " + s.name + " (" + sign + s.profit + " KS)\n"; });
+            todayItems.slice().reverse().forEach(s => { totalProfit += s.profit; var sign = s.profit <= 0 ? '' : '+'; details += "• " + s.name + " (" + sign + s.profit + " KS)\n"; });
             var mainSign = totalProfit <= 0 ? '' : '+';
             
-            // Fixed Markdown error by strictly using safe HTML tags
             var text = "📊 <b>Daily Sales Report</b>\n📅 " + todayStr + "\n🏪 " + state.profile.name + "\n\n📦 Items Sold: " + todayItems.length + "\n💰 Net Profit: " + mainSign + totalProfit + " KS\n\n<b>Details:</b>\n" + details;
             
             try {
                 var res = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: "HTML" }) });
-                if(res.ok) showToast("Report Sent to Telegram!"); else showToast("Failed to send report. Check Token.", "error");
-            } catch(e) { showToast("Connection failed", "error"); }
-        }
+                if(res.ok) window.showToast("Report Sent to Telegram!"); else window.showToast("Failed to send report. Check Token.", "error");
+            } catch(e) { window.showToast("Connection failed", "error"); }
+        };
 
         // ================= VOUCHER & COUPON (Blob Fix) =================
-        function switchVCTab(t) { document.getElementById('tab-v').classList.remove('active'); document.getElementById('tab-c').classList.remove('active'); document.getElementById('sec-v').style.display = 'none'; document.getElementById('sec-c').style.display = 'none'; document.getElementById('tab-'+t).classList.add('active'); document.getElementById('sec-'+t).style.display = 'block'; }
-        function updateV() { document.getElementById('vo-name').innerText = document.getElementById('v-name').value || "-"; document.getElementById('vo-game').innerText = document.getElementById('v-game').value || "-"; document.getElementById('vo-item').innerText = document.getElementById('v-item').value || "-"; document.getElementById('vo-price').innerText = (document.getElementById('v-price').value || "0") + " KS"; }
-        function updateC() { document.getElementById('co-desc').innerText = document.getElementById('c-desc').value || "GIFT VOUCHER"; document.getElementById('co-code').innerText = document.getElementById('c-code').value.toUpperCase() || "XXXX"; document.getElementById('co-exp').innerText = document.getElementById('c-exp').value || "-"; }
+        window.switchVCTab = function(t) { document.getElementById('tab-v').classList.remove('active'); document.getElementById('tab-c').classList.remove('active'); document.getElementById('sec-v').style.display = 'none'; document.getElementById('sec-c').style.display = 'none'; document.getElementById('tab-'+t).classList.add('active'); document.getElementById('sec-'+t).style.display = 'block'; };
+        window.updateV = function() { document.getElementById('vo-name').innerText = document.getElementById('v-name').value || "-"; document.getElementById('vo-game').innerText = document.getElementById('v-game').value || "-"; document.getElementById('vo-item').innerText = document.getElementById('v-item').value || "-"; document.getElementById('vo-price').innerText = (document.getElementById('v-price').value || "0") + " KS"; };
+        window.updateC = function() { document.getElementById('co-desc').innerText = document.getElementById('c-desc').value || "GIFT VOUCHER"; document.getElementById('co-code').innerText = document.getElementById('c-code').value.toUpperCase() || "XXXX"; document.getElementById('co-exp').innerText = document.getElementById('c-exp').value || "-"; };
         
-        function downloadImage(id, name) {
+        window.downloadImage = function(id, name) {
             const el = document.getElementById(id); const origShadow = el.style.boxShadow; const origTransform = el.style.transform;
-            el.style.boxShadow = 'none'; el.style.transform = 'none'; showToast("Generating image...");
+            el.style.boxShadow = 'none'; el.style.transform = 'none'; window.showToast("Generating image...");
             html2canvas(el, {scale:3, backgroundColor:"#ffffff", useCORS:true}).then(canvas => {
                 canvas.toBlob(function(blob) {
                     const url = URL.createObjectURL(blob); const a = document.createElement('a'); 
                     a.style.display = 'none'; a.href = url; a.download = `${state.profile.name}_${name}_${Date.now()}.png`; document.body.appendChild(a); a.click();
-                    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); el.style.boxShadow = origShadow; el.style.transform = origTransform; showToast("Downloaded Successfully!"); }, 100);
+                    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); el.style.boxShadow = origShadow; el.style.transform = origTransform; window.showToast("Downloaded Successfully!"); }, 100);
                 }, 'image/png');
-            }).catch(()=> { el.style.boxShadow = origShadow; el.style.transform = origTransform; showToast("Failed to generate image", "error"); });
-        }
-
-        // ================= INITIALIZE =================
-        window.onload = () => {
-            loadLocalDataFallback();
+            }).catch(()=> { el.style.boxShadow = origShadow; el.style.transform = origTransform; window.showToast("Failed to generate image", "error"); });
         };
-
     </script>
 </body>
 </html>
