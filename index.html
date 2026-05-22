@@ -13,126 +13,95 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <style>
-        /* ================= THEME VARIABLES (Clean & Minimal) ================= */
+        /* ================= THEME VARIABLES ================= */
         :root {
             --primary: #1877f2; --bg: #f4f6f8; --card: #ffffff; --text: #111827; --text-sec: #64748b;
-            --border: #e2e8f0; --hover: #f1f5f9; --red: #ef4444; --green: #10b981; 
+            --border: #e2e8f0; --hover: #f1f5f9; --red: #ef4444; --green: #10b981; --font-size: 14px;
             --shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -1px rgba(0, 0, 0, 0.03);
-            --shadow-hover: 0 10px 15px -3px rgba(0, 0, 0, 0.08), 0 4px 6px -2px rgba(0, 0, 0, 0.04);
         }
         [data-theme="dark"] {
             --primary: #ff8c00; --bg: #0f172a; --card: #1e293b; --text: #f8fafc; --text-sec: #94a3b8;
-            --border: #334155; --hover: #334155; --red: #f87171; --green: #34d399; 
-            --shadow: 0 4px 6px -1px rgba(0,0,0,0.3); --shadow-hover: 0 10px 15px -3px rgba(0,0,0,0.4);
+            --border: #334155; --hover: #334155; --red: #f87171; --green: #34d399; --shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
         }
 
-        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, sans-serif; }
-        body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; width: 100vw; transition: background 0.3s, color 0.3s; }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
+        body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; width: 100vw; font-size: var(--font-size); }
         input, select, textarea { outline: none; }
         button { cursor: pointer; border: none; background: transparent; color: inherit; }
         svg { display: block; }
 
-        /* ================= TOAST NOTIFICATIONS ================= */
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 100000; font-weight: 600; font-size: 13px; transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; }
+        /* ================= TOAST ================= */
+        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 100000; font-weight: 600; font-size: 13px; transition: 0.3s; opacity: 0; }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
 
-        /* ================= HEADER & SIDEBAR ================= */
+        /* ================= LAYOUT ================= */
         .header { height: 60px; background: var(--card); display: flex; align-items: center; justify-content: space-between; padding: 0 20px; box-shadow: var(--shadow); position: fixed; top: 0; width: 100%; z-index: 40; }
-        .sidebar { width: 280px; background: var(--card); height: 100vh; position: fixed; left: -300px; top: 0; z-index: 100; transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1); display: flex; flex-direction: column; box-shadow: 5px 0 25px rgba(0,0,0,0.1); border-right: 1px solid var(--border);}
+        .sidebar { width: 290px; background: var(--card); height: 100vh; position: fixed; left: -310px; top: 0; z-index: 100; transition: 0.3s ease; display: flex; flex-direction: column; box-shadow: 5px 0 25px rgba(0,0,0,0.1); border-right: 1px solid var(--border);}
         .sidebar.open { left: 0; }
-        .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 50; display: none; opacity: 0; transition: 0.3s;}
-        .overlay.show { display: block; opacity: 1; }
+        .overlay { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.4); backdrop-filter: blur(2px); z-index: 50; display: none; }
+        .overlay.show { display: block; }
         
         .sidebar-header { height: 60px; padding: 0 20px; display: flex; align-items: center; justify-content: space-between; border-bottom: 1px solid var(--border); font-weight: 800; font-size: 18px; color: var(--primary);}
-        .menu-item { padding: 14px 20px; display: flex; align-items: center; gap: 14px; cursor: pointer; font-weight: 600; color: var(--text-sec); transition: 0.2s;}
-        .menu-item:hover { color: var(--text); background: var(--hover); }
-        .menu-item.active { border-right: 4px solid var(--primary); color: var(--primary); background: rgba(24, 119, 242, 0.05); }
+        .menu-item { padding: 14px 20px; display: flex; align-items: center; gap: 14px; cursor: pointer; font-weight: 600; color: var(--text-sec); border-radius: 8px; margin: 4px 10px;}
+        .menu-item.active { color: var(--primary); background: rgba(24, 119, 242, 0.05); }
         [data-theme="dark"] .menu-item.active { background: rgba(255, 140, 0, 0.1); }
         
-        .game-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 20px; cursor: pointer; font-size: 14px; font-weight: 600; color: var(--text); transition: 0.2s; border-left: 3px solid transparent;}
-        .game-item:hover { background: var(--hover); }
-        .game-item.active { border-left-color: var(--primary); background: var(--hover); }
+        .game-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; margin: 4px 10px; border-radius: 8px; background: var(--bg); font-size: 14px; font-weight: 600;}
+        .game-item.active { border-left: 4px solid var(--primary); background: var(--hover); }
 
-        /* ================= VIEWS & LAYOUT ================= */
         .view { display: none; padding-top: 60px; height: 100vh; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: block; padding-left: 20px; padding-right: 20px; padding-top: 80px;}
-        .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 24px; }
-        .title-row h2 { font-size: 22px; font-weight: 800; color: var(--text); letter-spacing: -0.5px;}
+        .view.active { display: block; padding: 80px 20px 100px; }
+        .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
         
-        .btn { background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s; box-shadow: var(--shadow);}
-        .btn:active { transform: scale(0.95); }
-        
+        .btn { background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; }
         .input-group { margin-bottom: 16px; }
-        .input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sec); margin-bottom: 6px; text-transform: uppercase; letter-spacing: 0.5px;}
-        .input-field { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 15px; font-weight: 600; transition: 0.2s;}
-        .input-field:focus { border-color: var(--primary); box-shadow: 0 0 0 3px rgba(24,119,242,0.1); }
-        [data-theme="dark"] .input-field:focus { box-shadow: 0 0 0 3px rgba(255,140,0,0.1); }
-        
+        .input-group label { display: block; font-size: 12px; font-weight: 700; color: var(--text-sec); margin-bottom: 6px; }
+        .input-field { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 15px; font-weight: 600;}
         .card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border);}
 
         /* ================= INVENTORY ================= */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; margin-bottom: 24px; }
-        .stat-box { background: var(--card); padding: 16px 10px; text-align: center; border-radius: 12px; box-shadow: var(--shadow); border: 1px solid var(--border);}
-        .stat-box span { font-size: 11px; color: var(--text-sec); font-weight: 700; display: block; margin-bottom: 6px; text-transform: uppercase;}
-        .stat-box strong { font-size: 16px; font-weight: 800; color: var(--text); }
+        .stat-box { background: var(--card); padding: 16px 10px; text-align: center; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .stat-box span { font-size: 11px; color: var(--text-sec); font-weight: 700; display: block; margin-bottom: 4px; text-transform: uppercase;}
         
-        /* Mobile Mode (Cards) */
-        .mobile-item-card { background: var(--card); padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; transition: 0.2s;}
-        .mobile-item-card:active { transform: scale(0.98); }
+        /* Mobile Cards List */
+        .mobile-item-card { background: var(--card); padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
         .item-header { display: flex; justify-content: space-between; align-items: center;}
-        .item-title-text { font-weight: 800; font-size: 16px; color: var(--text); display: flex; align-items: center; gap: 8px;}
-        .combo-badge { background: var(--bg); color: var(--text-sec); font-size: 11px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); font-weight: 600;}
-        .item-prices { display: flex; gap: 15px; font-size: 13px; color: var(--text-sec); font-weight: 600; background: var(--bg); padding: 10px; border-radius: 8px;}
-        .item-prices strong { color: var(--text); font-weight: 800;}
-        
-        /* Desktop Mode (Floating Row Table) */
-        .desktop-table-wrapper { display: none; width: 100%;}
+        .combo-badge { background: var(--bg); color: var(--text-sec); font-size: 11px; padding: 4px 8px; border-radius: 6px; border: 1px solid var(--border); font-weight: 700;}
+        .item-prices { display: flex; gap: 12px; font-size: 13px; color: var(--text-sec); background: var(--bg); padding: 10px; border-radius: 8px; font-weight: 600;}
+        .item-profit-row { display: flex; justify-content: space-between; background: var(--bg); padding: 12px; border-radius: 8px; align-items: center;}
+
+        /* Desktop Table Layout Style (Clean Floating Row) */
+        .desktop-table-wrapper { width: 100%; overflow-x: auto; display: none;}
         table { width: 100%; border-collapse: separate; border-spacing: 0 10px; text-align: left; }
-        th { padding: 0 16px; color: var(--text-sec); font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px; border: none; }
-        tbody tr { background: var(--card); box-shadow: var(--shadow); transition: 0.2s; cursor: pointer; }
-        tbody tr:hover { transform: translateY(-2px); box-shadow: var(--shadow-hover); }
-        td { padding: 16px; border: none; vertical-align: middle; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border);}
+        th { padding: 0 16px; color: var(--text-sec); font-size: 12px; font-weight: 700; text-transform: uppercase; }
+        tbody tr { background: var(--card); box-shadow: var(--shadow); }
+        td { padding: 16px; border-top: 1px solid var(--border); border-bottom: 1px solid var(--border); }
         td:first-child { border-radius: 12px 0 0 12px; border-left: 1px solid var(--border); }
         td:last-child { border-radius: 0 12px 12px 0; border-right: 1px solid var(--border); }
 
-        .fab { position: fixed; bottom: 30px; right: 30px; width: 64px; height: 64px; border-radius: 32px; background: var(--primary); color: white; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(24,119,242,0.4); z-index: 40; transition: 0.2s;}
-        .fab:hover { transform: translateY(-3px); }
-        .fab:active { transform: scale(0.9); }
-        [data-theme="dark"] .fab { box-shadow: 0 10px 20px rgba(255,140,0,0.4); }
-
-        /* ================= MODALS (Soft & Clean) ================= */
-        .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); backdrop-filter: blur(3px); display: none; align-items: center; justify-content: center; z-index: 9999; opacity: 0; transition: 0.3s;}
-        .modal.show { display: flex; opacity: 1; }
-        .modal-content { background: var(--card); width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); transform: scale(0.95); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); max-height: 90vh; overflow-y: auto; border: 1px solid var(--border);}
-        .modal.show .modal-content { transform: scale(1); }
+        .fab { position: fixed; bottom: 30px; right: 30px; width: 64 height: 64px; background: var(--primary); color: white; border-radius: 50%; display: flex; align-items: center; justify-content: center; box-shadow: 0 10px 20px rgba(0,0,0,0.2); z-index: 40; width: 64px; height: 64px;}
         
-        /* Custom Confirm Modal */
-        #modal-confirm .modal-content { max-width: 320px; text-align: center; padding: 30px 20px;}
-
-        /* ================= VOUCHER / COUPON ================= */
+        /* Modals */
+        .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 9999; }
+        .modal.show { display: flex; }
+        .modal-content { background: var(--card); width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; border: 1px solid var(--border);}
+        
+        /* Vouchers */
         .vc-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
-        .vc-tab { flex: 1; padding: 12px; text-align: center; background: var(--card); font-weight: 700; border-radius: 10px; border: 1px solid var(--border); color: var(--text-sec); transition: 0.2s;}
-        .vc-tab.active { background: var(--primary); color: white; border-color: var(--primary); box-shadow: var(--shadow);}
-        
-        .receipt-card { background: #ffffff; padding: 24px; border-radius: 12px; color: #111827; max-width: 340px; margin: 0 auto; border: 1px solid #e2e8f0; box-shadow: 0 10px 25px rgba(0,0,0,0.05); }
-        .receipt-row { display: flex; justify-content: space-between; font-size: 14px; margin-bottom: 10px; font-weight: 600;}
-        .receipt-row span:first-child { color: #64748b; }
-        
-        .coupon-card { background: linear-gradient(135deg, #ff8c00, #ff4500); padding: 24px; border-radius: 16px; color: #ffffff; text-align: center; max-width: 340px; margin: 0 auto; box-shadow: 0 10px 25px rgba(255,140,0,0.3); position: relative; overflow: hidden;}
-        .coupon-card::before, .coupon-card::after { content: ''; position: absolute; top: 50%; width: 30px; height: 30px; background: var(--bg); border-radius: 50%; transform: translateY(-50%); z-index: 2;}
-        .coupon-card::before { left: -15px; } .coupon-card::after { right: -15px; }
-        .coupon-inner { border: 2px dashed rgba(255,255,255,0.4); border-radius: 12px; padding: 24px 15px; position: relative; z-index: 1;}
+        .vc-tab { flex: 1; padding: 12px; text-align: center; background: var(--card); font-weight: 700; border-radius: 10px; border: 1px solid var(--border); color: var(--text-sec);}
+        .vc-tab.active { background: var(--primary); color: white; border-color: var(--primary); }
+        .receipt-card { background: #fff; padding: 24px; border-radius: 12px; color: #111; max-width: 340px; margin: 0 auto; border: 1px solid #e2e8f0; }
+        .coupon-card { background: linear-gradient(135deg, #ff8c00, #ff4500); padding: 24px; border-radius: 16px; color: #fff; text-align: center; max-width: 340px; margin: 0 auto; }
+        .coupon-code { background: #fff; color: #ff4500; font-family: monospace; font-size: 18px; padding: 8px 16px; border-radius: 8px; font-weight: bold; display: inline-block; margin-bottom: 10px;}
 
-        /* Settings Toggle */
         .toggle-switch { position: relative; display: inline-block; width: 50px; height: 28px; }
         .toggle-switch input { opacity: 0; width: 0; height: 0; }
         .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: var(--border); transition: .4s; border-radius: 34px; }
-        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; box-shadow: 0 2px 5px rgba(0,0,0,0.2);}
+        .slider:before { position: absolute; content: ""; height: 20px; width: 20px; left: 4px; bottom: 4px; background-color: white; transition: .4s; border-radius: 50%; }
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(22px); }
-
         #auth-screen { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: var(--bg); z-index: 999999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-
     </style>
 </head>
 <body>
@@ -141,14 +110,9 @@
 
     <div id="auth-screen">
         <div class="card" style="width: 90%; max-width: 360px; text-align: center; padding: 40px 24px;">
-            <h1 style="color: var(--primary); margin-bottom: 8px; font-weight: 900; font-size: 32px; letter-spacing: -1px;">PCA STORE</h1>
+            <h1 style="color: var(--primary); margin-bottom: 8px; font-weight: 900; font-size: 32px;">PCA STORE</h1>
             <p style="font-size: 14px; color: var(--text-sec); margin-bottom: 40px; font-weight: 600;">Manager Dashboard</p>
-            
-            <button class="btn" style="width: 100%; background: var(--card); color: var(--text); border: 1px solid var(--border); margin-bottom: 20px; padding: 14px;" onclick="loginGoogle()">
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z" fill="#4285F4"/><path d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z" fill="#34A853"/><path d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z" fill="#FBBC05"/><path d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z" fill="#EA4335"/></svg>
-                Continue with Google
-            </button>
-            <button onclick="skipLogin()" style="color: var(--text-sec); font-size: 14px; font-weight: 700; text-decoration: underline;">Skip Login (Offline Mode)</button>
+            <button class="btn" style="width: 100%; background: var(--card); color: var(--text); border: 1px solid var(--border); margin-bottom: 10px; padding: 14px;" onclick="loginGoogle()">Continue with Google</button>
         </div>
     </div>
 
@@ -164,54 +128,36 @@
     <div class="overlay" id="overlay" onclick="toggleSidebar()"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <span style="letter-spacing: -0.5px;">Menu</span>
-            <button onclick="toggleSidebar()"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+            <span>Menu</span>
+            <button onclick="toggleSidebar()"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
         </div>
         <div style="flex-grow: 1; overflow-y: auto; padding: 15px 0;">
-            <div class="menu-item active" id="nav-inventory" onclick="switchView('inventory')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
-                Game Grid
-            </div>
-            <div class="menu-item" id="nav-sales" onclick="switchView('sales')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                Daily Sales
-            </div>
-            <div class="menu-item" id="nav-vc" onclick="switchView('vc')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
-                Voucher & Coupon
-            </div>
-            <div class="menu-item" id="nav-settings" onclick="switchView('settings')">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>
-                Settings
-            </div>
+            <div class="menu-item active" id="nav-inventory" onclick="switchView('inventory')">Game Grid</div>
+            <div class="menu-item" id="nav-sales" onclick="switchView('sales')">Daily Sales</div>
+            <div class="menu-item" id="nav-vc" onclick="switchView('vc')">Voucher & Coupon</div>
+            <div class="menu-item" id="nav-settings" onclick="switchView('settings')">Settings</div>
             
             <div style="padding: 20px 20px 8px; font-size: 11px; color: var(--text-sec); font-weight: 800; letter-spacing: 1px;">GAMES CATEGORY</div>
             <div id="sidebar-games-list"></div>
         </div>
         <div style="padding: 20px; border-top: 1px solid var(--border);">
-            <button class="btn" style="width: 100%;" onclick="openGameModal()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
-                Add New Game
-            </button>
+            <button class="btn" style="width: 100%;" onclick="openGameModal()">Add New Game</button>
         </div>
     </div>
 
     <main class="view active" id="view-inventory">
         <div class="title-row">
             <h2 id="inv-game-title">Select Game</h2>
-            <button class="btn" style="background: var(--green);" onclick="copyPriceList()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </button>
+            <button class="btn" style="background: var(--green);" onclick="copyPriceList()">Copy List</button>
         </div>
         
         <div class="stats-grid">
             <div class="stat-box"><span>Total Cost</span><strong id="stat-cost">0</strong></div>
             <div class="stat-box"><span>Total Revenue</span><strong id="stat-rev">0</strong></div>
-            <div class="stat-box" style="border-color: var(--primary); background: rgba(24,119,242,0.05);"><span>Net Profit</span><strong id="stat-prof" style="color: var(--primary);">0</strong></div>
+            <div class="stat-box" style="border-color: var(--primary); background: rgba(24,119,242,0.05);"><span style="color:var(--primary)">Net Profit</span><strong id="stat-prof">0</strong></div>
         </div>
 
         <div id="inv-mobile-container"></div>
-        
         <div class="desktop-table-wrapper" id="inv-desktop-container">
             <table>
                 <thead><tr><th>No.</th><th>Package & Formula</th><th>Cost</th><th>Sell</th><th>Profit</th><th>Action</th></tr></thead>
@@ -220,7 +166,7 @@
         </div>
 
         <button class="fab" onclick="openItemModal()">
-            <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
+            <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
     </main>
 
@@ -228,13 +174,13 @@
         <div class="title-row">
             <h2>Daily Sales Tracker</h2>
             <div style="display:flex; gap:10px;">
-                <button class="btn" style="background: #0088cc;" onclick="sendTelegram()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg></button>
-                <button class="btn" style="background: var(--card); color: var(--red); border: 1px solid var(--border);" onclick="confirmClearSales()"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg></button>
+                <button class="btn" style="background: #0088cc;" onclick="sendTelegram()">Send Telegram</button>
+                <button class="btn" style="background: var(--card); color: var(--red); border: 1px solid var(--border);" onclick="confirmClearSales()">Clear</button>
             </div>
         </div>
         <div class="card" style="display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--green);">
-            <div><span style="font-size:12px; color:var(--text-sec); font-weight:700; text-transform:uppercase;">Today's Profit</span><br><strong style="font-size:26px; color:var(--text);" id="sales-total-profit">0 KS</strong></div>
-            <div style="text-align:right;"><span style="font-size:12px; color:var(--text-sec); font-weight:700; text-transform:uppercase;">Items Sold</span><br><strong style="font-size:20px; color:var(--text);" id="sales-total-items">0</strong></div>
+            <div><span style="font-size:12px; color:var(--text-sec); font-weight:700;">TODAY'S PROFIT</span><br><strong style="font-size:26px;" id="sales-total-profit">0 KS</strong></div>
+            <div style="text-align:right;"><span style="font-size:12px; color:var(--text-sec); font-weight:700;">ITEMS SOLD</span><br><strong style="font-size:20px;" id="sales-total-items">0</strong></div>
         </div>
         <div class="card">
             <h3 style="font-size: 15px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px; color: var(--text-sec);">Recent Sales Activity</h3>
@@ -257,17 +203,17 @@
                 <div class="input-group"><label>Total Amount (KS)</label><input type="number" class="input-field" id="v-price" oninput="updateV()"></div>
             </div>
             <div class="receipt-card" id="print-v">
-                <div style="text-align: center; border-bottom: 2px dashed #cbd5e1; padding-bottom: 15px; margin-bottom: 15px;">
-                    <h2 style="margin-bottom: 5px; color:#0f172a;" id="vo-store">PCA Store</h2>
-                    <span style="font-size: 11px; color: #64748b; font-weight:800; letter-spacing:1px;">PAYMENT RECEIPT</span>
+                <div style="text-align: center; border-bottom: 2px dashed #cbd5e1; padding-bottom: 15px; margin-bottom: 15px; color:#111;">
+                    <h2 style="margin-bottom: 5px;" id="vo-store">PCA Store</h2>
+                    <span style="font-size: 11px; font-weight:800;">PAYMENT RECEIPT</span>
                 </div>
-                <div class="receipt-row"><span>Date:</span> <span id="vo-date" style="color:#0f172a;"></span></div>
-                <div class="receipt-row"><span>Customer:</span> <span id="vo-name" style="color:#0f172a;">-</span></div>
-                <div class="receipt-row"><span>Game/ID:</span> <span id="vo-game" style="color:#0f172a;">-</span></div>
-                <div class="receipt-row"><span>Package:</span> <span id="vo-item" style="color:#0f172a;">-</span></div>
+                <div class="receipt-row"><span>Date:</span> <span id="vo-date">-</span></div>
+                <div class="receipt-row"><span>Customer:</span> <span id="vo-name">-</span></div>
+                <div class="receipt-row"><span>Game/ID:</span> <span id="vo-game">-</span></div>
+                <div class="receipt-row"><span>Package:</span> <span id="vo-item">-</span></div>
                 <div class="receipt-row"><span>Status:</span> <span style="color: #10b981;">Successful</span></div>
                 <div style="border-top: 2px dashed #cbd5e1; margin-top: 15px; padding-top: 15px; display: flex; justify-content: space-between; align-items: center;">
-                    <span style="font-weight: 800; font-size: 14px; color:#0f172a;">Total Paid</span>
+                    <span style="font-weight: 800; font-size: 14px;">Total Paid</span>
                     <span style="font-weight: 900; font-size: 20px; color: #1877f2;" id="vo-price">0 KS</span>
                 </div>
             </div>
@@ -281,11 +227,12 @@
                 <div class="input-group"><label>Expiry Date</label><input type="text" class="input-field" id="c-exp" oninput="updateC()"></div>
             </div>
             <div class="coupon-card" id="print-c">
-                <div class="c-store-name" id="co-store" style="font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 2px; opacity: 0.9; margin-bottom: 5px;">PCA STORE</div>
-                <div class="coupon-title" id="co-desc">GIFT VOUCHER</div>
-                <div style="font-size: 12px; font-weight: 800; margin-bottom: 8px;">USE PROMO CODE:</div>
-                <div class="coupon-code" id="co-code">XXXX</div>
-                <div style="font-size: 11px; font-weight: 700;">Valid Until: <span id="co-exp">-</span></div>
+                <div class="coupon-inner">
+                    <div class="c-store-name" id="co-store">PCA STORE</div>
+                    <div id="co-desc" style="font-size:26px; font-weight:900; margin:10px 0;">GIFT VOUCHER</div>
+                    <div class="coupon-code" id="co-code">XXXX</div>
+                    <div style="font-size: 11px;">Valid Until: <span id="co-exp">-</span></div>
+                </div>
             </div>
             <button class="btn" style="width: 100%; margin-top: 20px; background: #ff8c00;" onclick="downloadImage('print-c', 'Coupon')">Download Coupon Image</button>
         </div>
@@ -295,23 +242,23 @@
         <div class="title-row"><h2>Settings</h2></div>
         
         <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; font-size: 15px;">Dark Mode</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="theme-toggle" onchange="toggleTheme()">
-                <span class="slider"></span>
-            </label>
+            <span style="font-weight: 700;">Dark Mode</span>
+            <label class="toggle-switch"><input type="checkbox" id="theme-toggle" onchange="toggleTheme()"><span class="slider"></span></label>
         </div>
 
         <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700; font-size: 15px;">Desktop View (Table Layout)</span>
-            <label class="toggle-switch">
-                <input type="checkbox" id="view-toggle" onchange="toggleViewMode()">
-                <span class="slider"></span>
-            </label>
+            <span style="font-weight: 700;">Desktop View (Table Layout)</span>
+            <label class="toggle-switch"><input type="checkbox" id="view-toggle" onchange="toggleViewMode()"><span class="slider"></span></label>
         </div>
 
         <div class="card">
-            <h3 style="font-size: 16px; margin-bottom: 16px; color: var(--text);">Store Information</h3>
+            <h3 style="font-size: 15px; font-weight: 700; margin-bottom:10px;">Interface Font Size</h3>
+            <input type="range" id="font-slider" min="12" max="20" value="14" oninput="changeFontSize(this.value)" style="width:100%;">
+            <span id="font-value" style="font-size:12px; font-weight:700; color:var(--text-sec)">14px</span>
+        </div>
+
+        <div class="card">
+            <h3 style="font-size: 16px; margin-bottom: 16px;">Store Information</h3>
             <div class="input-group"><label>Store Name</label><input type="text" class="input-field" id="set-name"></div>
             
             <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 16px; color: #0088cc;">Telegram Bot Setup</h3>
@@ -321,18 +268,20 @@
             <button class="btn" style="width: 100%; margin-top: 10px;" onclick="saveSettings()">Save Configuration</button>
         </div>
 
-        <button class="btn" style="width: 100%; background: transparent; color: var(--red); border: 2px solid var(--red);" onclick="confirmLogout()">Log Out & Clear Data</button>
+        <button class="btn" style="width: 100%; background: transparent; color: var(--red); border: 2px solid var(--red);" onclick="confirmLogoutOnly()">Log Out Only (Keep Local Data)</button>
     </main>
 
     <div class="modal" id="modal-game">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3 style="font-size:18px;">Add New Game</h3>
-                <button onclick="closeModal('modal-game')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-sec)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
+                <h3 id="game-modal-title">Add New Game</h3>
+                <button onclick="closeModal('modal-game')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
             </div>
-            <img src="" id="mg-img-preview" class="img-preview" style="display:none; width:80px; height:80px; border-radius:16px;">
-            <div style="margin-bottom: 20px; border: 2px dashed var(--border); padding: 15px; text-align: center; border-radius: 12px; cursor:pointer;" onclick="document.getElementById('mg-file').click()">
-                <span style="font-size:13px; font-weight:700; color:var(--primary);">Upload Icon</span>
+            <img src="" id="mg-img-preview" style="display:none; width:80px; height:80px; border-radius:16px; margin: 0 auto 15px; object-fit:cover;">
+            <div style="margin-bottom: 20px; border: 2px dashed var(--border); padding: 15px; text-align: center; border-radius: 12px; cursor: pointer;" onclick="document.getElementById('mg-file').click()">
+                <span style="font-size:13px; font-weight:700; color:var(--primary);">Upload Icon Photo</span>
                 <input type="file" id="mg-file" accept="image/*" style="display:none;" onchange="previewGameImage(this)">
             </div>
             <div class="input-group"><label>Game Name</label><input type="text" class="input-field" id="mg-name"></div>
@@ -343,137 +292,172 @@
     <div class="modal" id="modal-item">
         <div class="modal-content">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
-                <h3 id="mi-title" style="font-size:18px;">Add Item</h3>
-                <button onclick="closeModal('modal-item')"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="var(--text-sec)" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></button>
-            </div>
-            <div class="input-group"><label>Package Name</label><input type="text" class="input-field" id="mi-name"></div>
-            <div class="input-group"><label>Formula / Details</label><input type="text" class="input-field" id="mi-combo"></div>
-            
-            <div style="display:flex; gap:12px;">
-                <div class="input-group" style="flex:1;"><label>Cost (R$)</label><input type="number" class="input-field" id="mi-cost-rs" placeholder="0"></div>
-                <div class="input-group" style="flex:1;"><label>Cost (MMK)</label><input type="number" class="input-field" id="mi-cost-mmk" placeholder="0"></div>
-            </div>
-            
-            <div class="input-group"><label>Sell (MMK)</label><input type="number" class="input-field" id="mi-sell" placeholder="0"></div>
-            
-            <div style="display: flex; gap: 12px; margin-top: 24px;">
-                <button class="btn" id="mi-btn-del" style="background: var(--bg); color: var(--red); border: 1px solid var(--border); display: none;" onclick="confirmDeleteItem()">
-                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
+                <h3 id="mi-title">Add Item</h3>
+                <button onclick="closeModal('modal-item')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
                 </button>
+            </div>
+            <div class="input-group"><label>Package Name (e.g. 86)</label><input type="text" class="input-field" id="mi-name"></div>
+            <div class="input-group"><label>Formula / Details (e.g. 78 + 8)</label><input type="text" class="input-field" id="mi-combo"></div>
+            <div style="display:flex; gap:12px;">
+                <div class="input-group" style="flex:1;"><label>Cost (R$)</label><input type="number" class="input-field" id="mi-cost-rs"></div>
+                <div class="input-group" style="flex:1;"><label>Cost (MMK)</label><input type="number" class="input-field" id="mi-cost-mmk"></div>
+            </div>
+            <div class="input-group"><label>Sell (MMK)</label><input type="number" class="input-field" id="mi-sell"></div>
+            <div style="display: flex; gap: 12px; margin-top: 24px;">
+                <button class="btn" id="mi-btn-del" style="background: var(--bg); color: var(--red); border: 1px solid var(--border); display: none;" onclick="confirmDeleteItem()">Delete</button>
                 <button class="btn" style="flex: 1;" onclick="saveItem()">Save Item</button>
             </div>
         </div>
     </div>
 
     <div class="modal" id="modal-confirm">
-        <div class="modal-content">
+        <div class="modal-content" style="max-width:340px; text-align:center; padding:30px 20px;">
             <h3 id="confirm-title" style="margin-bottom:10px; font-size:18px;">Are you sure?</h3>
-            <p id="confirm-msg" style="font-size:14px; color:var(--text-sec); margin-bottom:24px; font-weight:600;">This action cannot be undone.</p>
+            <p id="confirm-msg" style="font-size:14px; color:var(--text-sec); margin-bottom:24px; font-weight:600;">Action description.</p>
             <div style="display:flex; gap:12px;">
                 <button class="btn" style="flex:1; background:var(--bg); color:var(--text); border:1px solid var(--border);" onclick="closeConfirm()">Cancel</button>
-                <button class="btn" id="confirm-yes-btn" style="flex:1; background:var(--red);">Yes, Confirm</button>
+                <button class="btn" id="confirm-yes-btn" style="flex:1; background:var(--red);">Confirm</button>
             </div>
         </div>
     </div>
 
     <script>
-        // SVG Assets (Clean Vector Icons)
+        let state = {
+            viewMode: 'mobile', theme: 'light', activeGame: '', fontSize: 14,
+            profile: { name: 'PCA Store', tgToken: '', tgChatId: '' }, data: {}, sales: [], uid: null
+        };
+        let tempEditIdx = -1; let tempBase64Image = ""; let confirmActionCallback = null; let isEditingGame = false; let editingGameOriginalName = "";
+
         const svgTrash = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
         const svgCart = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>`;
+        const svgEdit = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path></svg>`;
         const defaultImg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e2e8f0'><rect width='24' height='24' rx='6'/></svg>`;
 
-        // Global State
-        let state = {
-            viewMode: 'mobile', theme: 'light', activeGame: '', profile: { name: 'PCA Store', tgToken: '', tgChatId: '' },
-            data: {}, sales: [], uid: null
-        };
-        let tempEditIdx = -1; let tempBase64Image = ""; let confirmActionCallback = null;
-
-        // ================= UI HELPERS =================
         function showToast(msg, type = 'success') {
-            const toast = document.getElementById('toast');
-            toast.innerText = msg;
+            const toast = document.getElementById('toast'); toast.innerText = msg;
             toast.style.borderLeftColor = type === 'error' ? 'var(--red)' : 'var(--primary)';
-            toast.classList.add('show');
-            setTimeout(() => toast.classList.remove('show'), 2500);
+            toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500);
         }
-        function toggleSidebar() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); }
-        function switchView(viewId) {
-            document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.menu-item').forEach(m => m.classList.remove('active'));
-            document.getElementById('view-' + viewId).classList.add('active');
-            document.getElementById('nav-' + viewId).classList.add('active');
-            document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show');
-            if(viewId === 'inventory') renderInventory();
-            if(viewId === 'sales') renderSales();
-        }
+        document.getElementById('confirm-yes-btn').onclick = () => { if(confirmActionCallback) confirmActionCallback(); closeConfirm(); };
         function openModal(id) { document.getElementById(id).classList.add('show'); }
         function closeModal(id) { document.getElementById(id).classList.remove('show'); }
-
-        // Custom Confirm Logic
-        function showConfirm(title, msg, onConfirm) {
-            document.getElementById('confirm-title').innerText = title;
-            document.getElementById('confirm-msg').innerText = msg;
-            confirmActionCallback = onConfirm;
-            openModal('modal-confirm');
-        }
+        function showConfirm(title, msg, onConfirm) { document.getElementById('confirm-title').innerText = title; document.getElementById('confirm-msg').innerText = msg; confirmActionCallback = onConfirm; openModal('modal-confirm'); }
         function closeConfirm() { closeModal('modal-confirm'); confirmActionCallback = null; }
-        document.getElementById('confirm-yes-btn').onclick = () => { if(confirmActionCallback) confirmActionCallback(); closeConfirm(); };
 
-        // ================= DATA MANAGEMENT =================
-        function loadData() {
+        // ================= DATA LOADING & SYNC =================
+        function loadLocalDataFallback() {
             try {
-                const sData = localStorage.getItem('pcaData'); if(sData) state.data = JSON.parse(sData);
-                const sProf = localStorage.getItem('pcaProfile'); if(sProf) state.profile = JSON.parse(sProf);
-                const sSales = localStorage.getItem('pcaSales'); if(sSales) state.sales = JSON.parse(sSales);
-                const sTheme = localStorage.getItem('pcaTheme'); if(sTheme) { state.theme = sTheme; document.documentElement.setAttribute('data-theme', sTheme); document.getElementById('theme-toggle').checked = (sTheme==='dark');}
-                const sView = localStorage.getItem('pcaViewMode'); if(sView) { state.viewMode = sView; document.getElementById('view-toggle').checked = (sView==='desktop'); }
-                const games = Object.keys(state.data); if(games.length > 0) state.activeGame = games[0];
+                var json = localStorage.getItem('pcaData'); if(json) state.data = JSON.parse(json);
+                var profileJson = localStorage.getItem('pcaStoreProfile'); if(profileJson) state.profile = JSON.parse(profileJson);
+                var salesJson = localStorage.getItem('pcaSalesData'); if(salesJson) state.sales = JSON.parse(salesJson);
+                var sTheme = localStorage.getItem('pcaTheme'); if(sTheme) { state.theme = sTheme; document.documentElement.setAttribute('data-theme', sTheme); document.getElementById('theme-toggle').checked = (sTheme==='dark');}
+                var sView = localStorage.getItem('pcaViewMode'); if(sView) { state.viewMode = sView; document.getElementById('view-toggle').checked = (sView==='desktop'); }
+                var sFont = localStorage.getItem('pcaFontSize'); if(sFont) { state.fontSize = parseInt(sFont); changeFontSize(state.fontSize); }
+                var games = Object.keys(state.data); if(games.length > 0) state.activeGame = games[0];
             } catch(e) {}
             applyGlobalUI();
         }
-        function saveData() {
-            localStorage.setItem('pcaData', JSON.stringify(state.data));
-            localStorage.setItem('pcaProfile', JSON.stringify(state.profile));
-            localStorage.setItem('pcaSales', JSON.stringify(state.sales));
-            localStorage.setItem('pcaTheme', state.theme);
-            localStorage.setItem('pcaViewMode', state.viewMode);
+
+        function loadCloudData() {
+            db.collection("stores").doc(state.uid).get().then(function(snap) {
+                if(snap.exists) {
+                    var d = snap.data();
+                    if(d.data) state.data = d.data;
+                    if(d.profile) state.profile = d.profile;
+                    if(d.salesHistory) state.sales = d.salesHistory;
+                    var games = Object.keys(state.data); if(games.length > 0) state.activeGame = games[0];
+                    localStorage.setItem('pcaData', JSON.stringify(state.data));
+                    localStorage.setItem('pcaStoreProfile', JSON.stringify(state.profile));
+                    localStorage.setItem('pcaSalesData', JSON.stringify(state.sales));
+                }
+                applyGlobalUI();
+            }).catch(function(e) { loadLocalDataFallback(); });
         }
+
+        function saveDataToCloud() {
+            localStorage.setItem('pcaData', JSON.stringify(state.data));
+            localStorage.setItem('pcaStoreProfile', JSON.stringify(state.profile));
+            localStorage.setItem('pcaSalesData', JSON.stringify(state.sales));
+            if(auth && state.uid && db) {
+                db.collection("stores").doc(state.uid).set({ data: state.data, profile: state.profile, salesHistory: state.sales }, {merge: true}).catch(e=>{});
+            }
+        }
+
         function applyGlobalUI() {
-            document.getElementById('ui-store-name').innerText = state.profile.name;
+            document.getElementById('topStoreName').innerText = state.profile.name;
             document.getElementById('set-name').value = state.profile.name;
             document.getElementById('set-tg-token').value = state.profile.tgToken || "";
             document.getElementById('set-tg-chat').value = state.profile.tgChatId || "";
+            document.getElementById('vo-store').innerText = state.profile.name;
+            document.getElementById('co-store').innerText = state.profile.name;
+            document.getElementById('vo-date').innerText = new Date().toLocaleDateString();
             if(state.viewMode === 'desktop') { document.getElementById('inv-mobile-container').style.display = 'none'; document.getElementById('inv-desktop-container').style.display = 'block'; } 
             else { document.getElementById('inv-mobile-container').style.display = 'block'; document.getElementById('inv-desktop-container').style.display = 'none'; }
-            renderSidebarGames(); renderInventory();
+            renderSidebarGames(); renderInventory(); renderSales();
         }
 
-        // ================= SETTINGS =================
-        function toggleTheme() { state.theme = document.getElementById('theme-toggle').checked ? 'dark' : 'light'; if(state.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme'); saveData(); }
-        function toggleViewMode() { state.viewMode = document.getElementById('view-toggle').checked ? 'desktop' : 'mobile'; saveData(); applyGlobalUI(); }
-        function saveSettings() { state.profile.name = document.getElementById('set-name').value || "PCA Store"; state.profile.tgToken = document.getElementById('set-tg-token').value.trim(); state.profile.tgChatId = document.getElementById('set-tg-chat').value.trim(); saveData(); applyGlobalUI(); showToast("Settings Saved"); }
+        // ================= CONFIGURATION =================
+        function toggleTheme() { state.theme = document.getElementById('theme-toggle').checked ? 'dark' : 'light'; if(state.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme'); localStorage.setItem('pcaTheme', state.theme); }
+        function toggleViewMode() { state.viewMode = document.getElementById('view-toggle').checked ? 'desktop' : 'mobile'; localStorage.setItem('pcaViewMode', state.viewMode); applyGlobalUI(); }
+        function changeFontSize(val) { state.fontSize = val; document.documentElement.style.setProperty('--font-size', val + 'px'); document.getElementById('font-slider').value = val; document.getElementById('font-value').innerText = val + "px"; localStorage.setItem('pcaFontSize', val); }
+        function saveSettings() { state.profile.name = document.getElementById('set-name').value || "PCA Store"; state.profile.tgToken = document.getElementById('set-tg-token').value.trim(); state.profile.tgChatId = document.getElementById('set-tg-chat').value.trim(); saveDataToCloud(); applyGlobalUI(); showToast("Settings Configured!"); }
 
-        // ================= SIDEBAR GAMES =================
+        function confirmLogoutOnly() { showConfirm("Logout Only", "Are you sure you want to log out? Your local catalog data will remain safe on this device.", () => { if(auth) auth.signOut(); state.uid = null; document.getElementById('auth-screen').style.display = 'flex'; showToast("Logged out"); }); }
+
+        // ================= SIDEBAR & NAVIGATION =================
+        window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); };
+        window.switchView = function(v) {
+            document.querySelectorAll('.view').forEach(function(el) { el.classList.remove('active'); }); document.getElementById('view-' + v).classList.add('active');
+            document.querySelectorAll('.menu-item').forEach(function(el) { el.classList.remove('active'); }); if(document.getElementById('nav-' + v)) document.getElementById('nav-' + v).classList.add('active');
+            document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show');
+            if(v === 'inventory') renderInventory(); if(v === 'sales') renderSales();
+        };
+
+        // ================= GAME MANAGMENT (Add & Edit) =================
         function renderSidebarGames() {
             const list = document.getElementById('sidebar-games-list'); list.innerHTML = '';
             Object.keys(state.data).forEach(gName => {
-                const img = state.data[gName].image || defaultImg;
-                const isActive = gName === state.activeGame ? 'active' : '';
-                list.innerHTML += `<div class="game-item ${isActive}" onclick="selectGame('${gName}')">
-                        <div style="display:flex; align-items:center; gap:12px;"><img src="${img}" style="width:28px; height:28px; border-radius:8px; object-fit:cover;"><span>${gName}</span></div>
-                        <button onclick="confirmDeleteGame('${gName}', event)" style="color:var(--text-sec); padding:4px;">${svgTrash}</button>
+                const img = state.data[gName].image || defaultImg; const isActive = gName === state.activeGame ? 'active' : '';
+                list.innerHTML += `<div class="game-item ${isActive}">
+                        <div style="display:flex; align-items:center; gap:12px; flex-grow:1;" onclick="selectGame('${gName}')"><img src="${img}" style="width:28px; height:28px; border-radius:8px; object-fit:cover;"><span>${gName}</span></div>
+                        <div style="display:flex; gap:4px;">
+                            <button onclick="openEditGameModal('${gName}', event)" style="padding:6px; color:var(--primary);">${svgEdit}</button>
+                            <button onclick="confirmDeleteGame('${gName}', event)" style="padding:6px; color:var(--red);">${svgTrash}</button>
+                        </div>
                     </div>`;
             });
         }
         function selectGame(name) { state.activeGame = name; renderSidebarGames(); renderInventory(); toggleSidebar(); }
-        function confirmDeleteGame(name, e) { e.stopPropagation(); showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { delete state.data[name]; state.activeGame = Object.keys(state.data)[0] || ''; saveData(); applyGlobalUI(); }); }
+        function confirmDeleteGame(name, e) { e.stopPropagation(); showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { delete state.data[name]; state.activeGame = Object.keys(state.data)[0] || ''; saveDataToCloud(); applyGlobalUI(); }); }
+        
+        function openEditGameModal(name, e) {
+            if(e) e.stopPropagation();
+            isEditingGame = true; editingGameOriginalName = name;
+            document.getElementById('game-modal-title').innerText = "Edit Game Configuration";
+            document.getElementById('mg-name').value = name;
+            tempBase64Image = state.data[name].image || "";
+            if(tempBase64Image) { document.getElementById('mg-img-preview').src = tempBase64Image; document.getElementById('mg-img-preview').style.display = 'block'; }
+            else { document.getElementById('mg-img-preview').style.display = 'none'; }
+            openModal('modal-game');
+        }
 
-        function openGameModal() { document.getElementById('mg-name').value = ''; document.getElementById('mg-file').value = ''; document.getElementById('mg-img-preview').style.display = 'none'; tempBase64Image = ""; openModal('modal-game'); }
+        function openGameModal() { isEditingGame = false; document.getElementById('game-modal-title').innerText = "Add New Game"; document.getElementById('mg-name').value = ''; document.getElementById('mg-file').value = ''; document.getElementById('mg-img-preview').style.display = 'none'; tempBase64Image = ""; openModal('modal-game'); }
         function previewGameImage(input) { if(input.files && input.files[0]) { const reader = new FileReader(); reader.onload = e => { tempBase64Image = e.target.result; document.getElementById('mg-img-preview').src = tempBase64Image; document.getElementById('mg-img-preview').style.display = 'block'; }; reader.readAsDataURL(input.files[0]); } }
-        function saveGame() { const name = document.getElementById('mg-name').value.trim(); if(!name) return showToast("Enter game name", "error"); if(state.data[name]) return showToast("Game exists", "error"); state.data[name] = { image: tempBase64Image, items: [] }; state.activeGame = name; saveData(); applyGlobalUI(); closeModal('modal-game'); showToast("Game Added!"); }
+        
+        function saveGame() {
+            const name = document.getElementById('mg-name').value.trim(); if(!name) return showToast("Enter game name", "error");
+            if(isEditingGame) {
+                if(name !== editingGameOriginalName) { state.data[name] = state.data[editingGameOriginalName]; delete state.data[editingGameOriginalName]; }
+                state.data[name].image = tempBase64Image; state.activeGame = name; showToast("Game updated!");
+            } else {
+                if(state.data[name]) return showToast("Game already exists", "error");
+                state.data[name] = { image: tempBase64Image, items: [] }; state.activeGame = name; showToast("Game Added Successfully!");
+            }
+            isEditingGame = false; saveDataToCloud(); applyGlobalUI(); closeModal('modal-game');
+        }
 
-        // ================= INVENTORY (COMBO & R$ / MMK) =================
+        // ================= INVENTORY GRID =================
         function renderInventory() {
             const titleEl = document.getElementById('inv-game-title'); const mobileCon = document.getElementById('inv-mobile-container'); const desktopBody = document.getElementById('inv-table-body');
             mobileCon.innerHTML = ''; desktopBody.innerHTML = '';
@@ -484,213 +468,133 @@
             const gData = state.data[state.activeGame];
             let tc = 0, tr = 0;
 
-            gData.items.forEach((itm, idx) => {
-                let costRS = parseFloat(itm.costRS) || 0;
-                let costMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0; // fallback old data
-                let sell = parseFloat(itm.sell) || 0; 
-                let profit = sell - costMMK;
-                
-                tc += costMMK; tr += sell;
-                let color = profit < 0 ? 'var(--red)' : 'var(--green)'; let sign = profit <= 0 ? '' : '+';
-                
-                let comboBadgeMobile = itm.combo ? `<span class="combo-badge">${itm.combo}</span>` : '';
-                let comboBadgeDesktop = itm.combo ? `<br><span style="font-size:11px; color:var(--text-sec); font-weight:600;">${itm.combo}</span>` : '';
+            if(gData.items) {
+                gData.items.forEach((itm, idx) => {
+                    let costRS = parseFloat(itm.costRS) || 0; 
+                    let costMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0; 
+                    let sell = parseFloat(itm.sell) || 0; let profit = sell - costMMK; 
+                    tc += costMMK; tr += sell;
+                    
+                    let color = profit < 0 ? 'var(--red)' : 'var(--green)'; let sign = profit <= 0 ? '' : '+';
+                    let comboBadgeMobile = itm.combo ? `<span style="background:var(--bg); color:var(--text-sec); font-size:11px; padding:4px 8px; border-radius:6px; border:1px solid var(--border); font-weight:700; margin-left:8px;">${itm.combo}</span>` : '';
+                    let comboBadgeDesktop = itm.combo ? `<br><span style="font-size:11px; color:var(--text-sec); font-weight:600;">${itm.combo}</span>` : '';
+                    let costString = costRS > 0 ? `R$ ${costRS} / ${costMMK} KS` : `${costMMK} KS`;
+                    let costDesktop = costRS > 0 ? `<b>${costMMK} KS</b><br><span style="font-size:11px; color:var(--text-sec);">R$ ${costRS}</span>` : `<b>${costMMK} KS</b>`;
+                    let img = gData.image || defaultImg;
 
-                let costString = costRS > 0 ? `R$ ${costRS} / ${costMMK} KS` : `${costMMK} KS`;
-                let costDesktop = costRS > 0 ? `<div style="font-weight:bold;">${costMMK} KS</div><div style="font-size:11px; color:var(--text-sec);">R$ ${costRS}</div>` : `<div style="font-weight:bold;">${costMMK} KS</div>`;
-
-                // Mobile
-                mobileCon.innerHTML += `
-                    <div class="mobile-item-card">
-                        <div class="item-header">
-                            <span class="item-title-text" onclick="openItemModal(${idx})">
-                                <span style="background:var(--bg); padding:4px 10px; border-radius:6px; font-size:13px; color:var(--text-sec); border:1px solid var(--border);">${idx+1}</span>
-                                ${itm.name} ${comboBadgeMobile}
-                            </span>
-                            <button onclick="recordSale(${idx}, event)" style="background:rgba(24,119,242,0.1); color:var(--primary); padding:8px 12px; border-radius:8px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px;">${svgCart} Sell</button>
-                        </div>
-                        <div class="item-prices" onclick="openItemModal(${idx})"><span>Cost:</span> <strong>${costString}</strong> &nbsp;|&nbsp; <span>Sell:</span> <strong>${sell} KS</strong></div>
-                        <div class="item-profit-row" onclick="openItemModal(${idx})">
-                            <span style="font-size:12px; font-weight:700; color:var(--text-sec); text-transform:uppercase;">Net Profit</span>
-                            <span style="font-size:16px; font-weight:900; color:${color};">${sign}${profit} KS</span>
-                        </div>
-                    </div>`;
-                
-                // Desktop
-                desktopBody.innerHTML += `
-                    <tr>
-                        <td style="color:var(--text-sec); font-weight:bold;">${idx+1}</td>
-                        <td style="font-weight:800; cursor:pointer;" onclick="openItemModal(${idx})">${itm.name} ${comboBadgeDesktop}</td>
-                        <td onclick="openItemModal(${idx})" style="cursor:pointer;">${costDesktop}</td>
-                        <td onclick="openItemModal(${idx})" style="font-weight:bold; cursor:pointer;">${sell} KS</td>
-                        <td style="color:${color}; font-weight:900; font-size:16px;">${sign}${profit}</td>
-                        <td><button onclick="recordSale(${idx}, event)" style="color:var(--primary); font-weight:800; background:rgba(24,119,242,0.1); padding:8px 14px; border-radius:8px; display:flex; align-items:center; gap:6px; transition:0.2s;">${svgCart} Sell</button></td>
-                    </tr>`;
-            });
-
-            document.getElementById('stat-cost').innerText = tc; document.getElementById('stat-rev').innerText = tr; document.getElementById('stat-prof').innerText = tr-tc;
-            document.getElementById('stat-prof').style.color = (tr-tc) < 0 ? 'var(--red)' : 'var(--primary)';
+                    mobileCon.innerHTML += `<div class="card" style="padding:16px; margin-bottom:12px; border-radius:14px; display:flex; flex-direction:column; gap:12px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center;">
+                                <span style="font-weight:800; font-size:16px; cursor:pointer;" onclick="openItemModal(${idx})">
+                                    <span style="background:var(--bg); padding:4px 10px; border-radius:6px; font-size:13px; color:var(--text-sec); border:1px solid var(--border); margin-right:6px;">${idx+1}</span>
+                                    ${itm.name} ${comboBadgeMobile}
+                                </span>
+                                <button onclick="recordSale(${idx}, event)" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 12px; border-radius:8px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px;">${svgCart} Sell</button>
+                            </div>
+                            <div style="display:flex; gap:15px; font-size:13px; color:var(--text-sec); background:var(--bg); padding:10px; border-radius:8px; font-weight:600;" onclick="openItemModal(${idx})"><span>Cost: <strong style="color:var(--text);">${costString}</strong></span> <span>Sell: <strong style="color:var(--text);">${sell} KS</strong></span></div>
+                            <div style="display:flex; justify-content:space-between; background:var(--bg); padding:12px; border-radius:8px; align-items:center;" onclick="openItemModal(${idx})"><span style="font-size:12px; font-weight:700; color:var(--text-sec); text-transform:uppercase;">Net Profit</span><strong style="color:${color}; font-size:16px;">${sign}${profit} KS</strong></div>
+                        </div>`;
+                    
+                    desktopBody.innerHTML += `<tr>
+                            <td style="color:var(--text-sec); font-weight:bold;">${idx+1}</td>
+                            <td style="font-weight:800; cursor:pointer;" onclick="openItemModal(${idx})">${itm.name} ${comboBadgeDesktop}</td>
+                            <td onclick="openItemModal(${idx})" style="cursor:pointer;">${costDesktop}</td>
+                            <td onclick="openItemModal(${idx})" style="font-weight:bold; cursor:pointer;">${sell} KS</td>
+                            <td style="color:${color}; font-weight:900; font-size:16px;">${sign}${profit}</td>
+                            <td><button onclick="recordSale(${idx}, event)" style="color:var(--primary); font-weight:800; background:rgba(24,119,242,0.1); padding:8px 14px; border-radius:8px; display:flex; align-items:center; gap:6px;">${svgCart} Sell</button></td>
+                        </tr>`;
+                });
+            }
+            document.getElementById('stat-cost').innerText = tc + " KS"; document.getElementById('stat-rev').innerText = tr + " KS"; document.getElementById('stat-prof').innerText = (tr-tc) + " KS"; document.getElementById('stat-prof').style.color = (tr-tc) < 0 ? 'var(--red)' : 'var(--primary)';
         }
 
         function openItemModal(idx = -1) {
             tempEditIdx = idx;
             if(idx > -1) {
-                const itm = state.data[state.activeGame].items[idx];
-                document.getElementById('mi-title').innerText = "Edit Item";
-                document.getElementById('mi-name').value = itm.name;
-                document.getElementById('mi-combo').value = itm.combo || '';
-                document.getElementById('mi-cost-rs').value = itm.costRS || '';
-                document.getElementById('mi-cost-mmk').value = itm.costMMK !== undefined ? itm.costMMK : (itm.cost || '');
-                document.getElementById('mi-sell').value = itm.sell;
-                document.getElementById('mi-btn-del').style.display = 'block';
+                const itm = state.data[state.activeGame].items[idx]; document.getElementById('mi-title').innerText = "Edit Item Details"; document.getElementById('mi-name').value = itm.name; document.getElementById('mi-combo').value = itm.combo || ''; document.getElementById('mi-cost-rs').value = itm.costRS || ''; document.getElementById('mi-cost-mmk').value = itm.costMMK !== undefined ? itm.costMMK : (itm.cost || ''); document.getElementById('mi-sell').value = itm.sell; document.getElementById('mi-btn-del').style.display = 'block';
             } else {
                 if(!state.activeGame) return showToast("Add a game first", "error");
-                document.getElementById('mi-title').innerText = "Add Item";
-                document.getElementById('mi-name').value = '';
-                document.getElementById('mi-combo').value = '';
-                document.getElementById('mi-cost-rs').value = '';
-                document.getElementById('mi-cost-mmk').value = '';
-                document.getElementById('mi-sell').value = '';
-                document.getElementById('mi-btn-del').style.display = 'none';
+                document.getElementById('mi-title').innerText = "Add Package Item"; document.getElementById('mi-name').value = ''; document.getElementById('mi-combo').value = ''; document.getElementById('mi-cost-rs').value = ''; document.getElementById('mi-cost-mmk').value = ''; document.getElementById('mi-sell').value = ''; document.getElementById('mi-btn-del').style.display = 'none';
             }
             openModal('modal-item');
         }
 
         function saveItem() {
-            const ni = { 
-                name: document.getElementById('mi-name').value, 
-                combo: document.getElementById('mi-combo').value, 
-                costRS: parseFloat(document.getElementById('mi-cost-rs').value)||0, 
-                costMMK: parseFloat(document.getElementById('mi-cost-mmk').value)||0, 
-                sell: parseFloat(document.getElementById('mi-sell').value)||0 
-            };
-            if(!ni.name) return showToast("Enter Package Name", "error");
+            const ni = { name: document.getElementById('mi-name').value.trim(), combo: document.getElementById('mi-combo').value.trim(), costRS: parseFloat(document.getElementById('mi-cost-rs').value)||0, costMMK: parseFloat(document.getElementById('mi-cost-mmk').value)||0, sell: parseFloat(document.getElementById('mi-sell').value)||0 };
+            if(!ni.name) return showToast("Enter Package Name", "error"); if(!state.data[state.activeGame].items) state.data[state.activeGame].items = [];
             if(tempEditIdx > -1) state.data[state.activeGame].items[tempEditIdx] = ni; else state.data[state.activeGame].items.push(ni);
-            saveData(); renderInventory(); closeModal('modal-item');
+            saveDataToCloud(); renderInventory(); closeModal('modal-item');
         }
-
-        function confirmDeleteItem() { showConfirm("Delete Item", "Are you sure to delete this package?", () => { state.data[state.activeGame].items.splice(tempEditIdx, 1); saveData(); renderInventory(); closeModal('modal-item'); }); }
-
-        function copyPriceList() {
-            if(!state.activeGame || !state.data[state.activeGame] || state.data[state.activeGame].items.length === 0) return showToast("No items", "error");
-            let str = `*${state.activeGame}*\n`;
-            state.data[state.activeGame].items.forEach(i => str += `${i.name} - ${i.sell} KS\n`);
-            navigator.clipboard.writeText(str).then(() => showToast("Copied!"));
-        }
+        function confirmDeleteItem() { showConfirm("Delete Item", "Are you sure you want to delete this package?", () => { state.data[state.activeGame].items.splice(tempEditIdx, 1); saveDataToCloud(); renderInventory(); closeModal('modal-item'); }); }
+        function copyPriceList() { if(!state.activeGame || !state.data[state.activeGame] || !state.data[state.activeGame].items || state.data[state.activeGame].items.length === 0) return showToast("No items found", "error"); let str = `*${state.activeGame}*\n`; state.data[state.activeGame].items.forEach(i => str += `${i.name} - ${i.sell} KS\n`); navigator.clipboard.writeText(str).then(() => showToast("Price list copied!")); }
 
         // ================= SALES TRACKER =================
         function recordSale(idx, e) {
             if(e) e.stopPropagation();
-            const itm = state.data[state.activeGame].items[idx];
-            let cMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
+            const itm = state.data[state.activeGame].items[idx]; let cMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
             state.sales.push({ date: new Date().toLocaleDateString(), game: state.activeGame, name: itm.name, profit: (itm.sell||0)-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-            saveData(); showToast(`Sold 1x ${itm.name}`);
+            saveDataToCloud(); showToast(`Sold 1x ${itm.name}`); renderSales();
         }
 
         function renderSales() {
-            const today = new Date().toLocaleDateString();
-            let todayItems = state.sales.filter(s => s.date === today);
-            let profit = 0;
-            const con = document.getElementById('sales-list-container'); con.innerHTML = '';
+            const today = new Date().toLocaleDateString(); let todayItems = state.sales.filter(s => s.date === today); let profit = 0;
+            const con = document.getElementById('sales-list-container'); if(!con) return; con.innerHTML = '';
             
             if(todayItems.length === 0) {
-                con.innerHTML = `<div style="text-align:center; padding:30px 20px; color:var(--text-sec); font-size:13px; font-weight:600;">No sales recorded today.<br>Click 'Sell' in Game Grid to start tracking.</div>`;
+                con.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:600;">No sales recorded today.</div>`;
             } else {
                 todayItems.slice().reverse().forEach(s => {
-                    profit += s.profit;
-                    let color = s.profit < 0 ? 'var(--red)' : 'var(--green)'; let sign = s.profit <= 0 ? '' : '+';
-                    con.innerHTML += `<div style="display:flex; justify-content:space-between; padding:14px 0; border-bottom:1px solid var(--border); font-size:14px; align-items:center;">
+                    profit += s.profit; let color = s.profit < 0 ? 'var(--red)' : 'var(--green)'; let sign = s.profit <= 0 ? '' : '+';
+                    con.innerHTML += `<div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); align-items:center;">
                         <div><strong style="color:var(--text);">${s.name}</strong> <span style="font-size:11px; color:var(--text-sec); font-weight:bold; margin-left:6px;">${s.time}</span></div>
                         <strong style="color:${color}; font-size:15px;">${sign}${s.profit} KS</strong>
                     </div>`;
                 });
             }
-            document.getElementById('sales-total-items').innerText = todayItems.length;
-            document.getElementById('sales-total-profit').innerText = profit + " KS";
-            document.getElementById('sales-total-profit').style.color = profit < 0 ? 'var(--red)' : 'var(--text)';
+            document.getElementById('sales-total-items').innerText = todayItems.length; document.getElementById('sales-total-profit').innerText = profit + " KS"; document.getElementById('sales-total-profit').style.color = profit < 0 ? 'var(--red)' : 'var(--text)';
         }
 
-        function confirmClearSales() { showConfirm("Clear Sales", "Are you sure you want to clear today's sales history?", () => { state.sales = state.sales.filter(s => s.date !== new Date().toLocaleDateString()); saveData(); renderSales(); showToast("Cleared"); }); }
+        function confirmClearSales() { showConfirm("Clear Sales", "Reset daily transaction history for today?", () => { state.sales = state.sales.filter(s => s.date !== new Date().toLocaleDateString()); saveDataToCloud(); renderSales(); showToast("Cleared"); }); }
 
+        // ================= TELEGRAM (FIXED HTML PARSING) =================
         async function sendTelegram() {
-            if(!state.profile.tgToken || !state.profile.tgChatId) { switchView('settings'); return showToast("Set Telegram Keys in Settings", "error"); }
-            let todayItems = state.sales.filter(s => s.date === new Date().toLocaleDateString());
-            if(todayItems.length === 0) return showToast("No sales to report", "error");
-            let profit = 0, details = "";
-            todayItems.slice().reverse().forEach(s => { profit += s.profit; details += `• ${s.name} (${s.profit > 0 ? '+':''}${s.profit})\n`; });
-            const text = `📊 *Daily Sales*\n🏪 ${state.profile.name}\n📦 Items: ${todayItems.length}\n💰 Profit: ${profit>0?'+':''}${profit} KS\n\n${details}`;
+            var token = state.profile.tgToken; var chatId = state.profile.tgChatId;
+            if(!token || !chatId) { switchView('settings'); return showToast("Set Telegram Keys in Settings", "error"); }
+            var todayStr = new Date().toLocaleDateString(); var todayItems = state.sales.filter(function(s) { return s.date === todayStr; });
+            if(todayItems.length === 0) return showToast("No sales to report today", "error");
+
+            var totalProfit = 0; var details = "";
+            todayItems.slice().reverse().forEach(function(s) { totalProfit += s.profit; var sign = s.profit <= 0 ? '' : '+'; details += "• " + s.name + " (" + sign + s.profit + " KS)\n"; });
+            var mainSign = totalProfit <= 0 ? '' : '+';
+            
+            // Fixed Markdown error by strictly using safe HTML tags
+            var text = "📊 <b>Daily Sales Report</b>\n📅 " + todayStr + "\n🏪 " + state.profile.name + "\n\n📦 Items Sold: " + todayItems.length + "\n💰 Net Profit: " + mainSign + totalProfit + " KS\n\n<b>Details:</b>\n" + details;
+            
             try {
-                const res = await fetch(`https://api.telegram.org/bot${state.profile.tgToken}/sendMessage`, { method:"POST", headers:{"Content-Type":"application/json"}, body:JSON.stringify({chat_id:state.profile.tgChatId, text:text, parse_mode:"Markdown"})});
-                if(res.ok) showToast("Sent to Telegram!"); else showToast("Telegram Error", "error");
-            } catch(e) { showToast("Network Error", "error"); }
+                var res = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: "HTML" }) });
+                if(res.ok) showToast("Report Sent to Telegram!"); else showToast("Failed to send report. Check Token.", "error");
+            } catch(e) { showToast("Connection failed", "error"); }
         }
 
-        // ================= VOUCHER & COUPON (Blob Download Fix) =================
-        function switchVCTab(t) {
-            document.getElementById('tab-v').classList.remove('active'); document.getElementById('tab-c').classList.remove('active');
-            document.getElementById('sec-v').style.display = 'none'; document.getElementById('sec-c').style.display = 'none';
-            document.getElementById('tab-'+t).classList.add('active'); document.getElementById('sec-'+t).style.display = 'block';
-        }
+        // ================= VOUCHER & COUPON (Blob Fix) =================
+        function switchVCTab(t) { document.getElementById('tab-v').classList.remove('active'); document.getElementById('tab-c').classList.remove('active'); document.getElementById('sec-v').style.display = 'none'; document.getElementById('sec-c').style.display = 'none'; document.getElementById('tab-'+t).classList.add('active'); document.getElementById('sec-'+t).style.display = 'block'; }
         function updateV() { document.getElementById('vo-name').innerText = document.getElementById('v-name').value || "-"; document.getElementById('vo-game').innerText = document.getElementById('v-game').value || "-"; document.getElementById('vo-item').innerText = document.getElementById('v-item').value || "-"; document.getElementById('vo-price').innerText = (document.getElementById('v-price').value || "0") + " KS"; }
         function updateC() { document.getElementById('co-desc').innerText = document.getElementById('c-desc').value || "GIFT VOUCHER"; document.getElementById('co-code').innerText = document.getElementById('c-code').value.toUpperCase() || "XXXX"; document.getElementById('co-exp').innerText = document.getElementById('c-exp').value || "-"; }
         
         function downloadImage(id, name) {
-            const el = document.getElementById(id); 
-            const origShadow = el.style.boxShadow; const origTransform = el.style.transform;
-            el.style.boxShadow = 'none'; el.style.transform = 'none'; 
-            showToast("Generating image...");
-            
-            // Fixed base64 download issue using Blob API
+            const el = document.getElementById(id); const origShadow = el.style.boxShadow; const origTransform = el.style.transform;
+            el.style.boxShadow = 'none'; el.style.transform = 'none'; showToast("Generating image...");
             html2canvas(el, {scale:3, backgroundColor:"#ffffff", useCORS:true}).then(canvas => {
                 canvas.toBlob(function(blob) {
-                    const url = URL.createObjectURL(blob);
-                    const a = document.createElement('a'); 
-                    a.style.display = 'none';
-                    a.href = url;
-                    a.download = `${state.profile.name}_${name}_${Date.now()}.png`; 
-                    document.body.appendChild(a);
-                    a.click();
-                    setTimeout(() => {
-                        document.body.removeChild(a);
-                        URL.revokeObjectURL(url);
-                        el.style.boxShadow = origShadow; el.style.transform = origTransform; 
-                        showToast("Downloaded Successfully!");
-                    }, 100);
+                    const url = URL.createObjectURL(blob); const a = document.createElement('a'); 
+                    a.style.display = 'none'; a.href = url; a.download = `${state.profile.name}_${name}_${Date.now()}.png`; document.body.appendChild(a); a.click();
+                    setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); el.style.boxShadow = origShadow; el.style.transform = origTransform; showToast("Downloaded Successfully!"); }, 100);
                 }, 'image/png');
             }).catch(()=> { el.style.boxShadow = origShadow; el.style.transform = origTransform; showToast("Failed to generate image", "error"); });
         }
 
-        // ================= FIREBASE & AUTH LOGIC =================
-        const firebaseConfig = { apiKey: "AIzaSyBCBimkrfs-TGM-TioINkZfmQiBvIBsp1s", authDomain: "atomx-d-project.firebaseapp.com", projectId: "atomx-d-project", storageBucket: "atomx-d-project.appspot.com" };
-        let app, auth, db, storage, googleProvider;
-        try { app = firebase.initializeApp(firebaseConfig); auth = firebase.auth(); db = firebase.firestore(); storage = firebase.storage(); googleProvider = new firebase.auth.GoogleAuthProvider(); try { db.enablePersistence().catch(e=>{}); } catch(e){} } catch(e) {}
-
-        function skipLogin() { document.getElementById('auth-screen').style.display = 'none'; loadData(); }
-        function loginGoogle() {
-            if(!auth) return showToast("No Firebase Config", "error");
-            auth.setPersistence(firebase.auth.Auth.Persistence.LOCAL).then(() => auth.signInWithPopup(googleProvider))
-            .then(res => { state.uid = res.user.uid; document.getElementById('auth-screen').style.display = 'none'; loadCloudSync(); })
-            .catch(e => showToast("Google Login Failed", "error"));
-        }
-        function confirmLogout() { showConfirm("Log Out", "Log out and clear all local data?", () => { if(auth) auth.signOut(); localStorage.clear(); location.reload(); }); }
-        
-        function loadCloudSync() {
-            if(state.uid && db) {
-                db.collection("stores").doc(state.uid).get().then(snap => {
-                    if(snap.exists) { const d = snap.data(); if(d.data) state.data = d.data; if(d.profile) state.profile = d.profile; }
-                    saveData(); applyGlobalUI();
-                });
-            }
-        }
-
+        // ================= INITIALIZE =================
         window.onload = () => {
-            if(localStorage.getItem('pcaData')) { document.getElementById('auth-screen').style.display = 'none'; loadData(); }
-            else if(auth) {
-                auth.onAuthStateChanged(user => {
-                    if(user) { state.uid = user.uid; document.getElementById('auth-screen').style.display = 'none'; loadCloudSync(); }
-                    else { document.getElementById('auth-screen').style.display = 'flex'; }
-                });
-            } else { document.getElementById('auth-screen').style.display = 'flex'; }
+            loadLocalDataFallback();
         };
 
     </script>
