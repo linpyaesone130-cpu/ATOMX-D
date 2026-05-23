@@ -308,11 +308,88 @@
         input:checked + .slider { background-color: var(--primary); }
         input:checked + .slider:before { transform: translateX(22px); }
 
+        /* ================= SKELETON SHIMMER ================= */
+        @keyframes shimmer {
+            0% { background-position: -400px 0; }
+            100% { background-position: 400px 0; }
+        }
+        .skeleton {
+            background: linear-gradient(90deg, var(--border) 25%, var(--hover) 50%, var(--border) 75%);
+            background-size: 800px 100%;
+            animation: shimmer 1.4s infinite linear;
+            border-radius: 8px;
+        }
+        .skeleton-card { background: var(--card); border-radius: 14px; padding: 16px; margin-bottom: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .skeleton-line { height: 14px; margin-bottom: 10px; }
+        .skeleton-line.short { width: 40%; }
+        .skeleton-line.medium { width: 65%; }
+        .skeleton-line.full { width: 100%; }
+        .skeleton-box { height: 48px; width: 100%; border-radius: 8px; margin-bottom: 10px; }
+
+        /* ================= PULL TO REFRESH ================= */
+        #ptr-indicator {
+            position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-60px);
+            background: var(--card); border: 1px solid var(--border); border-radius: 30px;
+            padding: 8px 18px; font-size: 12px; font-weight: 700; color: var(--text-sec);
+            display: flex; align-items: center; gap: 8px; z-index: 200;
+            box-shadow: var(--shadow); transition: transform 0.3s ease;
+            pointer-events: none;
+        }
+        #ptr-indicator.visible { transform: translateX(-50%) translateY(10px); }
+        #ptr-indicator.releasing { color: var(--primary); }
+        #ptr-spin { transition: transform 0.3s; }
+
+        /* ================= COUNT-UP ANIMATION ================= */
+        .count-up { transition: color 0.3s; }
+
+        /* ================= PROFIT MARGIN BADGE ================= */
+        .margin-badge {
+            display: inline-flex; align-items: center; gap: 3px;
+            font-size: 10px; font-weight: 800; padding: 3px 7px; border-radius: 20px;
+            letter-spacing: 0.3px; flex-shrink: 0;
+        }
+        .margin-badge.good { background: rgba(16,185,129,0.12); color: var(--green); }
+        .margin-badge.ok { background: rgba(24,119,242,0.10); color: var(--primary); }
+        .margin-badge.bad { background: rgba(239,68,68,0.10); color: var(--red); }
+
+        /* ================= BULK IMPORT MODAL ================= */
+        #bulk-drop-zone {
+            border: 2px dashed var(--border); border-radius: 14px; padding: 32px 20px;
+            text-align: center; cursor: pointer; transition: 0.25s; background: var(--bg);
+        }
+        #bulk-drop-zone.drag-over { border-color: var(--primary); background: rgba(24,119,242,0.05); }
+        #bulk-preview-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 14px; }
+        #bulk-preview-table th { background: var(--bg); padding: 8px 10px; font-weight: 800; color: var(--text-sec); text-align: left; }
+        #bulk-preview-table td { padding: 8px 10px; border-bottom: 1px solid var(--border); font-weight: 600; }
+
+        /* ================= LANGUAGE TOGGLE ================= */
+        .lang-toggle {
+            display: flex; align-items: center; gap: 6px;
+            background: var(--bg); border: 1px solid var(--border);
+            border-radius: 20px; padding: 4px 10px; cursor: pointer;
+            font-size: 12px; font-weight: 800; color: var(--text-sec);
+            transition: 0.2s;
+        }
+        .lang-toggle:active { transform: scale(0.95); }
+
+        /* ================= KEYBOARD SHORTCUT HINT ================= */
+        .kbd {
+            display: inline-block; background: var(--bg); border: 1px solid var(--border);
+            border-radius: 5px; padding: 1px 6px; font-size: 10px; font-weight: 700;
+            color: var(--text-sec); font-family: monospace; letter-spacing: 0.5px;
+        }
+
     </style>
 </head>
 <body>
 
     <div id="toast">Message</div>
+
+    <!-- Pull to Refresh Indicator -->
+    <div id="ptr-indicator">
+        <svg id="ptr-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
+        <span id="ptr-text">Pull to Refresh</span>
+    </div>
 
     <header class="header">
         <div class="header-left">
@@ -321,7 +398,13 @@
             </button>
             <span id="ui-store-name" style="font-weight: 800; font-size: 18px; color: var(--primary);">PCA Store</span>
         </div>
-        <div id="header-auth-status" style="font-size:12px; font-weight:700; color:var(--text-sec);"></div>
+        <div style="display:flex; align-items:center; gap:10px;">
+            <button class="lang-toggle" onclick="window.toggleLang()" id="lang-btn" title="Switch Language">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span id="lang-label">EN</span>
+            </button>
+            <div id="header-auth-status" style="font-size:12px; font-weight:700; color:var(--text-sec);"></div>
+        </div>
     </header>
 
     <div class="overlay" id="overlay" onclick="window.toggleSidebar()"></div>
@@ -364,20 +447,28 @@
     <main class="view active" id="view-inventory">
         <div class="title-row">
             <h2 id="inv-game-title">Select Game</h2>
-            <button class="btn" style="background: var(--green);" onclick="window.copyPriceList()">
-                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-            </button>
+            <div style="display:flex; gap:8px;">
+                <button class="btn" style="background: var(--card); color: var(--text-sec); border: 1px solid var(--border);" onclick="window.openBulkModal()" title="Bulk Import CSV">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                </button>
+                <button class="btn" style="background: var(--green);" onclick="window.copyPriceList()">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
+            </div>
         </div>
         
         <div class="search-box">
             <input type="text" id="search-input" placeholder="Search Package or Formula..." oninput="window.renderInventory()">
             <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </div>
+        <div style="text-align:right; margin-top:-14px; margin-bottom:12px;">
+            <span class="kbd">Ctrl</span> <span style="font-size:10px; color:var(--text-sec); font-weight:700;">+</span> <span class="kbd">K</span> <span style="font-size:10px; color:var(--text-sec); font-weight:600;"> to focus search</span>
+        </div>
 
         <div class="stats-grid">
-            <div class="stat-box"><span>Total Cost</span><strong id="stat-cost">0</strong></div>
-            <div class="stat-box"><span>Total Revenue</span><strong id="stat-rev">0</strong></div>
-            <div class="stat-box" style="border-color: var(--primary); background: rgba(24,119,242,0.05);"><span style="color:var(--primary)">Net Profit</span><strong id="stat-prof">0</strong></div>
+            <div class="stat-box"><span id="lbl-total-cost">Total Cost</span><strong id="stat-cost" class="count-up">0</strong></div>
+            <div class="stat-box"><span id="lbl-total-rev">Total Revenue</span><strong id="stat-rev" class="count-up">0</strong></div>
+            <div class="stat-box" style="border-color: var(--primary); background: rgba(24,119,242,0.05);"><span style="color:var(--primary)" id="lbl-net-profit">Net Profit</span><strong id="stat-prof" class="count-up">0</strong></div>
         </div>
 
         <div id="inv-mobile-container"></div>
@@ -433,11 +524,14 @@
                     <label>Store Logo (optional)</label>
                     <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
                         <img id="v-logo-preview" src="" style="display:none; width:48px; height:48px; border-radius:10px; object-fit:cover; border:2px solid var(--border);">
-                        <label style="flex:1; background:var(--bg); border:1.5px dashed var(--border); border-radius:10px; padding:10px; text-align:center; cursor:pointer; font-size:13px; font-weight:700; color:var(--text-sec);">
-                            📁 Upload Logo
+                        <label style="flex:1; background:var(--bg); border:1.5px dashed var(--border); border-radius:10px; padding:10px; text-align:center; cursor:pointer; font-size:13px; font-weight:700; color:var(--text-sec); display:flex; align-items:center; justify-content:center; gap:7px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Upload Logo
                             <input type="file" accept="image/*" style="display:none;" onchange="window.uploadVoucherLogo(this)">
                         </label>
-                        <button onclick="window.clearVoucherLogo()" style="color:var(--red); font-size:12px; font-weight:700; padding:6px 10px; background:rgba(239,68,68,0.1); border-radius:8px;">✕ Clear</button>
+                        <button onclick="window.clearVoucherLogo()" style="color:var(--red); font-size:12px; font-weight:700; padding:6px 10px; background:rgba(239,68,68,0.1); border-radius:8px; display:flex; align-items:center; gap:4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -464,7 +558,7 @@
                     <div class="receipt-row"><span>Customer</span> <span id="vo-name">-</span></div>
                     <div class="receipt-row"><span>Game / ID</span> <span id="vo-game">-</span></div>
                     <div class="receipt-row"><span>Package</span> <span id="vo-item">-</span></div>
-                    <div class="receipt-row"><span>Status</span> <span style="color:#16a34a; font-weight:800;">✓ Successful</span></div>
+                    <div class="receipt-row"><span>Status</span> <span style="color:#16a34a; font-weight:800; display:inline-flex; align-items:center; gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Successful</span></div>
                 </div>
                 <div class="receipt-total">
                     <span class="receipt-total-label">Total Paid</span>
@@ -477,8 +571,14 @@
                 </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:16px;">
-                <button class="btn" style="flex:1; background:var(--primary);" onclick="window.printVoucher()">🖨️ Print</button>
-                <button class="btn" style="flex:1; background:var(--green);" onclick="window.downloadImage('print-v', 'Voucher')">⬇️ Download</button>
+                <button class="btn" style="flex:1; background:var(--primary);" onclick="window.printVoucher()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print
+                </button>
+                <button class="btn" style="flex:1; background:var(--green);" onclick="window.downloadImage('print-v', 'Voucher')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                </button>
             </div>
         </div>
 
@@ -492,11 +592,14 @@
                     <label>Store Logo (optional)</label>
                     <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
                         <img id="c-logo-preview" src="" style="display:none; width:48px; height:48px; border-radius:10px; object-fit:cover; border:2px solid var(--border);">
-                        <label style="flex:1; background:var(--bg); border:1.5px dashed var(--border); border-radius:10px; padding:10px; text-align:center; cursor:pointer; font-size:13px; font-weight:700; color:var(--text-sec);">
-                            📁 Upload Logo
+                        <label style="flex:1; background:var(--bg); border:1.5px dashed var(--border); border-radius:10px; padding:10px; text-align:center; cursor:pointer; font-size:13px; font-weight:700; color:var(--text-sec); display:flex; align-items:center; justify-content:center; gap:7px;">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                            Upload Logo
                             <input type="file" accept="image/*" style="display:none;" onchange="window.uploadCouponLogo(this)">
                         </label>
-                        <button onclick="window.clearCouponLogo()" style="color:var(--red); font-size:12px; font-weight:700; padding:6px 10px; background:rgba(239,68,68,0.1); border-radius:8px;">✕ Clear</button>
+                        <button onclick="window.clearCouponLogo()" style="color:var(--red); font-size:12px; font-weight:700; padding:6px 10px; background:rgba(239,68,68,0.1); border-radius:8px; display:flex; align-items:center; gap:4px;">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                        </button>
                     </div>
                 </div>
             </div>
@@ -522,8 +625,14 @@
                 </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:16px;">
-                <button class="btn" style="flex:1; background:var(--primary);" onclick="window.printVoucher('print-c')">🖨️ Print</button>
-                <button class="btn" style="flex:1; background:#ff8c00;" onclick="window.downloadImage('print-c', 'Coupon')">⬇️ Download</button>
+                <button class="btn" style="flex:1; background:var(--primary);" onclick="window.printVoucher('print-c')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print
+                </button>
+                <button class="btn" style="flex:1; background:#ff8c00;" onclick="window.downloadImage('print-c', 'Coupon')">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Download
+                </button>
             </div>
         </div>
     </main>
@@ -543,8 +652,19 @@
         </div>
 
         <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
-            <span style="font-weight: 700;">Dark Mode</span>
+            <span style="font-weight: 700;" id="lbl-dark-mode">Dark Mode</span>
             <label class="toggle-switch"><input type="checkbox" id="theme-toggle" onchange="window.toggleTheme()"><span class="slider"></span></label>
+        </div>
+
+        <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+            <div>
+                <span style="font-weight: 700;" id="lbl-language">Language</span>
+                <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:2px;" id="lbl-language-sub">Switch between English and Myanmar</div>
+            </div>
+            <button class="lang-toggle" onclick="window.toggleLang()" style="padding: 8px 16px;">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                <span id="lang-label-settings">EN / မြန်မာ</span>
+            </button>
         </div>
 
         <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
@@ -556,6 +676,26 @@
             <h3 style="font-size: 15px; font-weight: 700; margin-bottom:10px;">Interface Font Size</h3>
             <input type="range" id="font-slider" min="12" max="20" value="14" oninput="window.changeFontSize(this.value)" style="width:100%;">
             <span id="font-value" style="font-size:12px; font-weight:700; color:var(--text-sec)">14px</span>
+        </div>
+
+        <!-- PUBLISH TO STORE -->
+        <div class="card" style="border-left: 4px solid var(--green);">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div>
+                    <div style="font-weight:900; font-size:16px;">🚀 Publish to Store</div>
+                    <div style="font-size:12px; color:var(--text-sec); font-weight:600; margin-top:3px;">Sell price ကိုသာ store.html သို့ push မယ်</div>
+                </div>
+                <button class="btn" id="publish-btn" onclick="window.openPublishAuth()" style="background:var(--green); min-width:100px;">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+                    Publish
+                </button>
+            </div>
+            <div id="publish-status" style="display:none; font-size:12px; font-weight:700; padding:10px 14px; border-radius:10px; background:var(--bg); border:1px solid var(--border);"></div>
+            <div style="margin-top:10px;">
+                <div style="font-size:11px; font-weight:700; color:var(--text-sec); margin-bottom:6px; text-transform:uppercase; letter-spacing:0.5px;">Games ပါမည်:</div>
+                <div id="publish-preview" style="display:flex; flex-wrap:wrap; gap:6px;"></div>
+            </div>
+            <div id="publish-last" style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:8px;"></div>
         </div>
 
         <div class="card">
@@ -643,6 +783,99 @@
         </div>
     </div>
 
+    <!-- BULK IMPORT MODAL -->
+    <div class="modal" id="modal-bulk">
+        <div class="modal-content" style="max-width:480px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div>
+                    <h3 id="bulk-modal-title" style="font-size:17px; font-weight:800;">Bulk Import CSV</h3>
+                    <div style="font-size:12px; color:var(--text-sec); margin-top:3px; font-weight:600;" id="bulk-modal-sub">Upload a CSV with: Name, Formula, CostRS, CostMMK, Sell</div>
+                </div>
+                <button onclick="window.closeModal('modal-bulk')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+
+            <!-- Download Template -->
+            <button onclick="window.downloadCSVTemplate()" style="width:100%; background:var(--bg); border:1px solid var(--border); border-radius:10px; padding:10px 14px; font-size:13px; font-weight:700; color:var(--primary); display:flex; align-items:center; justify-content:center; gap:8px; margin-bottom:16px; cursor:pointer;">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                <span id="bulk-download-tpl">Download Template CSV</span>
+            </button>
+
+            <!-- Drop zone -->
+            <div id="bulk-drop-zone" onclick="document.getElementById('bulk-csv-file').click()" ondragover="window.onBulkDragOver(event)" ondragleave="window.onBulkDragLeave(event)" ondrop="window.onBulkDrop(event)">
+                <svg width="36" height="36" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" style="color:var(--text-sec); margin:0 auto 10px;"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                <div style="font-weight:700; color:var(--text-sec); font-size:13px;" id="bulk-drop-text">Click or drag & drop CSV file here</div>
+                <input type="file" id="bulk-csv-file" accept=".csv" style="display:none;" onchange="window.parseBulkCSV(this.files[0])">
+            </div>
+
+            <!-- Preview -->
+            <div id="bulk-preview-wrap" style="display:none; margin-top:14px; max-height:200px; overflow-y:auto; border-radius:10px; border:1px solid var(--border);">
+                <table id="bulk-preview-table">
+                    <thead><tr><th>Name</th><th>Formula</th><th>Cost(MMK)</th><th>Sell</th></tr></thead>
+                    <tbody id="bulk-preview-body"></tbody>
+                </table>
+            </div>
+            <div id="bulk-preview-count" style="font-size:12px; font-weight:700; color:var(--text-sec); margin-top:8px; display:none;"></div>
+
+            <button id="bulk-import-btn" class="btn" style="width:100%; margin-top:16px; display:none;" onclick="window.commitBulkImport()">
+                <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <span id="bulk-import-btn-label">Import Items</span>
+            </button>
+        </div>
+    </div>
+
+    <!-- PUBLISH ADMIN AUTH MODAL -->
+    <div class="modal" id="modal-publish-auth">
+        <div class="modal-content" style="max-width:340px; text-align:center;">
+            <div style="width:56px; height:56px; background:linear-gradient(135deg,#10b981,#059669); border-radius:18px; margin:0 auto 16px; display:flex; align-items:center; justify-content:center;">
+                <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+            </div>
+            <h3 style="font-size:18px; font-weight:900; margin-bottom:4px;">Admin Verify</h3>
+            <p style="font-size:12px; color:var(--text-sec); font-weight:600; margin-bottom:20px;">Store သို့ publish လုပ်ရန် admin password လိုအပ်သည်</p>
+            <div class="input-group" style="text-align:left;">
+                <label>Username</label>
+                <input type="text" class="input-field" id="pub-username" placeholder="e.g. PCA28" autocomplete="off">
+            </div>
+            <div class="input-group" style="text-align:left; position:relative;">
+                <label>Password</label>
+                <input type="password" class="input-field" id="pub-password" placeholder="Enter password" autocomplete="off" onkeydown="if(event.key==='Enter') window.verifyPublishAuth()">
+                <button onclick="(function(){var i=document.getElementById('pub-password');i.type=i.type==='password'?'text':'password';})()" style="position:absolute; right:14px; bottom:14px; background:none; border:none; cursor:pointer; color:var(--text-sec);">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>
+                </button>
+            </div>
+            <div id="pub-auth-err" style="font-size:12px; color:var(--red); font-weight:700; min-height:18px; margin-bottom:10px;"></div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn" style="flex:1; background:var(--bg); color:var(--text); border:1px solid var(--border);" onclick="window.closeModal('modal-publish-auth')">Cancel</button>
+                <button class="btn" id="pub-auth-btn" style="flex:1; background:var(--green);" onclick="window.verifyPublishAuth()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    Confirm
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- PRICE CHANGE LOG MODAL -->
+    <div class="modal" id="modal-price-log" style="z-index:10000;">
+        <div class="modal-content" style="max-width:460px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <div>
+                    <h3 style="font-size:17px; font-weight:900;">📋 Price Change Log</h3>
+                    <div style="font-size:12px; color:var(--text-sec); font-weight:600; margin-top:2px;">Complete audit trail of price edits</div>
+                </div>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <button onclick="window.clearPriceLog()" style="font-size:12px; font-weight:700; color:var(--red); background:rgba(239,68,68,0.1); padding:6px 10px; border-radius:8px;">Clear</button>
+                    <button onclick="window.closeModal('modal-price-log')">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                    </button>
+                </div>
+            </div>
+            <div id="price-log-container" style="max-height:400px; overflow-y:auto;">
+                <div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:600;">No price changes recorded yet.</div>
+            </div>
+        </div>
+    </div>
+
     <script>
         let state = {
             viewMode: 'mobile', theme: 'light', activeGame: '', fontSize: 14,
@@ -670,14 +903,26 @@
         window.closeConfirm = function() { window.closeModal('modal-confirm'); confirmActionCallback = null; };
 
         // ================= FIREBASE CONFIG & AUTH LOGIC =================
+        // Primary DB — manage/auth data (atomx)
         const firebaseConfig = {
             apiKey: "AIzaSyBCBimkrfs-TGM-TioINkZfmQiBvIBsp1s",
             authDomain: "atomx-d-project.firebaseapp.com",
             projectId: "atomx-d-project",
             storageBucket: "atomx-d-project.appspot.com"
         };
+
+        // Store DB — dahlia store (for publishing games to store.html)
+        const storeFirebaseConfig = {
+            apiKey: "AIzaSyCRq3M1hclmBnqClfQrmv8WGE6-hth0Zr0",
+            authDomain: "dahliagametopupstore-9d3fd.firebaseapp.com",
+            projectId: "dahliagametopupstore-9d3fd",
+            storageBucket: "dahliagametopupstore-9d3fd.appspot.com",
+            messagingSenderId: "110787045948",
+            appId: "1:110787045948:web:e46ed650774c0f6128f139"
+        };
         
         let app, auth, db, storage, googleProvider;
+        let storeApp, storeDb; // Second Firebase app for store sync
         try {
             app = firebase.initializeApp(firebaseConfig);
             auth = firebase.auth();
@@ -686,6 +931,12 @@
             googleProvider = new firebase.auth.GoogleAuthProvider();
             try { db.enablePersistence().catch(e=>{}); } catch(e){}
         } catch(e) { console.log("Firebase Load Fallback Active."); }
+
+        // Init store Firebase (second app)
+        try {
+            storeApp = firebase.initializeApp(storeFirebaseConfig, "storeApp");
+            storeDb = storeApp.firestore();
+        } catch(e) { console.log("Store Firebase init failed:", e); }
 
         window.onload = () => {
             loadLocalDataFallback(); // Make sure offline works 100% instantly
@@ -868,6 +1119,130 @@
         window.changeFontSize = function(val) { state.fontSize = val; document.documentElement.style.setProperty('--font-size', val + 'px'); document.getElementById('font-slider').value = val; document.getElementById('font-value').innerText = val + "px"; localStorage.setItem('pcaFontSize', val); };
         window.saveSettings = function() { state.profile.name = document.getElementById('set-name').value || "PCA Store"; state.profile.tgToken = document.getElementById('set-tg-token').value.trim(); state.profile.tgChatId = document.getElementById('set-tg-chat').value.trim(); saveDataToCloud(); applyGlobalUI(); window.showToast("Settings Configured!"); };
 
+        // ================= PUBLISH TO STORE =================
+        // Admin credentials mirror admin.html
+        const _PUB_ADMINS = {'PCA28':1,'Raycod28':1,'pca28':1,'raycod28':1};
+        const _PUB_PW = atob('UENBMjgwODIz');
+        let _pubAuthorized = false;
+
+        window.updatePublishPreview = function() {
+            const preview = document.getElementById('publish-preview');
+            const lastEl  = document.getElementById('publish-last');
+            if (!preview) return;
+            const games = Object.keys(state.data);
+            if (games.length === 0) {
+                preview.innerHTML = '<span style="font-size:12px; color:var(--text-sec); font-weight:600;">No games yet</span>';
+                return;
+            }
+            preview.innerHTML = games.map(g => {
+                const items = (state.data[g].items || []).filter(i => parseFloat(i.sell) > 0).length;
+                const img   = state.data[g].image || '';
+                return `<div style="display:flex; align-items:center; gap:6px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:6px 10px;">
+                    ${img && !img.startsWith('data:image/svg') ? `<img src="${img}" style="width:20px; height:20px; border-radius:5px; object-fit:cover;">` : '🎮'}
+                    <span style="font-size:12px; font-weight:800;">${g}</span>
+                    <span style="font-size:10px; color:var(--text-sec); font-weight:700;">${items} pkg</span>
+                </div>`;
+            }).join('');
+            const last = localStorage.getItem('pcaLastPublish');
+            if (lastEl) lastEl.innerHTML = last ? `🕒 Last published: ${last}` : '';
+        };
+
+        window.openPublishAuth = function() {
+            // If already authorized this session, skip login
+            if (_pubAuthorized) { window.publishToStore(); return; }
+            document.getElementById('pub-username').value = '';
+            document.getElementById('pub-password').value = '';
+            document.getElementById('pub-auth-err').textContent = '';
+            window.openModal('modal-publish-auth');
+            setTimeout(() => document.getElementById('pub-username').focus(), 300);
+        };
+
+        window.verifyPublishAuth = function() {
+            const user = document.getElementById('pub-username').value.trim();
+            const pw   = document.getElementById('pub-password').value;
+            const err  = document.getElementById('pub-auth-err');
+            const btn  = document.getElementById('pub-auth-btn');
+
+            if (!user || !pw) { err.textContent = 'Username နှင့် password ထည့်ပါ'; return; }
+            if (_PUB_ADMINS[user] === undefined) { err.textContent = 'Username မမှန်ပါ'; return; }
+            if (pw !== _PUB_PW) { err.textContent = 'Password မှားပါသည်'; return; }
+
+            _pubAuthorized = true;
+            btn.innerHTML = '✅ Verified';
+            window.closeModal('modal-publish-auth');
+            setTimeout(() => window.publishToStore(), 300);
+        };
+
+        window.publishToStore = async function() {
+            if (!storeDb) { window.showToast('Store DB မချိတ်မိပါ', 'error'); return; }
+            const games = Object.keys(state.data);
+            if (games.length === 0) { window.showToast('Game မရှိသေးပါ', 'error'); return; }
+
+            const btn      = document.getElementById('publish-btn');
+            const statusEl = document.getElementById('publish-status');
+            btn.disabled   = true;
+            btn.innerHTML  = '<span style="font-size:13px;font-weight:700;">Publishing...</span>';
+            statusEl.style.display = 'block';
+            statusEl.style.color   = 'var(--text-sec)';
+            statusEl.innerHTML     = '⏳ Firestore သို့ upload လုပ်နေသည်...';
+
+            let ok = 0, fail = 0;
+
+            for (const gameName of games) {
+                const gData = state.data[gameName];
+                const items = gData.items || [];
+
+                // SELL PRICE ONLY — cost/profit data publish မလုပ်
+                const packages = items
+                    .filter(itm => parseFloat(itm.sell) > 0)
+                    .map(itm => ({
+                        d: itm.name + (itm.combo ? ' (' + itm.combo + ')' : ''),
+                        p: parseInt(itm.sell) || 0
+                        // costMMK, costRS ထည့်မသွားပါ
+                    }));
+
+                const gameDoc = {
+                    n:           gameName,
+                    e:           '🎮',
+                    c:           '#FF8C00',
+                    cur:         'Kyats',
+                    ci:          '💎',
+                    pl:          'Mobile',
+                    img:         (gData.image && !gData.image.startsWith('data:image/svg')) ? gData.image : '',
+                    pr:          packages,
+                    regions:     [],
+                    showSid:     false,
+                    bannerImg:   '',
+                    _src:        'manage',
+                    _updatedAt:  new Date().toISOString()
+                };
+
+                try {
+                    await storeDb.collection('games').doc(gameName).set(gameDoc, { merge: true });
+                    ok++;
+                    statusEl.innerHTML = `⏳ ${ok}/${games.length} published...`;
+                } catch(e) {
+                    fail++;
+                    console.error('Publish failed:', gameName, e);
+                }
+            }
+
+            btn.disabled  = false;
+            btn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 2L11 13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg> Publish`;
+
+            if (fail === 0) {
+                statusEl.style.color = 'var(--green)';
+                statusEl.innerHTML   = `✅ ${ok} game${ok>1?'s':''} published! Store.html မှာ live ဖြစ်ပြီ။`;
+                window.showToast(`${ok} games published!`);
+                localStorage.setItem('pcaLastPublish', new Date().toLocaleString());
+                window.updatePublishPreview();
+            } else {
+                statusEl.style.color = 'var(--red)';
+                statusEl.innerHTML   = `⚠️ ${ok} success, ${fail} failed. Firestore rules စစ်ကြည့်ပါ။`;
+                window.showToast('Publish partially failed', 'error');
+            }
+        };
+
         // ================= SIDEBAR =================
         window.toggleSidebar = function() { document.getElementById('sidebar').classList.toggle('open'); document.getElementById('overlay').classList.toggle('show'); };
         window.switchView = function(v) {
@@ -875,6 +1250,7 @@
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); if(document.getElementById('nav-' + v)) document.getElementById('nav-' + v).classList.add('active');
             document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show');
             if(v === 'inventory') window.renderInventory(); if(v === 'sales') window.renderSales();
+            if(v === 'settings') window.updatePublishPreview();
         };
 
         // ================= GAME MANAGMENT =================
@@ -928,7 +1304,7 @@
 
             mobileCon.innerHTML = ''; desktopBody.innerHTML = '';
             
-            if(!state.activeGame || !state.data[state.activeGame]) { titleEl.innerText = "No Data Found"; return; }
+            if(!state.activeGame || !state.data[state.activeGame]) { titleEl.innerText = t('no_data'); return; }
             titleEl.innerText = state.activeGame;
 
             const gData = state.data[state.activeGame];
@@ -961,20 +1337,24 @@
                                 <span style="font-weight:800; font-size:15px; cursor:pointer; flex:1; min-width:0; display:flex; align-items:center; flex-wrap:wrap; gap:6px;" onclick="window.openItemModal(${idx})">
                                     <span style="background:var(--bg); padding:4px 10px; border-radius:6px; font-size:13px; color:var(--text-sec); border:1px solid var(--border); flex-shrink:0;">${idx+1}</span>
                                     <span style="word-break:break-word;">${itm.name}</span> ${comboBadgeMobile}
+                                    ${getMarginBadge(sell, costMMK)}
                                 </span>
-                                <button onclick="window.recordSale(${idx}, event)" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 12px; border-radius:8px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px; flex-shrink:0;">${svgCart} Sell</button>
+                                <button onclick="window.recordSale(${idx}, event)" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 12px; border-radius:8px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px; flex-shrink:0;">
+                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                                    ${t('sell_btn')}
+                                </button>
                             </div>
                             <div style="display:flex; gap:8px;" onclick="window.openItemModal(${idx})">
                                 <div style="flex:1; background:var(--bg); padding:10px 12px; border-radius:8px; min-width:0;">
-                                    <div style="font-size:10px; font-weight:700; color:var(--text-sec); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Cost</div>
+                                    <div style="font-size:10px; font-weight:700; color:var(--text-sec); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">${t('cost')}</div>
                                     <div style="font-size:13px; font-weight:800; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${costString}</div>
                                 </div>
                                 <div style="flex:1; background:var(--bg); padding:10px 12px; border-radius:8px; min-width:0;">
-                                    <div style="font-size:10px; font-weight:700; color:var(--text-sec); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Sell</div>
+                                    <div style="font-size:10px; font-weight:700; color:var(--text-sec); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">${t('sell')}</div>
                                     <div style="font-size:13px; font-weight:800; color:var(--primary);">${sell} KS</div>
                                 </div>
                             </div>
-                            <div style="display:flex; justify-content:space-between; background:var(--bg); padding:12px; border-radius:8px; align-items:center;" onclick="window.openItemModal(${idx})"><span style="font-size:12px; font-weight:700; color:var(--text-sec); text-transform:uppercase;">Net Profit</span><strong style="color:${color}; font-size:16px;">${sign}${profit} KS</strong></div>
+                            <div style="display:flex; justify-content:space-between; background:var(--bg); padding:12px; border-radius:8px; align-items:center;" onclick="window.openItemModal(${idx})"><span style="font-size:12px; font-weight:700; color:var(--text-sec); text-transform:uppercase;">${t('net_profit')}</span><strong style="color:${color}; font-size:16px;">${sign}${profit} KS</strong></div>
                         </div>`;
                     
                     desktopBody.innerHTML += `<tr>
@@ -990,15 +1370,22 @@
             
             if(!itemsFound) {
                 if(query) {
-                    mobileCon.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-sec); font-weight:bold;">No results found for "${query}"</div>`;
-                    desktopBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 40px; color: var(--text-sec); font-weight:bold;">No results found for "${query}"</td></tr>`;
+                    mobileCon.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-sec); font-weight:bold;">${t('no_search')} "${query}"</div>`;
+                    desktopBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 40px; color: var(--text-sec); font-weight:bold;">${t('no_search')} "${query}"</td></tr>`;
                 } else {
-                    mobileCon.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-sec); font-weight:bold;">No packages added yet. Click '+' to add one.</div>`;
-                    desktopBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 40px; color: var(--text-sec); font-weight:bold;">No packages added yet. Click '+' to add one.</td></tr>`;
+                    mobileCon.innerHTML = `<div style="text-align:center; padding: 40px; color: var(--text-sec); font-weight:bold;">${t('no_items')}</div>`;
+                    desktopBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding: 40px; color: var(--text-sec); font-weight:bold;">${t('no_items')}</td></tr>`;
                 }
             }
 
-            document.getElementById('stat-cost').innerText = tc + " KS"; document.getElementById('stat-rev').innerText = tr + " KS"; document.getElementById('stat-prof').innerText = (tr-tc) + " KS"; document.getElementById('stat-prof').style.color = (tr-tc) < 0 ? 'var(--red)' : 'var(--primary)';
+            const statCost = document.getElementById('stat-cost');
+            const statRev = document.getElementById('stat-rev');
+            const statProf = document.getElementById('stat-prof');
+            const netP = tr - tc;
+            animateCountUp(statCost, tc);
+            animateCountUp(statRev, tr);
+            animateCountUp(statProf, netP);
+            statProf.style.color = netP < 0 ? 'var(--red)' : 'var(--primary)';
         };
 
         window.openItemModal = function(idx = -1) {
@@ -1034,7 +1421,7 @@
             const con = document.getElementById('sales-list-container'); if(!con) return; con.innerHTML = '';
             
             if(todayItems.length === 0) {
-                con.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:600;">No sales recorded today.</div>`;
+                con.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:600;">${t('no_sales')}</div>`;
             } else {
                 todayItems.slice().reverse().forEach(s => {
                     profit += s.profit; let color = s.profit < 0 ? 'var(--red)' : 'var(--green)'; let sign = s.profit <= 0 ? '' : '+';
@@ -1044,7 +1431,10 @@
                     </div>`;
                 });
             }
-            document.getElementById('sales-total-items').innerText = todayItems.length; document.getElementById('sales-total-profit').innerText = profit + " KS"; document.getElementById('sales-total-profit').style.color = profit < 0 ? 'var(--red)' : 'var(--text)';
+            const itemsEl = document.getElementById('sales-total-items');
+            const profitEl = document.getElementById('sales-total-profit');
+            if(itemsEl) animateCountUp(itemsEl, todayItems.length, '');
+            if(profitEl) { animateCountUp(profitEl, profit); profitEl.style.color = profit < 0 ? 'var(--red)' : 'var(--text)'; }
         };
 
         window.confirmClearSales = function() { window.showConfirm("Clear Sales", "Reset daily transaction history for today?", () => { state.sales = state.sales.filter(s => s.date !== new Date().toLocaleDateString()); saveDataToCloud(); window.renderSales(); window.showToast("Cleared"); }); };
@@ -1166,6 +1556,300 @@
                 }, 'image/png');
             }).catch(()=> { el.style.boxShadow = origShadow; el.style.transform = origTransform; window.showToast("Failed to generate image", "error"); });
         };
+
+        // ================= LANGUAGE SYSTEM =================
+        const LANG = {
+            en: {
+                menu_inventory: "Game Grid", menu_sales: "Daily Sales", menu_vc: "Voucher & Coupon", menu_settings: "Settings",
+                games_category: "GAMES CATEGORY", add_new_game: "Add New Game",
+                search_placeholder: "Search Package or Formula...",
+                lbl_total_cost: "TOTAL COST", lbl_total_rev: "TOTAL REVENUE", lbl_net_profit: "NET PROFIT",
+                no_data: "No Data Found", no_items: "No packages added yet. Click '+' to add one.",
+                no_search: "No results found for",
+                daily_sales: "Daily Sales", todays_profit: "TODAY'S PROFIT", items_sold: "ITEMS SOLD",
+                no_sales: "No sales recorded today.",
+                vc_title: "Voucher & Coupon", tab_receipt: "Receipt Voucher", tab_coupon: "Gift Coupon",
+                settings_title: "Settings", dark_mode: "Dark Mode", desktop_view: "Desktop View (Table Layout)",
+                font_size: "Interface Font Size", store_info: "Store Information",
+                tg_setup: "Telegram Bot Setup", save_config: "Save Configuration",
+                lbl_language: "Language", lbl_language_sub: "Switch between English and Myanmar",
+                cost: "Cost", sell: "Sell", net_profit: "Net Profit", sell_btn: "Sell",
+                bulk_title: "Bulk Import CSV", bulk_sub: "Upload a CSV with: Name, Formula, CostRS, CostMMK, Sell",
+                bulk_drop: "Click or drag & drop CSV file here", bulk_download_tpl: "Download Template CSV",
+                bulk_import_btn: "Import Items", bulk_count: "items ready to import",
+            },
+            my: {
+                menu_inventory: "ဂိမ်းဂရစ်", menu_sales: "နေ့စဉ်အရောင်း", menu_vc: "ဘောင်ချာ နှင့် ကူပွန်", menu_settings: "ဆက်တင်",
+                games_category: "ဂိမ်းအမျိုးအစား", add_new_game: "ဂိမ်းသစ်ထည့်ရန်",
+                search_placeholder: "ပက်ကေ့ဂျ် သို့ ဖော်မြူလာ ရှာပါ...",
+                lbl_total_cost: "စုစုပေါင်းကုန်ကျ", lbl_total_rev: "စုစုပေါင်းဝင်ငွေ", lbl_net_profit: "အမြတ်ငွေ",
+                no_data: "ဒေတာမတွေ့ပါ", no_items: "ပက်ကေ့ဂျ်မရှိသေးပါ။ '+' နှိပ်ပါ။",
+                no_search: "ရှာမတွေ့ပါ -",
+                daily_sales: "နေ့စဉ်အရောင်း", todays_profit: "ယနေ့အမြတ်", items_sold: "ရောင်းသောပစ္စည်း",
+                no_sales: "ယနေ့အရောင်းမှတ်တမ်းမရှိသေးပါ။",
+                vc_title: "ဘောင်ချာ နှင့် ကူပွန်", tab_receipt: "ဘောင်ချာ", tab_coupon: "ကူပွန်",
+                settings_title: "ဆက်တင်", dark_mode: "အမှောင်မုဒ်", desktop_view: "ဒက်စတော့မြင်ကွင်း",
+                font_size: "ဖောင့်အရွယ်", store_info: "ဆိုင်အချက်အလက်",
+                tg_setup: "Telegram Bot ဆက်တင်", save_config: "သိမ်းဆည်းရန်",
+                lbl_language: "ဘာသာစကား", lbl_language_sub: "မြန်မာ / အင်္ဂလိပ် ပြောင်းရန်",
+                cost: "ကုန်ကျ", sell: "ရောင်းဈေး", net_profit: "အမြတ်", sell_btn: "ရောင်း",
+                bulk_title: "CSV နဲ့ အစုလိုက်ထည့်သွင်း", bulk_sub: "CSV ဖိုင်တွင် Name, Formula, CostRS, CostMMK, Sell ပါရမည်",
+                bulk_drop: "CSV ဖိုင် နှိပ် သို့ ဆွဲချပါ", bulk_download_tpl: "Template CSV ဒေါင်းလုဒ်",
+                bulk_import_btn: "ထည့်သွင်းရန်", bulk_count: "ပုစ္ဆာများ ထည့်သွင်းရန်အဆင်သင့်",
+            }
+        };
+
+        let currentLang = localStorage.getItem('pcaLang') || 'en';
+
+        function t(key) { return LANG[currentLang][key] || LANG['en'][key] || key; }
+
+        function applyLang() {
+            document.getElementById('lang-label').innerText = currentLang === 'en' ? 'EN' : 'မြ';
+            // Nav
+            const mi = document.querySelectorAll('.menu-item');
+            if(mi[0]) mi[0].childNodes[mi[0].childNodes.length-1].textContent = ' ' + t('menu_inventory');
+            if(mi[1]) mi[1].childNodes[mi[1].childNodes.length-1].textContent = ' ' + t('menu_sales');
+            if(mi[2]) mi[2].childNodes[mi[2].childNodes.length-1].textContent = ' ' + t('menu_vc');
+            if(mi[3]) mi[3].childNodes[mi[3].childNodes.length-1].textContent = ' ' + t('menu_settings');
+            // Stats
+            const sc = document.getElementById('lbl-total-cost'); if(sc) sc.innerText = t('lbl_total_cost');
+            const sr = document.getElementById('lbl-total-rev'); if(sr) sr.innerText = t('lbl_total_rev');
+            const sp = document.getElementById('lbl-net-profit'); if(sp) sp.innerText = t('lbl_net_profit');
+            // Search
+            const si = document.getElementById('search-input'); if(si) si.placeholder = t('search_placeholder');
+            // Settings labels
+            const ldm = document.getElementById('lbl-dark-mode'); if(ldm) ldm.innerText = t('dark_mode');
+            const ll = document.getElementById('lbl-language'); if(ll) ll.innerText = t('lbl_language');
+            const lls = document.getElementById('lbl-language-sub'); if(lls) lls.innerText = t('lbl_language_sub');
+            // VC tabs
+            const tv = document.getElementById('tab-v'); if(tv) tv.innerText = t('tab_receipt');
+            const tc = document.getElementById('tab-c'); if(tc) tc.innerText = t('tab_coupon');
+            // Sales
+            const tpi = document.querySelector('#view-sales [style*="TODAY"]'); // dynamic
+            // Bulk
+            const bmt = document.getElementById('bulk-modal-title'); if(bmt) bmt.innerText = t('bulk_title');
+            const bms = document.getElementById('bulk-modal-sub'); if(bms) bms.innerText = t('bulk_sub');
+            const bdt = document.getElementById('bulk-drop-text'); if(bdt) bdt.innerText = t('bulk_drop');
+            const bltpl = document.getElementById('bulk-download-tpl'); if(bltpl) bltpl.innerText = t('bulk_download_tpl');
+            const bibl = document.getElementById('bulk-import-btn-label'); if(bibl) bibl.innerText = t('bulk_import_btn');
+            window.renderInventory();
+            window.renderSales();
+        }
+
+        window.toggleLang = function() {
+            currentLang = currentLang === 'en' ? 'my' : 'en';
+            localStorage.setItem('pcaLang', currentLang);
+            applyLang();
+            window.showToast(currentLang === 'en' ? 'Language: English' : 'ဘာသာ: မြန်မာ');
+        };
+
+        // ================= COUNT-UP ANIMATION =================
+        function animateCountUp(el, targetVal, suffix = ' KS') {
+            const start = 0; const duration = 600;
+            const startTime = performance.now();
+            function step(now) {
+                const progress = Math.min((now - startTime) / duration, 1);
+                const eased = 1 - Math.pow(1 - progress, 3);
+                const current = Math.round(eased * targetVal);
+                el.innerText = current + suffix;
+                if (progress < 1) requestAnimationFrame(step);
+                else el.innerText = targetVal + suffix;
+            }
+            requestAnimationFrame(step);
+        }
+
+        // ================= SKELETON LOADER =================
+        function showSkeletonInventory() {
+            const con = document.getElementById('inv-mobile-container');
+            let html = '';
+            for(let i = 0; i < 4; i++) {
+                html += `<div class="skeleton-card">
+                    <div style="display:flex; justify-content:space-between; margin-bottom:12px;">
+                        <div class="skeleton skeleton-line medium"></div>
+                        <div class="skeleton" style="width:60px; height:32px; border-radius:8px;"></div>
+                    </div>
+                    <div style="display:flex; gap:8px; margin-bottom:12px;">
+                        <div class="skeleton skeleton-box" style="flex:1;"></div>
+                        <div class="skeleton skeleton-box" style="flex:1;"></div>
+                    </div>
+                    <div class="skeleton skeleton-line short"></div>
+                </div>`;
+            }
+            con.innerHTML = html;
+        }
+
+        // ================= KEYBOARD SHORTCUTS =================
+        document.addEventListener('keydown', function(e) {
+            // Ctrl+K / Cmd+K => focus search
+            if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
+                e.preventDefault();
+                const searchEl = document.getElementById('search-input');
+                if (searchEl) {
+                    window.switchView('inventory');
+                    setTimeout(() => { searchEl.focus(); searchEl.select(); }, 100);
+                }
+            }
+            // Escape => close any open modal
+            if (e.key === 'Escape') {
+                document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
+            }
+        });
+
+        // ================= PULL TO REFRESH =================
+        (function() {
+            let startY = 0; let pulling = false; let triggered = false;
+            const THRESHOLD = 90;
+            const indicator = document.getElementById('ptr-indicator');
+            const ptrSpin = document.getElementById('ptr-spin');
+            const ptrText = document.getElementById('ptr-text');
+
+            document.addEventListener('touchstart', e => {
+                const el = document.querySelector('.view.active');
+                if (el && el.scrollTop === 0) { startY = e.touches[0].clientY; pulling = true; triggered = false; }
+            }, { passive: true });
+
+            document.addEventListener('touchmove', e => {
+                if (!pulling) return;
+                const dist = e.touches[0].clientY - startY;
+                if (dist < 10) return;
+                const ratio = Math.min(dist / THRESHOLD, 1);
+                indicator.classList.add('visible');
+                ptrSpin.style.transform = `rotate(${ratio * 360}deg)`;
+                if (dist >= THRESHOLD) {
+                    indicator.classList.add('releasing');
+                    ptrText.innerText = currentLang === 'my' ? 'လွှတ်ပြီး sync လုပ်ရန်' : 'Release to Sync';
+                    triggered = true;
+                } else {
+                    indicator.classList.remove('releasing');
+                    ptrText.innerText = currentLang === 'my' ? 'ဆွဲချ၍ refresh လုပ်ရန်' : 'Pull to Refresh';
+                    triggered = false;
+                }
+            }, { passive: true });
+
+            document.addEventListener('touchend', () => {
+                if (!pulling) return;
+                pulling = false;
+                indicator.classList.remove('visible', 'releasing');
+                ptrText.innerText = currentLang === 'my' ? 'ဆွဲချ၍ refresh လုပ်ရန်' : 'Pull to Refresh';
+                if (triggered) {
+                    triggered = false;
+                    showSkeletonInventory();
+                    setTimeout(() => {
+                        if (auth && state.uid) { syncFromCloud(); }
+                        else { applyGlobalUI(); window.showToast(currentLang === 'my' ? 'Refresh ပြုလုပ်ပြီး' : 'Refreshed!'); }
+                    }, 600);
+                }
+            });
+        })();
+
+        function syncFromCloud() {
+            window.showToast(currentLang === 'my' ? 'Cloud နှင့် sync လုပ်နေသည်...' : 'Syncing...');
+            db.collection("stores").doc(state.uid).get().then(snap => {
+                if(snap.exists) {
+                    let d = snap.data();
+                    state.data = d.data || d.inventory || state.data;
+                    state.profile = d.profile || state.profile;
+                    state.sales = d.salesHistory || state.sales;
+                }
+                saveDataToLocal(); applyGlobalUI();
+                window.showToast(currentLang === 'my' ? 'Sync ပြုလုပ်ပြီး!' : 'Synced!');
+            }).catch(() => {
+                applyGlobalUI();
+                window.showToast(currentLang === 'my' ? 'Offline မုဒ်' : 'Working Offline', 'error');
+            });
+        }
+
+        // ================= PROFIT MARGIN BADGE =================
+        function getMarginBadge(sell, cost) {
+            if (!sell || sell === 0) return '';
+            const margin = Math.round(((sell - cost) / sell) * 100);
+            let cls = margin >= 20 ? 'good' : margin >= 5 ? 'ok' : 'bad';
+            const arrowSvg = margin >= 0
+                ? `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="19" x2="12" y2="5"/><polyline points="5 12 12 5 19 12"/></svg>`
+                : `<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><polyline points="19 12 12 19 5 12"/></svg>`;
+            return `<span class="margin-badge ${cls}">${arrowSvg}${margin}%</span>`;
+        }
+
+        // ================= BULK CSV IMPORT =================
+        let bulkData = [];
+
+        window.openBulkModal = function() {
+            if (!state.activeGame) return window.showToast(currentLang === 'my' ? 'ဂိမ်းတစ်ခုအရင်ရွေးပါ' : 'Select a game first', 'error');
+            bulkData = [];
+            document.getElementById('bulk-preview-wrap').style.display = 'none';
+            document.getElementById('bulk-import-btn').style.display = 'none';
+            document.getElementById('bulk-preview-count').style.display = 'none';
+            document.getElementById('bulk-csv-file').value = '';
+            document.getElementById('bulk-preview-body').innerHTML = '';
+            window.openModal('modal-bulk');
+        };
+
+        window.downloadCSVTemplate = function() {
+            const csv = 'Name,Formula,CostRS,CostMMK,Sell\nWeekly 86 Diamonds,86+10 Bonus,1.2,2400,3000\nMonthly 706 Diamonds,706 Dia,9.5,19000,22000';
+            const a = document.createElement('a');
+            a.href = 'data:text/csv;charset=utf-8,' + encodeURIComponent(csv);
+            a.download = 'pca_import_template.csv'; a.click();
+        };
+
+        window.onBulkDragOver = function(e) { e.preventDefault(); document.getElementById('bulk-drop-zone').classList.add('drag-over'); };
+        window.onBulkDragLeave = function() { document.getElementById('bulk-drop-zone').classList.remove('drag-over'); };
+        window.onBulkDrop = function(e) {
+            e.preventDefault(); document.getElementById('bulk-drop-zone').classList.remove('drag-over');
+            const file = e.dataTransfer.files[0];
+            if (file && file.name.endsWith('.csv')) window.parseBulkCSV(file);
+            else window.showToast('Please upload a .csv file', 'error');
+        };
+
+        window.parseBulkCSV = function(file) {
+            if (!file) return;
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const lines = e.target.result.split('\n').filter(l => l.trim());
+                bulkData = [];
+                const tbody = document.getElementById('bulk-preview-body');
+                tbody.innerHTML = '';
+                for (let i = 1; i < lines.length; i++) {
+                    const cols = lines[i].split(',').map(c => c.trim());
+                    if (!cols[0]) continue;
+                    const item = { name: cols[0] || '', combo: cols[1] || '', costRS: parseFloat(cols[2]) || 0, costMMK: parseFloat(cols[3]) || 0, sell: parseFloat(cols[4]) || 0 };
+                    bulkData.push(item);
+                    const profit = item.sell - item.costMMK;
+                    const color = profit < 0 ? 'var(--red)' : 'var(--green)';
+                    tbody.innerHTML += `<tr>
+                        <td style="font-weight:700;">${item.name}${item.combo ? `<br><span style="font-size:10px;color:var(--text-sec);">${item.combo}</span>` : ''}</td>
+                        <td>${item.costMMK} KS</td>
+                        <td style="font-weight:800; color:${color};">${item.sell} KS</td>
+                    </tr>`;
+                }
+                if (bulkData.length > 0) {
+                    document.getElementById('bulk-preview-wrap').style.display = 'block';
+                    document.getElementById('bulk-import-btn').style.display = 'flex';
+                    const cnt = document.getElementById('bulk-preview-count');
+                    cnt.style.display = 'block';
+                    cnt.innerHTML = `<span style="color:var(--primary); font-weight:800;">${bulkData.length}</span> ${t('bulk_count')}`;
+                } else {
+                    window.showToast('No valid data found in CSV', 'error');
+                }
+            };
+            reader.readAsText(file);
+        };
+
+        window.commitBulkImport = function() {
+            if (!state.activeGame || !bulkData.length) return;
+            if (!state.data[state.activeGame].items) state.data[state.activeGame].items = [];
+            bulkData.forEach(item => state.data[state.activeGame].items.push(item));
+            saveDataToCloud();
+            window.renderInventory();
+            window.closeModal('modal-bulk');
+            window.showToast(`${bulkData.length} items imported!`);
+            bulkData = [];
+        };
+
+        // ================= INIT LANG + APPLY =================
+        window.addEventListener('load', function() {
+            // Small delay to apply lang after DOM is ready
+            setTimeout(() => { applyLang(); }, 100);
+        });
     </script>
 </body>
 </html>
