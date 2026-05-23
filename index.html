@@ -11,6 +11,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-firestore-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
 
     <style>
         /* ================= THEME VARIABLES ================= */
@@ -25,7 +26,7 @@
         }
 
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif; }
-        body { background: var(--bg); color: var(--text); overflow: hidden; height: 100vh; width: 100vw; font-size: var(--font-size); transition: background 0.3s, color 0.3s; }
+        body { background: var(--bg); color: var(--text); overflow: hidden; overflow-x: hidden; height: 100vh; width: 100vw; font-size: var(--font-size); transition: background 0.3s, color 0.3s; }
         input, select, textarea { outline: none; }
         button { cursor: pointer; border: none; background: transparent; color: inherit; display: inline-flex; align-items: center; justify-content: center; gap: 6px;}
         svg { display: block; }
@@ -56,8 +57,8 @@
         .game-item.active { border-left: 4px solid var(--primary); background: var(--hover); }
 
         /* ================= VIEWS ================= */
-        .view { display: none; padding-top: 60px; height: 100vh; overflow-y: auto; padding-bottom: 100px; }
-        .view.active { display: block; padding: 80px 16px 100px; }
+        .view { display: none; padding-top: 60px; height: 100vh; overflow-y: auto; overflow-x: hidden; padding-bottom: 100px; }
+        .view.active { display: block; padding: 80px 16px 100px; overflow-x: hidden; }
         .title-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
         
         .btn { background: var(--primary); color: white; padding: 12px 20px; border-radius: 10px; font-weight: 700; font-size: 14px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: 0.2s;}
@@ -67,233 +68,213 @@
         .input-field { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 15px; font-weight: 600;}
         .card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border);}
 
-        /* ================= SEARCH BAR — SOLID LIQUID STYLE ================= */
+        /* ================= SEARCH BAR — LIQUID MORPHING GLOW ================= */
         .search-box { position: relative; margin-bottom: 20px; width: 100%; }
-        .search-box .search-icon {
-            position: absolute; left: 0; top: 0; bottom: 0;
-            width: 52px; display: flex; align-items: center; justify-content: center;
-            color: white; z-index: 3; pointer-events: none;
-            transition: transform 0.3s cubic-bezier(0.34,1.56,0.64,1);
-        }
-        .search-box {
-            display: flex; align-items: center;
-            background: linear-gradient(135deg, var(--primary) 0%, #0d47a1 100%);
-            border-radius: 50px;
-            padding: 3px;
-            box-shadow: 0 6px 20px rgba(24,119,242,0.35), 0 2px 8px rgba(24,119,242,0.2);
-            transition: box-shadow 0.3s ease, transform 0.2s ease;
-            position: relative;
-            margin-bottom: 20px;
-        }
-        [data-theme="dark"] .search-box {
-            background: linear-gradient(135deg, #ff8c00 0%, #e65c00 100%);
-            box-shadow: 0 6px 20px rgba(255,140,0,0.35), 0 2px 8px rgba(255,140,0,0.2);
-        }
-        .search-box:focus-within {
-            box-shadow: 0 8px 28px rgba(24,119,242,0.5), 0 0 0 3px rgba(24,119,242,0.2);
-            transform: translateY(-1px);
-        }
-        [data-theme="dark"] .search-box:focus-within {
-            box-shadow: 0 8px 28px rgba(255,140,0,0.5), 0 0 0 3px rgba(255,140,0,0.2);
-        }
+        .search-box .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-sec); transition: color 0.3s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1); pointer-events: none; z-index: 2; }
         .search-box input {
-            flex: 1;
-            padding: 13px 18px 13px 52px;
-            border-radius: 46px;
-            border: none;
-            background: var(--card);
-            color: var(--text);
-            font-size: 14px; font-weight: 700;
-            outline: none;
-            width: 100%;
-            transition: background 0.3s;
-        }
-        .search-box input::placeholder { color: var(--text-sec); font-weight: 600; }
-        .search-box input:focus ~ .search-icon { transform: scale(1.15); }
-
-        /* ================= VOUCHER & COUPON — REDESIGNED ================= */
-        /* Tabs */
-        .vc-tabs { display: flex; gap: 0; margin-bottom: 24px; background: var(--bg); border-radius: 16px; padding: 5px; border: 1px solid var(--border); }
-        .vc-tab {
-            flex: 1; padding: 12px; text-align: center; font-weight: 800; font-size: 13px;
-            border-radius: 12px; color: var(--text-sec); cursor: pointer;
-            transition: all 0.3s cubic-bezier(0.34,1.56,0.64,1);
-            letter-spacing: 0.3px; background: transparent; border: none;
-        }
-        .vc-tab.active {
-            background: var(--card);
-            color: var(--primary);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
-            transform: none;
-        }
-        [data-theme="dark"] .vc-tab.active { color: #ff8c00; }
-        .vc-tab:not(.active):active { transform: scale(0.97); }
-
-        /* ── RECEIPT VOUCHER ── */
-        .receipt-card {
-            background: var(--card);
-            border-radius: 24px;
-            overflow: hidden;
-            max-width: 360px;
-            margin: 0 auto;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15), 0 4px 16px rgba(0,0,0,0.08);
-            color: #111;
-            border: 1px solid var(--border);
-        }
-        .receipt-header {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            padding: 28px 28px 44px;
-            text-align: center;
-            position: relative;
-            color: white;
-            overflow: hidden;
-        }
-        .receipt-header::before {
-            content: '';
-            position: absolute;
-            top: -40px; right: -40px;
-            width: 130px; height: 130px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.05);
-        }
-        .receipt-header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px; left: 0; right: 0;
-            height: 28px;
-            background: var(--card);
-            border-radius: 50% 50% 0 0 / 28px 28px 0 0;
-        }
-        .receipt-store-emoji { font-size: 40px; margin-bottom: 8px; display: block; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.3)); }
-        .receipt-store-name { font-size: 22px; font-weight: 900; letter-spacing: 1px; }
-        .receipt-label {
-            font-size: 10px; font-weight: 800; opacity: 0.7;
-            letter-spacing: 4px; text-transform: uppercase; margin-top: 6px; display: block;
-        }
-        .receipt-body { padding: 8px 24px 0; }
-        .receipt-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 12px 0; border-bottom: 1px solid var(--border);
-            font-size: 13px;
-        }
-        .receipt-row:last-of-type { border-bottom: none; }
-        .receipt-row span:first-child {
-            color: var(--text-sec); font-weight: 700; font-size: 11px;
-            text-transform: uppercase; letter-spacing: 0.5px;
-        }
-        .receipt-row span:last-child { font-weight: 800; color: var(--text); font-size: 14px; }
-        .receipt-total {
-            background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
-            margin: 12px 0 0;
-            padding: 18px 24px;
-            display: flex; justify-content: space-between; align-items: center;
-            color: white;
-        }
-        .receipt-total-label { font-size: 11px; font-weight: 800; opacity: 0.8; text-transform: uppercase; letter-spacing: 2px; }
-        .receipt-total-amount { font-size: 24px; font-weight: 900; }
-        /* Receipt perforated edge */
-        .receipt-perforation {
-            display: flex; align-items: center; gap: 0;
-            margin: 0 -1px; overflow: hidden;
-        }
-        .receipt-perforation::before, .receipt-perforation::after {
-            content: '';
-            flex: 1; height: 2px;
-            border-top: 2px dashed var(--border);
-        }
-        .receipt-hole {
-            width: 20px; height: 20px; border-radius: 50%;
-            background: var(--bg); border: 1px solid var(--border);
-            flex-shrink: 0; margin: 0 -10px; z-index: 1;
-        }
-        .receipt-hole-left { margin-left: -10px; }
-        .receipt-hole-right { margin-right: -10px; }
-
-        /* ── COUPON CARD ── */
-        .coupon-card {
-            max-width: 360px;
-            margin: 0 auto;
-            border-radius: 24px;
-            overflow: hidden;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.2);
-            position: relative;
-            background: #fff;
-        }
-        .coupon-top {
-            background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
-            padding: 32px 28px 24px;
-            text-align: center;
-            color: white;
-            position: relative;
-            overflow: hidden;
-        }
-        .coupon-top::before {
-            content: '';
-            position: absolute;
-            top: -50px; left: -50px;
-            width: 180px; height: 180px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.04);
-        }
-        .coupon-top::after {
-            content: '';
-            position: absolute;
-            bottom: -30px; right: -30px;
-            width: 120px; height: 120px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.05);
-        }
-        .coupon-store {
-            font-size: 10px; font-weight: 900;
-            letter-spacing: 5px; opacity: 0.6;
-            text-transform: uppercase; margin-bottom: 14px;
+            width: 100%; padding: 16px 16px 16px 50px;
+            border-radius: 14px; border: 2px solid transparent;
+            background: var(--card); color: var(--text);
+            font-size: 15px; font-weight: 700;
+            transition: border-radius 0.5s cubic-bezier(0.34,1.56,0.64,1),
+                        box-shadow 0.4s ease, border-color 0.3s ease,
+                        background 0.3s ease;
+            box-shadow: var(--shadow);
             position: relative; z-index: 1;
         }
-        .coupon-desc {
-            font-size: 30px; font-weight: 900;
-            line-height: 1.1; position: relative; z-index: 1;
-            text-shadow: 0 4px 12px rgba(0,0,0,0.3);
+        .search-box input:focus {
+            border-color: var(--primary);
+            border-radius: 18px 10px 18px 10px;
+            box-shadow: 0 0 0 4px rgba(24,119,242,0.18),
+                        0 0 20px rgba(24,119,242,0.25),
+                        0 0 40px rgba(24,119,242,0.10),
+                        var(--shadow);
+            outline: none;
+            background: var(--card);
         }
-        .coupon-divider {
-            display: flex; align-items: center;
-            background: var(--bg);
+        [data-theme="dark"] .search-box input:focus {
+            border-color: #ff8c00;
+            border-radius: 18px 10px 18px 10px;
+            box-shadow: 0 0 0 4px rgba(255,140,0,0.18),
+                        0 0 20px rgba(255,140,0,0.28),
+                        0 0 40px rgba(255,140,0,0.12),
+                        var(--shadow);
+        }
+        .search-box input:focus ~ .search-icon { color: var(--primary); transform: translateY(-50%) scale(1.15) rotate(-8deg); }
+        [data-theme="dark"] .search-box input:focus ~ .search-icon { color: #ff8c00; }
+
+        /* ================= VOUCHER & COUPON — COLORFUL & FUN ================= */
+        /* Tabs */
+        .vc-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
+        .vc-tab {
+            flex: 1; padding: 13px; text-align: center; font-weight: 800; font-size: 13px;
+            border-radius: 14px; border: 2px solid var(--border);
+            color: var(--text-sec); cursor: pointer; background: var(--card);
+            transition: all 0.25s cubic-bezier(0.34,1.56,0.64,1);
+            letter-spacing: 0.3px;
+        }
+        .vc-tab.active {
+            background: linear-gradient(135deg, #6c63ff, #f953c6);
+            color: white; border-color: transparent;
+            box-shadow: 0 6px 18px rgba(108,99,255,0.35);
+            transform: translateY(-2px);
+        }
+        .vc-tab:not(.active):active { transform: scale(0.96); }
+
+        /* Receipt Voucher Card - Modern Clean Style */
+        .receipt-card {
+            background: #fff;
+            border-radius: 20px;
+            overflow: visible;
+            max-width: 300px;
+            margin: 0 auto;
+            box-shadow: 0 8px 32px rgba(100,116,139,0.15), 0 2px 8px rgba(0,0,0,0.06);
+            color: #1e293b;
             position: relative;
+        }
+        [data-theme="dark"] .receipt-card { background: #1e293b; color: #f1f5f9; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+
+        /* Green check circle on top */
+        .receipt-header {
+            background: transparent;
+            padding: 28px 20px 8px;
+            text-align: center;
+            position: relative;
+            color: #1e293b;
+            overflow: visible;
+        }
+        [data-theme="dark"] .receipt-header { color: #f1f5f9; }
+        .receipt-header::after { display: none; }
+        .receipt-header::before { display: none; }
+
+        .receipt-check-circle {
+            width: 52px; height: 52px; border-radius: 50%;
+            background: #dcfce7;
+            display: flex; align-items: center; justify-content: center;
+            margin: 0 auto 12px;
+        }
+        .receipt-check-circle svg { color: #16a34a; }
+        .receipt-store-name { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+        [data-theme="dark"] .receipt-store-name { color: #f1f5f9; }
+        .receipt-label { font-size: 12px; font-weight: 500; color: #94a3b8; display: block; margin-bottom: 4px; }
+        .receipt-store-emoji { display: none; }
+
+        /* Divider with notches */
+        .receipt-divider {
+            display: flex; align-items: center;
+            margin: 16px 0 0; position: relative;
+        }
+        .receipt-notch-left {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #f1f5f9; flex-shrink: 0; margin-left: -9px;
+            box-shadow: inset 1px 0 3px rgba(0,0,0,0.06);
+        }
+        .receipt-notch-right {
+            width: 18px; height: 18px; border-radius: 50%;
+            background: #f1f5f9; flex-shrink: 0; margin-right: -9px;
+            box-shadow: inset -1px 0 3px rgba(0,0,0,0.06);
+        }
+        [data-theme="dark"] .receipt-notch-left,
+        [data-theme="dark"] .receipt-notch-right { background: #0f172a; }
+        .receipt-dashed { flex: 1; border-top: 2px dashed #e2e8f0; }
+        [data-theme="dark"] .receipt-dashed { border-color: #334155; }
+
+        .receipt-body { padding: 14px 20px 6px; }
+        .receipt-row {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 7px 0; font-size: 13px;
+        }
+        .receipt-row span:first-child { color: #94a3b8; font-weight: 600; font-size: 12px; }
+        .receipt-row span:last-child { font-weight: 700; color: #1e293b; font-size: 13px; }
+        [data-theme="dark"] .receipt-row span:last-child { color: #f1f5f9; }
+
+        /* Total box at bottom */
+        .receipt-total {
+            background: #f8fafc;
+            margin: 10px 16px 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            display: flex; justify-content: space-between; align-items: center;
+            border: 1px solid #e2e8f0;
+        }
+        [data-theme="dark"] .receipt-total { background: #0f172a; border-color: #334155; }
+        .receipt-total-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
+        .receipt-total-amount { font-size: 17px; font-weight: 900; color: #1877f2; }
+
+        /* hide old perforation holes */
+        .receipt-perforation { display: none; }
+        .receipt-hole { display: none; }
+
+        /* Coupon Card */
+        .coupon-card {
+            background: linear-gradient(135deg, #fc466b 0%, #ff9a44 50%, #f7971e 100%);
+            border-radius: 24px;
+            padding: 0;
+            max-width: 360px;
+            margin: 0 auto;
+            overflow: hidden;
+            box-shadow: 0 10px 40px rgba(252,70,107,0.4);
+            position: relative;
+            color: #fff;
+        }
+        .coupon-top {
+            padding: 28px 28px 20px;
+            text-align: center;
+            position: relative;
+        }
+        .coupon-circles {
+            position: absolute;
+            top: -30px; right: -30px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.12);
+        }
+        .coupon-circles2 {
+            position: absolute;
+            bottom: -20px; left: -20px;
+            width: 80px; height: 80px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.10);
+        }
+        .coupon-store { font-size: 11px; font-weight: 900; letter-spacing: 3px; opacity: 0.85; text-transform: uppercase; margin-bottom: 8px; }
+        .coupon-desc { font-size: 28px; font-weight: 900; line-height: 1.1; text-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .coupon-divider {
+            display: flex; align-items: center; margin: 0 -1px;
+            position: relative;
+        }
+        .coupon-divider::before, .coupon-divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            border-top: 2px dashed rgba(255,255,255,0.4);
         }
         .coupon-notch-left, .coupon-notch-right {
             width: 28px; height: 28px; border-radius: 50%;
-            background: var(--bg);
+            background: #f4f6f8;
             flex-shrink: 0;
+            margin: 0 -1px;
         }
-        .coupon-notch-left { margin-left: -14px; border-right: 1px solid var(--border); }
-        .coupon-notch-right { margin-right: -14px; border-left: 1px solid var(--border); }
-        .coupon-dashed-line {
-            flex: 1; height: 2px;
-            background: repeating-linear-gradient(to right, var(--border) 0, var(--border) 8px, transparent 8px, transparent 16px);
-        }
-        .coupon-bottom {
-            background: var(--card);
-            padding: 20px 28px 28px;
-            text-align: center;
-        }
+        [data-theme="dark"] .coupon-notch-left, [data-theme="dark"] .coupon-notch-right { background: #0f172a; }
+        .coupon-bottom { padding: 16px 28px 24px; text-align: center; }
         .coupon-code-badge {
             display: inline-block;
-            background: var(--bg);
-            border: 2px dashed var(--border);
-            border-radius: 14px;
+            background: rgba(255,255,255,0.25);
+            border: 2px dashed rgba(255,255,255,0.7);
+            border-radius: 12px;
             font-family: 'Courier New', monospace;
-            font-size: 24px; font-weight: 900;
-            letter-spacing: 6px;
-            color: var(--text);
-            padding: 12px 28px;
-            margin-bottom: 12px;
+            font-size: 22px; font-weight: 900;
+            letter-spacing: 5px;
+            padding: 10px 24px;
+            margin-bottom: 10px;
+            backdrop-filter: blur(4px);
         }
-        .coupon-exp { font-size: 11px; font-weight: 700; color: var(--text-sec); letter-spacing: 1px; }
+        .coupon-exp { font-size: 11px; font-weight: 700; opacity: 0.8; letter-spacing: 1px; }
 
         /* ================= INVENTORY ================= */
-        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; margin-bottom: 20px; }
-        .stat-box { background: var(--card); padding: 12px 6px; text-align: center; border-radius: 12px; border: 1px solid var(--border); box-shadow: var(--shadow); }
-        .stat-box span { font-size: 10px; color: var(--text-sec); font-weight: 800; display: block; margin-bottom: 4px; text-transform: uppercase;}
-        .stat-box strong { font-size: 14px; }
+        .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
+        .stat-box { background: var(--card); padding: 8px 4px; text-align: center; border-radius: 10px; border: 1px solid var(--border); box-shadow: var(--shadow); }
+        .stat-box span { font-size: 9px; color: var(--text-sec); font-weight: 800; display: block; margin-bottom: 2px; text-transform: uppercase;}
+        .stat-box strong { font-size: 12px; }
         
         .mobile-item-card { background: var(--card); padding: 16px; border-radius: 14px; margin-bottom: 12px; box-shadow: var(--shadow); border: 1px solid var(--border); display: flex; flex-direction: column; gap: 12px; }
         .item-header { display: flex; justify-content: space-between; align-items: center;}
@@ -389,8 +370,8 @@
         </div>
         
         <div class="search-box">
-            <svg class="search-icon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
             <input type="text" id="search-input" placeholder="Search Package or Formula..." oninput="window.renderInventory()">
+            <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
         </div>
 
         <div class="stats-grid">
@@ -447,31 +428,58 @@
                 <div class="input-group"><label>Game / Player ID</label><input type="text" class="input-field" id="v-game" oninput="window.updateV()"></div>
                 <div class="input-group"><label>Package</label><input type="text" class="input-field" id="v-item" oninput="window.updateV()"></div>
                 <div class="input-group"><label>Total Amount (KS)</label><input type="number" class="input-field" id="v-price" oninput="window.updateV()"></div>
+                <div class="input-group"><label>QR Code Text / Link (optional)</label><input type="text" class="input-field" id="v-qr" placeholder="e.g. t.me/yourstore" oninput="window.updateV()"></div>
+                <div class="input-group">
+                    <label>Store Logo (optional)</label>
+                    <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+                        <img id="v-logo-preview" src="" style="display:none; width:48px; height:48px; border-radius:10px; object-fit:cover; border:2px solid var(--border);">
+                        <label style="flex:1; background:var(--bg); border:1.5px dashed var(--border); border-radius:10px; padding:10px; text-align:center; cursor:pointer; font-size:13px; font-weight:700; color:var(--text-sec);">
+                            📁 Upload Logo
+                            <input type="file" accept="image/*" style="display:none;" onchange="window.uploadVoucherLogo(this)">
+                        </label>
+                        <button onclick="window.clearVoucherLogo()" style="color:var(--red); font-size:12px; font-weight:700; padding:6px 10px; background:rgba(239,68,68,0.1); border-radius:8px;">✕ Clear</button>
+                    </div>
+                </div>
             </div>
             <div class="receipt-card" id="print-v">
+                <!-- Logo -->
+                <div id="vo-logo-wrap" style="display:none; text-align:center; padding:16px 0 0;">
+                    <img id="vo-logo" src="" style="width:56px; height:56px; border-radius:12px; object-fit:cover;">
+                </div>
                 <div class="receipt-header">
-                    <span class="receipt-store-emoji">🎮</span>
-                    <div class="receipt-store-name" id="vo-store">PCA Store</div>
-                    <span class="receipt-label">Payment Receipt</span>
+                    <div class="receipt-check-circle">
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                    </div>
+                    <div class="receipt-store-name">Top up successfully</div>
+                    <span class="receipt-label">Thank you! Your payment is complete.</span>
+                </div>
+                <div class="receipt-divider">
+                    <div class="receipt-notch-left"></div>
+                    <div class="receipt-dashed"></div>
+                    <div class="receipt-notch-right"></div>
                 </div>
                 <div class="receipt-body">
+                    <div class="receipt-row"><span>Store</span> <span id="vo-store">PCA Store</span></div>
                     <div class="receipt-row"><span>Date</span> <span id="vo-date">-</span></div>
                     <div class="receipt-row"><span>Customer</span> <span id="vo-name">-</span></div>
                     <div class="receipt-row"><span>Game / ID</span> <span id="vo-game">-</span></div>
                     <div class="receipt-row"><span>Package</span> <span id="vo-item">-</span></div>
-                    <div class="receipt-row"><span>Status</span> <span style="color:#10b981; font-size:13px;">✓ Successful</span></div>
-                </div>
-                <div class="receipt-perforation">
-                    <div class="receipt-hole receipt-hole-left"></div>
-                    <div style="flex:1; height:2px; background: repeating-linear-gradient(to right, var(--border) 0, var(--border) 8px, transparent 8px, transparent 16px);"></div>
-                    <div class="receipt-hole receipt-hole-right"></div>
+                    <div class="receipt-row"><span>Status</span> <span style="color:#16a34a; font-weight:800;">✓ Successful</span></div>
                 </div>
                 <div class="receipt-total">
                     <span class="receipt-total-label">Total Paid</span>
                     <span class="receipt-total-amount" id="vo-price">0 KS</span>
                 </div>
+                <!-- QR Code -->
+                <div id="vo-qr-wrap" style="display:none; text-align:center; padding:14px 20px 18px;">
+                    <div style="font-size:10px; font-weight:700; color:#94a3b8; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Scan to Contact</div>
+                    <div id="vo-qr-code" style="display:inline-block;"></div>
+                </div>
             </div>
-            <button class="btn" style="width: 100%; margin-top: 20px; background:var(--green);" onclick="window.downloadImage('print-v', 'Voucher')">Download Voucher Image</button>
+            <div style="display:flex; gap:10px; margin-top:16px;">
+                <button class="btn" style="flex:1; background:var(--primary);" onclick="window.printVoucher()">🖨️ Print</button>
+                <button class="btn" style="flex:1; background:var(--green);" onclick="window.downloadImage('print-v', 'Voucher')">⬇️ Download</button>
+            </div>
         </div>
 
         <div id="sec-c" style="display:none;">
@@ -479,9 +487,22 @@
                 <div class="input-group"><label>Discount Text</label><input type="text" class="input-field" id="c-desc" oninput="window.updateC()"></div>
                 <div class="input-group"><label>Promo Code</label><input type="text" class="input-field" id="c-code" oninput="window.updateC()" style="text-transform:uppercase;"></div>
                 <div class="input-group"><label>Expiry Date</label><input type="text" class="input-field" id="c-exp" oninput="window.updateC()"></div>
+                <div class="input-group"><label>QR Code Text / Link (optional)</label><input type="text" class="input-field" id="c-qr" placeholder="e.g. t.me/yourstore" oninput="window.updateC()"></div>
+                <div class="input-group">
+                    <label>Store Logo (optional)</label>
+                    <div style="display:flex; align-items:center; gap:10px; margin-top:6px;">
+                        <img id="c-logo-preview" src="" style="display:none; width:48px; height:48px; border-radius:10px; object-fit:cover; border:2px solid var(--border);">
+                        <label style="flex:1; background:var(--bg); border:1.5px dashed var(--border); border-radius:10px; padding:10px; text-align:center; cursor:pointer; font-size:13px; font-weight:700; color:var(--text-sec);">
+                            📁 Upload Logo
+                            <input type="file" accept="image/*" style="display:none;" onchange="window.uploadCouponLogo(this)">
+                        </label>
+                        <button onclick="window.clearCouponLogo()" style="color:var(--red); font-size:12px; font-weight:700; padding:6px 10px; background:rgba(239,68,68,0.1); border-radius:8px;">✕ Clear</button>
+                    </div>
+                </div>
             </div>
             <div class="coupon-card" id="print-c">
                 <div class="coupon-top">
+                    <img id="co-logo" src="" style="display:none; width:48px; height:48px; border-radius:10px; object-fit:cover; margin:0 auto 10px; border:2px solid rgba(255,255,255,0.3);">
                     <div class="coupon-store" id="co-store">PCA STORE</div>
                     <div class="coupon-desc" id="co-desc">GIFT VOUCHER</div>
                 </div>
@@ -494,9 +515,16 @@
                     <div style="font-size:11px; font-weight:800; color:var(--text-sec); letter-spacing:3px; text-transform:uppercase; margin-bottom:10px;">Promo Code</div>
                     <div class="coupon-code-badge" id="co-code">XXXX</div>
                     <div class="coupon-exp">Valid Until: <span id="co-exp">-</span></div>
+                    <div id="co-qr-wrap" style="display:none; margin-top:14px;">
+                        <div style="font-size:10px; font-weight:700; color:#94a3b8; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Scan to Contact</div>
+                        <div id="co-qr-code" style="display:inline-block;"></div>
+                    </div>
                 </div>
             </div>
-            <button class="btn" style="width: 100%; margin-top: 20px; background: #ff8c00;" onclick="window.downloadImage('print-c', 'Coupon')">Download Coupon Image</button>
+            <div style="display:flex; gap:10px; margin-top:16px;">
+                <button class="btn" style="flex:1; background:var(--primary);" onclick="window.printVoucher('print-c')">🖨️ Print</button>
+                <button class="btn" style="flex:1; background:#ff8c00;" onclick="window.downloadImage('print-c', 'Coupon')">⬇️ Download</button>
+            </div>
         </div>
     </main>
 
@@ -928,15 +956,24 @@
                     let costString = costRS > 0 ? `R$ ${costRS} / ${costMMK} KS` : `${costMMK} KS`;
                     let costDesktop = costRS > 0 ? `<b>${costMMK} KS</b><br><span style="font-size:11px; color:var(--text-sec);">R$ ${costRS}</span>` : `<b>${costMMK} KS</b>`;
 
-                    mobileCon.innerHTML += `<div class="card" style="padding:16px; margin-bottom:12px; border-radius:14px; display:flex; flex-direction:column; gap:12px;">
-                            <div style="display:flex; justify-content:space-between; align-items:center;">
-                                <span style="font-weight:800; font-size:16px; cursor:pointer;" onclick="window.openItemModal(${idx})">
-                                    <span style="background:var(--bg); padding:4px 10px; border-radius:6px; font-size:13px; color:var(--text-sec); border:1px solid var(--border); margin-right:6px;">${idx+1}</span>
-                                    ${itm.name} ${comboBadgeMobile}
+                    mobileCon.innerHTML += `<div class="card" style="padding:16px; margin-bottom:12px; border-radius:14px; display:flex; flex-direction:column; gap:12px; overflow:hidden;">
+                            <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
+                                <span style="font-weight:800; font-size:15px; cursor:pointer; flex:1; min-width:0; display:flex; align-items:center; flex-wrap:wrap; gap:6px;" onclick="window.openItemModal(${idx})">
+                                    <span style="background:var(--bg); padding:4px 10px; border-radius:6px; font-size:13px; color:var(--text-sec); border:1px solid var(--border); flex-shrink:0;">${idx+1}</span>
+                                    <span style="word-break:break-word;">${itm.name}</span> ${comboBadgeMobile}
                                 </span>
-                                <button onclick="window.recordSale(${idx}, event)" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 12px; border-radius:8px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px;">${svgCart} Sell</button>
+                                <button onclick="window.recordSale(${idx}, event)" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 12px; border-radius:8px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px; flex-shrink:0;">${svgCart} Sell</button>
                             </div>
-                            <div style="display:flex; gap:15px; font-size:13px; color:var(--text-sec); background:var(--bg); padding:10px; border-radius:8px; font-weight:600;" onclick="window.openItemModal(${idx})"><span>Cost: <strong style="color:var(--text);">${costString}</strong></span> <span>Sell: <strong style="color:var(--text);">${sell} KS</strong></span></div>
+                            <div style="display:flex; gap:8px;" onclick="window.openItemModal(${idx})">
+                                <div style="flex:1; background:var(--bg); padding:10px 12px; border-radius:8px; min-width:0;">
+                                    <div style="font-size:10px; font-weight:700; color:var(--text-sec); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Cost</div>
+                                    <div style="font-size:13px; font-weight:800; color:var(--text); white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${costString}</div>
+                                </div>
+                                <div style="flex:1; background:var(--bg); padding:10px 12px; border-radius:8px; min-width:0;">
+                                    <div style="font-size:10px; font-weight:700; color:var(--text-sec); text-transform:uppercase; letter-spacing:0.5px; margin-bottom:3px;">Sell</div>
+                                    <div style="font-size:13px; font-weight:800; color:var(--primary);">${sell} KS</div>
+                                </div>
+                            </div>
                             <div style="display:flex; justify-content:space-between; background:var(--bg); padding:12px; border-radius:8px; align-items:center;" onclick="window.openItemModal(${idx})"><span style="font-size:12px; font-weight:700; color:var(--text-sec); text-transform:uppercase;">Net Profit</span><strong style="color:${color}; font-size:16px;">${sign}${profit} KS</strong></div>
                         </div>`;
                     
@@ -1033,8 +1070,90 @@
 
         // ================= VOUCHER & COUPON =================
         window.switchVCTab = function(t) { document.getElementById('tab-v').classList.remove('active'); document.getElementById('tab-c').classList.remove('active'); document.getElementById('sec-v').style.display = 'none'; document.getElementById('sec-c').style.display = 'none'; document.getElementById('tab-'+t).classList.add('active'); document.getElementById('sec-'+t).style.display = 'block'; };
-        window.updateV = function() { document.getElementById('vo-name').innerText = document.getElementById('v-name').value || "-"; document.getElementById('vo-game').innerText = document.getElementById('v-game').value || "-"; document.getElementById('vo-item').innerText = document.getElementById('v-item').value || "-"; document.getElementById('vo-price').innerText = (document.getElementById('v-price').value || "0") + " KS"; };
-        window.updateC = function() { document.getElementById('co-desc').innerText = document.getElementById('c-desc').value || "GIFT VOUCHER"; document.getElementById('co-code').innerText = document.getElementById('c-code').value.toUpperCase() || "XXXX"; document.getElementById('co-exp').innerText = document.getElementById('c-exp').value || "-"; };
+        
+        // QR helpers
+        let vQR = null, cQR = null;
+        function makeQR(elId, text) {
+            const el = document.getElementById(elId);
+            el.innerHTML = '';
+            if (!text) return null;
+            return new QRCode(el, { text, width: 90, height: 90, colorDark: '#1e293b', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+        }
+
+        window.updateV = function() {
+            document.getElementById('vo-name').innerText = document.getElementById('v-name').value || "-";
+            document.getElementById('vo-game').innerText = document.getElementById('v-game').value || "-";
+            document.getElementById('vo-item').innerText = document.getElementById('v-item').value || "-";
+            document.getElementById('vo-price').innerText = (document.getElementById('v-price').value || "0") + " KS";
+            // QR
+            const qrText = document.getElementById('v-qr').value.trim();
+            const wrap = document.getElementById('vo-qr-wrap');
+            if (qrText) { wrap.style.display = 'block'; makeQR('vo-qr-code', qrText); }
+            else { wrap.style.display = 'none'; document.getElementById('vo-qr-code').innerHTML = ''; }
+        };
+
+        window.updateC = function() {
+            document.getElementById('co-desc').innerText = document.getElementById('c-desc').value || "GIFT VOUCHER";
+            document.getElementById('co-code').innerText = document.getElementById('c-code').value.toUpperCase() || "XXXX";
+            document.getElementById('co-exp').innerText = document.getElementById('c-exp').value || "-";
+            // QR
+            const qrText = document.getElementById('c-qr').value.trim();
+            const wrap = document.getElementById('co-qr-wrap');
+            if (qrText) { wrap.style.display = 'block'; makeQR('co-qr-code', qrText); }
+            else { wrap.style.display = 'none'; document.getElementById('co-qr-code').innerHTML = ''; }
+        };
+
+        // Logo upload — Voucher
+        window.uploadVoucherLogo = function(input) {
+            if (!input.files || !input.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const src = e.target.result;
+                document.getElementById('v-logo-preview').src = src;
+                document.getElementById('v-logo-preview').style.display = 'block';
+                document.getElementById('vo-logo').src = src;
+                document.getElementById('vo-logo-wrap').style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        };
+        window.clearVoucherLogo = function() {
+            document.getElementById('v-logo-preview').style.display = 'none';
+            document.getElementById('vo-logo-wrap').style.display = 'none';
+            document.getElementById('vo-logo').src = '';
+        };
+
+        // Logo upload — Coupon
+        window.uploadCouponLogo = function(input) {
+            if (!input.files || !input.files[0]) return;
+            const reader = new FileReader();
+            reader.onload = e => {
+                const src = e.target.result;
+                document.getElementById('c-logo-preview').src = src;
+                document.getElementById('c-logo-preview').style.display = 'block';
+                document.getElementById('co-logo').src = src;
+                document.getElementById('co-logo').style.display = 'block';
+            };
+            reader.readAsDataURL(input.files[0]);
+        };
+        window.clearCouponLogo = function() {
+            document.getElementById('c-logo-preview').style.display = 'none';
+            document.getElementById('co-logo').style.display = 'none';
+            document.getElementById('co-logo').src = '';
+        };
+
+        // Print
+        window.printVoucher = function(id = 'print-v') {
+            const el = document.getElementById(id);
+            html2canvas(el, { scale: 3, backgroundColor: '#ffffff', useCORS: true }).then(canvas => {
+                const win = window.open('', '_blank');
+                win.document.write(`<!DOCTYPE html><html><head><title>Print</title>
+                <style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f1f5f9;}
+                img{max-width:100%;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.12);}
+                @media print{body{background:white;}}</style></head>
+                <body><img src="${canvas.toDataURL('image/png')}" onload="window.print();"></body></html>`);
+                win.document.close();
+            }).catch(() => window.showToast("Print failed", "error"));
+        };
         
         window.downloadImage = function(id, name) {
             const el = document.getElementById(id); const origShadow = el.style.boxShadow; const origTransform = el.style.transform;
