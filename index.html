@@ -55,6 +55,10 @@
         
         .game-item { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; margin: 4px 10px; border-radius: 8px; background: var(--bg); font-size: 14px; font-weight: 600; cursor: pointer;}
         .game-item.active { border-left: 4px solid var(--primary); background: var(--hover); }
+        .drag-handle { cursor: grab; padding: 4px; color: var(--text-sec); opacity: 0.5; flex-shrink: 0; touch-action: none; }
+        .drag-handle:active { cursor: grabbing; }
+        .game-item.dragging { opacity: 0.4; background: var(--hover); border: 2px dashed var(--primary); }
+        .game-item.drag-over { border-top: 3px solid var(--primary); }
 
         /* ================= VIEWS ================= */
         .view { display: none; padding-top: 60px; height: 100vh; overflow-y: auto; overflow-x: hidden; padding-bottom: 100px; }
@@ -1011,6 +1015,7 @@
             state.data = {};
             state.sales = [];
             state.activeGame = '';
+            state.gameOrder = [];
             state.profile = { name: 'PCA Store', tgToken: '', tgChatId: '' };
             localStorage.removeItem('pcaStoreData');
             localStorage.removeItem('pcaSalesData');
@@ -1034,9 +1039,15 @@
 
             var games = Object.keys(state.data); 
             if(games.length > 0) {
-                state.activeGame = games[0];
+                // Restore saved order, then append any new games not yet in order
+                var savedOrder = [];
+                try { var so = localStorage.getItem('pcaGameOrder'); if(so) savedOrder = JSON.parse(so); } catch(e){}
+                var ordered = savedOrder.filter(g => state.data[g]);
+                games.forEach(g => { if(!ordered.includes(g)) ordered.push(g); });
+                state.gameOrder = ordered;
+                state.activeGame = state.gameOrder[0] || games[0];
                 games.forEach(g => { if(!state.data[g].items) state.data[g].items = []; });
-            } else { state.activeGame = ""; }
+            } else { state.activeGame = ""; state.gameOrder = []; }
             
             applyGlobalUI();
         }
@@ -1050,6 +1061,7 @@
                     let cloudInv = cData.data || cData.inventory || {};
                     let cloudProf = cData.profile || {};
                     let cloudSales = cData.salesHistory || [];
+                    let cloudOrder = cData.gameOrder || [];
 
                     // 1. Merge Inventory (Cloud is master; local additions layered on top)
                     if (Object.keys(state.data).length === 0) {
@@ -1057,6 +1069,13 @@
                     } else {
                         state.data = { ...cloudInv, ...state.data };
                     }
+
+                    // 1b. Restore game order from cloud
+                    var allGames = Object.keys(state.data);
+                    var ordered = cloudOrder.filter(g => state.data[g]);
+                    allGames.forEach(g => { if(!ordered.includes(g)) ordered.push(g); });
+                    state.gameOrder = ordered;
+                    if(!state.activeGame || !state.data[state.activeGame]) state.activeGame = state.gameOrder[0] || '';
 
                     // 2. Profile Merge
                     if(cloudProf && cloudProf.name) {
@@ -1090,12 +1109,13 @@
             localStorage.setItem('pcaStoreData', JSON.stringify(state.data));
             localStorage.setItem('pcaStoreProfile', JSON.stringify(state.profile));
             localStorage.setItem('pcaSalesData', JSON.stringify(state.sales));
+            localStorage.setItem('pcaGameOrder', JSON.stringify(state.gameOrder || []));
         }
 
         function saveDataToCloud() {
             saveDataToLocal();
             if(auth && state.uid && db) {
-                db.collection("stores").doc(state.uid).set({ inventory: state.data, data: state.data, profile: state.profile, salesHistory: state.sales }, {merge: true}).catch(e=>{});
+                db.collection("stores").doc(state.uid).set({ inventory: state.data, data: state.data, profile: state.profile, salesHistory: state.sales, gameOrder: state.gameOrder || [] }, {merge: true}).catch(e=>{});
             }
         }
 
@@ -1256,19 +1276,66 @@
         // ================= GAME MANAGMENT =================
         window.renderSidebarGames = function() {
             const list = document.getElementById('sidebar-games-list'); list.innerHTML = '';
-            Object.keys(state.data).forEach(gName => {
+            // Use gameOrder if available, else fallback to Object.keys
+            if(!state.gameOrder || state.gameOrder.length === 0) {
+                state.gameOrder = Object.keys(state.data);
+            }
+            // Ensure all games are in order array
+            Object.keys(state.data).forEach(g => { if(!state.gameOrder.includes(g)) state.gameOrder.push(g); });
+
+            state.gameOrder.filter(gName => state.data[gName]).forEach(gName => {
                 const img = state.data[gName].image || defaultImg; const isActive = gName === state.activeGame ? 'active' : '';
-                list.innerHTML += `<div class="game-item ${isActive}">
-                        <div style="display:flex; align-items:center; gap:12px; flex-grow:1;" onclick="window.selectGame('${gName}')"><img src="${img}" style="width:28px; height:28px; border-radius:8px; object-fit:cover;"><span>${gName}</span></div>
-                        <div style="display:flex; gap:4px;">
-                            <button onclick="window.openEditGameModal('${gName}', event)" style="padding:6px; color:var(--primary);">${svgEdit}</button>
-                            <button onclick="window.confirmDeleteGame('${gName}', event)" style="padding:6px; color:var(--red);">${svgTrash}</button>
-                        </div>
+                const item = document.createElement('div');
+                item.className = `game-item ${isActive}`;
+                item.draggable = true;
+                item.dataset.game = gName;
+                item.innerHTML = `
+                    <span class="drag-handle" title="Drag to reorder">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg>
+                    </span>
+                    <div style="display:flex; align-items:center; gap:12px; flex-grow:1;" onclick="window.selectGame('${gName}')"><img src="${img}" style="width:28px; height:28px; border-radius:8px; object-fit:cover;"><span>${gName}</span></div>
+                    <div style="display:flex; gap:4px;">
+                        <button onclick="window.openEditGameModal('${gName}', event)" style="padding:6px; color:var(--primary);">${svgEdit}</button>
+                        <button onclick="window.confirmDeleteGame('${gName}', event)" style="padding:6px; color:var(--red);">${svgTrash}</button>
                     </div>`;
+                // Drag events
+                item.addEventListener('dragstart', e => { e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', gName); setTimeout(()=>item.classList.add('dragging'),0); });
+                item.addEventListener('dragend', () => item.classList.remove('dragging'));
+                item.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; list.querySelectorAll('.game-item').forEach(el=>el.classList.remove('drag-over')); item.classList.add('drag-over'); });
+                item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+                item.addEventListener('drop', e => {
+                    e.preventDefault(); item.classList.remove('drag-over');
+                    const from = e.dataTransfer.getData('text/plain');
+                    const to = gName;
+                    if(from === to) return;
+                    const fi = state.gameOrder.indexOf(from);
+                    const ti = state.gameOrder.indexOf(to);
+                    if(fi < 0 || ti < 0) return;
+                    state.gameOrder.splice(fi, 1);
+                    state.gameOrder.splice(ti, 0, from);
+                    saveDataToCloud();
+                    window.renderSidebarGames();
+                });
+                // Touch drag support
+                let touchDragGame = null;
+                item.addEventListener('touchstart', e => { touchDragGame = gName; }, {passive:true});
+                item.addEventListener('touchend', e => {
+                    if(!touchDragGame) return;
+                    const touch = e.changedTouches[0];
+                    const target = document.elementFromPoint(touch.clientX, touch.clientY);
+                    const targetItem = target ? target.closest('.game-item') : null;
+                    if(targetItem && targetItem.dataset.game && targetItem.dataset.game !== touchDragGame) {
+                        const from = touchDragGame; const to = targetItem.dataset.game;
+                        const fi = state.gameOrder.indexOf(from); const ti = state.gameOrder.indexOf(to);
+                        if(fi >= 0 && ti >= 0){ state.gameOrder.splice(fi,1); state.gameOrder.splice(ti,0,from); saveDataToCloud(); window.renderSidebarGames(); }
+                    }
+                    touchDragGame = null;
+                }, {passive:true});
+                list.appendChild(item);
             });
         };
         window.selectGame = function(name) { state.activeGame = name; document.getElementById('search-input').value = ''; window.renderSidebarGames(); window.renderInventory(); window.toggleSidebar(); };
-        window.confirmDeleteGame = function(name, e) { e.stopPropagation(); window.showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { delete state.data[name]; state.activeGame = Object.keys(state.data)[0] || ''; saveDataToCloud(); applyGlobalUI(); }); };
+        window.confirmDeleteGame = function(name, e) { e.stopPropagation(); window.showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { delete state.data[name]; state.gameOrder = (state.gameOrder||[]).filter(g=>g!==name); state.activeGame = state.gameOrder[0] || Object.keys(state.data)[0] || ''; saveDataToCloud(); applyGlobalUI(); }); };
         
         window.openEditGameModal = function(name, e) {
             if(e) e.stopPropagation();
@@ -1287,11 +1354,19 @@
         window.saveGame = function() {
             const name = document.getElementById('mg-name').value.trim(); if(!name) return window.showToast("Enter game name", "error");
             if(isEditingGame) {
-                if(name !== editingGameOriginalName) { state.data[name] = state.data[editingGameOriginalName]; delete state.data[editingGameOriginalName]; }
+                if(name !== editingGameOriginalName) {
+                    state.data[name] = state.data[editingGameOriginalName]; delete state.data[editingGameOriginalName];
+                    // Update gameOrder with new name
+                    const oi = (state.gameOrder||[]).indexOf(editingGameOriginalName);
+                    if(oi>=0) state.gameOrder[oi] = name; else state.gameOrder.push(name);
+                }
                 state.data[name].image = tempBase64Image; state.activeGame = name; window.showToast("Game updated!");
             } else {
                 if(state.data[name]) return window.showToast("Game already exists", "error");
-                state.data[name] = { image: tempBase64Image, items: [] }; state.activeGame = name; window.showToast("Game Added Successfully!");
+                state.data[name] = { image: tempBase64Image, items: [] };
+                if(!state.gameOrder) state.gameOrder = [];
+                state.gameOrder.push(name);
+                state.activeGame = name; window.showToast("Game Added Successfully!");
             }
             isEditingGame = false; saveDataToCloud(); applyGlobalUI(); window.closeModal('modal-game');
         };
