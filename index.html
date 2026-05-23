@@ -330,6 +330,19 @@
         .skeleton-line.full { width: 100%; }
         .skeleton-box { height: 48px; width: 100%; border-radius: 8px; margin-bottom: 10px; }
 
+
+        /* ================= EXCHANGE CALCULATOR ================= */
+        .exchange-widget { margin: 12px 10px; background: var(--bg); border: 1px solid var(--border); border-radius: 12px; padding: 14px; }
+        .exchange-widget .ex-title { font-size: 10px; font-weight: 800; color: var(--text-sec); text-transform: uppercase; letter-spacing: 1px; margin-bottom: 10px; display: flex; align-items: center; gap: 6px; }
+        .exchange-row { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; }
+        .exchange-row input { flex: 1; min-width: 0; padding: 8px 10px; border-radius: 8px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 13px; font-weight: 700; }
+        .exchange-row .ex-label { font-size: 11px; font-weight: 800; color: var(--text-sec); white-space: nowrap; min-width: 38px; text-align: right; }
+        .ex-result { background: rgba(24,119,242,0.08); border: 1px solid rgba(24,119,242,0.18); border-radius: 8px; padding: 8px 10px; font-size: 13px; font-weight: 800; color: var(--primary); text-align: center; min-height: 34px; display: flex; align-items: center; justify-content: center; }
+        [data-theme="dark"] .exchange-widget { background: rgba(255,255,255,0.03); }
+        [data-theme="dark"] .ex-result { background: rgba(255,140,0,0.1); border-color: rgba(255,140,0,0.2); color: #ff8c00; }
+        .ex-sym-input { width: 52px !important; flex: none !important; text-align: center; font-size: 12px !important; padding: 8px 6px !important; }
+        .ex-rate-badge { font-size: 9px; font-weight: 700; color: var(--text-sec); text-align: center; margin-top: 4px; }
+
         /* ================= PULL TO REFRESH ================= */
         #ptr-indicator {
             position: fixed; top: 60px; left: 50%; transform: translateX(-50%) translateY(-60px);
@@ -437,6 +450,30 @@
                 Settings
             </div>
             
+            <!-- ═══ EXCHANGE CALCULATOR ═══ -->
+            <div class="exchange-widget" id="exchange-widget" style="display:none;">
+                <div class="ex-title">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
+                    Exchange Rate
+                </div>
+                <!-- Currency symbol + rate setting row -->
+                <div class="exchange-row">
+                    <input class="ex-sym-input input-field" type="text" id="ex-symbol" placeholder="R$" value="R$" oninput="window.saveExRate()" style="width:52px;flex:none;text-align:center;font-size:12px;padding:8px 6px;">
+                    <span style="font-size:12px;color:var(--text-sec);font-weight:700;">1</span>
+                    <span style="font-size:12px;color:var(--text-sec);font-weight:700;">=</span>
+                    <input class="input-field" type="number" id="ex-rate" placeholder="Rate" value="2000" min="1" oninput="window.saveExRate(); window.calcExchange()" style="flex:1;padding:8px 10px;font-size:13px;">
+                    <span class="ex-label">MMK</span>
+                </div>
+                <!-- Calculator row -->
+                <div class="exchange-row">
+                    <input class="input-field" type="number" id="ex-amount" placeholder="0.00" oninput="window.calcExchange()" style="flex:1;padding:8px 10px;font-size:13px;">
+                    <span class="ex-label" id="ex-sym-label">R$</span>
+                    <span style="font-size:14px;font-weight:800;color:var(--text-sec);">=</span>
+                </div>
+                <div class="ex-result" id="ex-result">— MMK</div>
+                <div class="ex-rate-badge" id="ex-rate-badge">1 R$ = 2,000 MMK</div>
+            </div>
+
             <div style="padding: 20px 20px 8px; font-size: 11px; color: var(--text-sec); font-weight: 800; letter-spacing: 1px;">GAMES CATEGORY</div>
             <div id="sidebar-games-list"></div>
         </div>
@@ -671,7 +708,7 @@
             </button>
         </div>
 
-        <div class="card" style="display: flex; justify-content: space-between; align-items: center;">
+        <div class="card" style="display: none; justify-content: space-between; align-items: center;">
             <span style="font-weight: 700;">Desktop View (Table Layout)</span>
             <label class="toggle-switch"><input type="checkbox" id="view-toggle" onchange="window.toggleViewMode()"><span class="slider"></span></label>
         </div>
@@ -765,7 +802,7 @@
             <div class="input-group"><label>Package Name</label><input type="text" class="input-field" id="mi-name"></div>
             <div class="input-group"><label>Formula / Details</label><input type="text" class="input-field" id="mi-combo"></div>
             <div style="display:flex; gap:12px;">
-                <div class="input-group" style="flex:1;"><label>Cost (R$)</label><input type="number" class="input-field" id="mi-cost-rs"></div>
+                <div class="input-group" style="flex:1;"><label id="mi-cost-rs-label">Cost (R$)</label><input type="number" class="input-field" id="mi-cost-rs" oninput="window.autoCalcMMK()"></div>
                 <div class="input-group" style="flex:1;"><label>Cost (MMK)</label><input type="number" class="input-field" id="mi-cost-mmk"></div>
             </div>
             <div class="input-group"><label>Sell (MMK)</label><input type="number" class="input-field" id="mi-sell"></div>
@@ -1033,7 +1070,7 @@
                 var profileJson = localStorage.getItem('pcaStoreProfile'); if(profileJson) state.profile = JSON.parse(profileJson);
                 var salesJson = localStorage.getItem('pcaSalesData'); if(salesJson) state.sales = JSON.parse(salesJson);
                 var sTheme = localStorage.getItem('pcaTheme'); if(sTheme) { state.theme = sTheme; document.documentElement.setAttribute('data-theme', sTheme); document.getElementById('theme-toggle').checked = (sTheme==='dark');}
-                var sView = localStorage.getItem('pcaViewMode'); if(sView) { state.viewMode = sView; document.getElementById('view-toggle').checked = (sView==='desktop'); }
+                var sView = localStorage.getItem('pcaViewMode'); if(sView && sView !== 'desktop') { state.viewMode = sView; document.getElementById('view-toggle').checked = false; } else { state.viewMode = 'mobile'; localStorage.setItem('pcaViewMode','mobile'); document.getElementById('view-toggle').checked = false; }
                 var sFont = localStorage.getItem('pcaFontSize'); if(sFont) { state.fontSize = parseInt(sFont); window.changeFontSize(state.fontSize); }
             } catch(e) {}
 
@@ -1130,7 +1167,7 @@
             const lms = document.getElementById('login-modal-store-name'); if(lms) lms.innerText = state.profile.name;
             if(state.viewMode === 'desktop') { document.getElementById('inv-mobile-container').style.display = 'none'; document.getElementById('inv-desktop-container').style.display = 'block'; } 
             else { document.getElementById('inv-mobile-container').style.display = 'block'; document.getElementById('inv-desktop-container').style.display = 'none'; }
-            window.renderSidebarGames(); window.renderInventory(); window.renderSales();
+            window.renderSidebarGames(); window.renderInventory(); window.renderSales(); window.loadExRate();
         }
 
         // ================= CONFIGURATION =================
@@ -1340,7 +1377,7 @@
                 list.appendChild(item);
             });
         };
-        window.selectGame = function(name) { state.activeGame = name; document.getElementById('search-input').value = ''; window.renderSidebarGames(); window.renderInventory(); window.toggleSidebar(); };
+        window.selectGame = function(name) { state.activeGame = name; document.getElementById('search-input').value = ''; window.renderSidebarGames(); window.renderInventory(); window.loadExRate(); window.toggleSidebar(); };
         window.confirmDeleteGame = function(name, e) { e.stopPropagation(); window.showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { delete state.data[name]; state.gameOrder = (state.gameOrder||[]).filter(g=>g!==name); state.activeGame = state.gameOrder[0] || Object.keys(state.data)[0] || ''; saveDataToCloud(); applyGlobalUI(); }); };
         
         window.openEditGameModal = function(name, e) {
@@ -1410,8 +1447,9 @@
                     let color = profit < 0 ? 'var(--red)' : 'var(--green)'; let sign = profit <= 0 ? '' : '+';
                     let comboBadgeMobile = itm.combo ? `<span style="background:var(--bg); color:var(--text-sec); font-size:11px; padding:4px 8px; border-radius:6px; border:1px solid var(--border); font-weight:700; margin-left:8px;">${itm.combo}</span>` : '';
                     let comboBadgeDesktop = itm.combo ? `<br><span style="font-size:11px; color:var(--text-sec); font-weight:600;">${itm.combo}</span>` : '';
-                    let costString = costRS > 0 ? `R$ ${costRS} / ${costMMK} KS` : `${costMMK} KS`;
-                    let costDesktop = costRS > 0 ? `<b>${costMMK} KS</b><br><span style="font-size:11px; color:var(--text-sec);">R$ ${costRS}</span>` : `<b>${costMMK} KS</b>`;
+                    let exSym = (function(){ try{ var k='exRate_'+state.activeGame; var s=localStorage.getItem(k); return s?JSON.parse(s).sym:'R$'; }catch(e){return 'R$';} })();
+                    let costString = costRS > 0 ? `${exSym} ${costRS} / ${costMMK} KS` : `${costMMK} KS`;
+                    let costDesktop = costRS > 0 ? `<b>${costMMK} KS</b><br><span style="font-size:11px; color:var(--text-sec);">${exSym} ${costRS}</span>` : `<b>${costMMK} KS</b>`;
 
                     mobileCon.innerHTML += `<div class="card" style="padding:16px; margin-bottom:12px; border-radius:14px; display:flex; flex-direction:column; gap:12px; overflow:hidden;">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
@@ -1471,6 +1509,10 @@
 
         window.openItemModal = function(idx = -1) {
             tempEditIdx = idx;
+            // Refresh currency label from active game's exchange setting
+            const exSym2 = (function(){ try{ var k='exRate_'+state.activeGame; var s=localStorage.getItem(k); return s?JSON.parse(s).sym:'R$'; }catch(e){return 'R$';} })();
+            const rsLbl = document.getElementById('mi-cost-rs-label');
+            if(rsLbl) rsLbl.innerText = 'Cost (' + exSym2 + ')';
             if(idx > -1) {
                 const itm = state.data[state.activeGame].items[idx]; document.getElementById('mi-title').innerText = "Edit Item Details"; document.getElementById('mi-name').value = itm.name; document.getElementById('mi-combo').value = itm.combo || ''; document.getElementById('mi-cost-rs').value = itm.costRS || ''; document.getElementById('mi-cost-mmk').value = itm.costMMK !== undefined ? itm.costMMK : (itm.cost || ''); document.getElementById('mi-sell').value = itm.sell; document.getElementById('mi-btn-del').style.display = 'block';
             } else {
@@ -1931,6 +1973,54 @@
             // Small delay to apply lang after DOM is ready
             setTimeout(() => { applyLang(); }, 100);
         });
+
+        // ================= EXCHANGE CALCULATOR =================
+        window.calcExchange = function() {
+            const amount = parseFloat(document.getElementById('ex-amount').value) || 0;
+            const rate   = parseFloat(document.getElementById('ex-rate').value)   || 0;
+            const sym    = (document.getElementById('ex-symbol').value || 'R$').trim();
+            const result = Math.round(amount * rate);
+            document.getElementById('ex-result').innerText = result > 0 ? result.toLocaleString() + ' MMK' : '— MMK';
+            document.getElementById('ex-sym-label').innerText = sym;
+        };
+
+        window.saveExRate = function() {
+            const sym  = (document.getElementById('ex-symbol').value || 'R$').trim();
+            const rate = parseFloat(document.getElementById('ex-rate').value) || 0;
+            const key  = 'exRate_' + (state.activeGame || '__default__');
+            try { localStorage.setItem(key, JSON.stringify({ sym, rate })); } catch(e) {}
+            document.getElementById('ex-sym-label').innerText = sym;
+            document.getElementById('ex-rate-badge').innerText = '1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK';
+            // Update item modal label too
+            const label = document.querySelector('label[for="mi-cost-rs"], #modal-item label');
+            const rsLabel = document.getElementById('mi-cost-rs-label');
+            if(rsLabel) rsLabel.innerText = 'Cost (' + sym + ')';
+        };
+
+        window.loadExRate = function() {
+            const widget = document.getElementById('exchange-widget');
+            if(!state.activeGame) { if(widget) widget.style.display = 'none'; return; }
+            if(widget) widget.style.display = 'block';
+            const key = 'exRate_' + state.activeGame;
+            let cfg = { sym: 'R$', rate: 2000 };
+            try { const saved = localStorage.getItem(key); if(saved) cfg = JSON.parse(saved); } catch(e) {}
+            document.getElementById('ex-symbol').value = cfg.sym;
+            document.getElementById('ex-rate').value   = cfg.rate;
+            document.getElementById('ex-sym-label').innerText = cfg.sym;
+            document.getElementById('ex-rate-badge').innerText = '1 ' + cfg.sym + ' = ' + (cfg.rate||0).toLocaleString() + ' MMK';
+            document.getElementById('ex-amount').value = '';
+            document.getElementById('ex-result').innerText = '— MMK';
+        };
+
+
+        window.autoCalcMMK = function() {
+            const rs   = parseFloat(document.getElementById('mi-cost-rs').value) || 0;
+            const rate = parseFloat(document.getElementById('ex-rate').value)    || 0;
+            if(rs > 0 && rate > 0) {
+                document.getElementById('mi-cost-mmk').value = Math.round(rs * rate);
+            }
+        };
+
     </script>
 </body>
 </html>
