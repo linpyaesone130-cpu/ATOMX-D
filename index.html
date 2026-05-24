@@ -1293,18 +1293,11 @@
                         // costMMK, costRS ထည့်မသွားပါ
                     }));
 
+                // merge:true နဲ့ set လုပ်မို့ pr, img, n ကိုသာ update — admin ထားတဲ့ cur, ci, e, c, pl, bannerImg မထိ
                 const gameDoc = {
                     n:           gameName,
-                    e:           '🎮',
-                    c:           '#FF8C00',
-                    cur:         'Kyats',
-                    ci:          '💎',
-                    pl:          'Mobile',
                     img:         (gData.image && !gData.image.startsWith('data:image/svg')) ? gData.image : '',
                     pr:          packages,
-                    regions:     [],
-                    showSid:     false,
-                    // bannerImg မထည့်ပါ — publish လုပ်လိုက်ရင် store ထဲ admin ကသတ်မှတ်ထားတဲ့ banner ပုံမပျောက်အောင်
                     _src:        'manage',
                     _updatedAt:  new Date().toISOString()
                 };
