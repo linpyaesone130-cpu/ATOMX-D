@@ -32,8 +32,9 @@
         svg { display: block; }
 
         /* ================= TOAST ================= */
-        #toast { position: fixed; bottom: 30px; left: 50%; transform: translateX(-50%) translateY(100px); background: var(--text); color: var(--bg); padding: 12px 24px; border-radius: 30px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); z-index: 100000; font-weight: 600; font-size: 13px; transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); opacity: 0; pointer-events: none; text-align: center; white-space: nowrap;}
+        #toast { position: fixed; top: 70px; left: 50%; transform: translateX(-50%) translateY(-20px); background: var(--card); color: var(--text); padding: 10px 18px 10px 14px; border-radius: 14px; box-shadow: 0 8px 32px rgba(0,0,0,0.15), 0 2px 8px rgba(0,0,0,0.08); z-index: 100000; font-weight: 700; font-size: 13px; transition: 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); opacity: 0; pointer-events: none; display: flex; align-items: center; gap: 9px; border: 1px solid var(--border); white-space: nowrap; border-left: 3px solid var(--primary); }
         #toast.show { transform: translateX(-50%) translateY(0); opacity: 1; }
+        #toast-icon { flex-shrink: 0; display: flex; align-items: center; }
 
         /* ================= HEADER ================= */
         .header { height: 60px; background: var(--card); display: flex; align-items: center; justify-content: space-between; padding: 0 16px; box-shadow: var(--shadow); position: fixed; top: 0; width: 100%; z-index: 40; border-bottom: 1px solid var(--border);}
@@ -59,6 +60,7 @@
         .drag-handle:active { cursor: grabbing; }
         .game-item.dragging { opacity: 0.4; background: var(--hover); border: 2px dashed var(--primary); }
         .game-item.drag-over { border-top: 3px solid var(--primary); }
+        .game-item.locked { opacity: 0.75; }
 
         /* ================= VIEWS ================= */
         .view { display: none; padding-top: 60px; height: 100vh; overflow-y: auto; overflow-x: hidden; padding-bottom: 100px; }
@@ -400,7 +402,10 @@
 </head>
 <body>
 
-    <div id="toast">Message</div>
+    <div id="toast">
+        <span id="toast-icon"></span>
+        <span id="toast-msg"></span>
+    </div>
 
     <!-- Pull to Refresh Indicator -->
     <div id="ptr-indicator">
@@ -461,7 +466,7 @@
                     <input class="ex-sym-input input-field" type="text" id="ex-symbol" placeholder="R$" value="R$" oninput="window.saveExRate()" style="width:52px;flex:none;text-align:center;font-size:12px;padding:8px 6px;">
                     <span style="font-size:12px;color:var(--text-sec);font-weight:700;">1</span>
                     <span style="font-size:12px;color:var(--text-sec);font-weight:700;">=</span>
-                    <input class="input-field" type="number" id="ex-rate" placeholder="Rate" value="2000" min="1" oninput="window.saveExRate(); window.calcExchange()" style="flex:1;padding:8px 10px;font-size:13px;">
+                    <input class="input-field" type="number" id="ex-rate" placeholder="Rate" value="2000" min="1" oninput="window.calcExchange(); window.previewRate()" onblur="window.promptApplyRate()" onkeydown="if(event.key==='Enter'){event.preventDefault();window.promptApplyRate();}" style="flex:1;padding:8px 10px;font-size:13px;">
                     <span class="ex-label">MMK</span>
                 </div>
                 <!-- Calculator row -->
@@ -472,9 +477,21 @@
                 </div>
                 <div class="ex-result" id="ex-result">— MMK</div>
                 <div class="ex-rate-badge" id="ex-rate-badge">1 R$ = 2,000 MMK</div>
+                <div id="ex-apply-wrap" style="display:none; margin-top:8px;">
+                    <button onclick="window.applyNewRate()" style="width:100%; padding:8px; border-radius:8px; background:var(--primary); color:white; font-size:12px; font-weight:800; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
+                        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        Apply Rate to All Items
+                    </button>
+                </div>
             </div>
 
-            <div style="padding: 20px 20px 8px; font-size: 11px; color: var(--text-sec); font-weight: 800; letter-spacing: 1px;">GAMES CATEGORY</div>
+            <div style="padding: 20px 20px 8px 20px; display:flex; align-items:center; justify-content:space-between;">
+                <span style="font-size: 11px; color: var(--text-sec); font-weight: 800; letter-spacing: 1px;">GAMES CATEGORY</span>
+                <button id="global-lock-btn" onclick="window.toggleGlobalLock()" title="Lock / Unlock game order" style="display:flex;align-items:center;gap:5px;padding:4px 10px;border-radius:20px;border:1.5px solid var(--border);background:var(--bg);font-size:11px;font-weight:800;color:var(--text-sec);transition:0.2s;">
+                    <span id="global-lock-icon"></span>
+                    <span id="global-lock-label">LOCK</span>
+                </button>
+            </div>
             <div id="sidebar-games-list"></div>
         </div>
         <div style="padding: 20px; border-top: 1px solid var(--border);">
@@ -931,10 +948,28 @@
         const defaultImg = `data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='%23e2e8f0'><rect width='24' height='24' rx='6'/></svg>`;
 
         // Exposing utilities safely
+        const _svgToastSuccess = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>`;
+        const _svgToastError   = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>`;
+        const _svgToastLock    = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+        const _svgToastUnlock  = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+        const _svgToastSync    = `<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>`;
+        let _toastTimer = null;
         window.showToast = function(msg, type = 'success') {
-            const toast = document.getElementById('toast'); toast.innerText = msg;
-            toast.style.borderLeftColor = type === 'error' ? 'var(--red)' : 'var(--primary)';
-            toast.classList.add('show'); setTimeout(() => toast.classList.remove('show'), 2500);
+            const toast   = document.getElementById('toast');
+            const iconEl  = document.getElementById('toast-icon');
+            const msgEl   = document.getElementById('toast-msg');
+            // pick icon & color
+            let icon = _svgToastSuccess, color = 'var(--primary)';
+            if(type === 'error')              { icon = _svgToastError;  color = 'var(--red)'; }
+            else if(type === 'lock'  || msg.toLowerCase().includes('locked'))   { icon = _svgToastLock;   color = '#f59e0b'; }
+            else if(type === 'unlock'|| msg.toLowerCase().includes('unlocked')) { icon = _svgToastUnlock; color = 'var(--green)'; }
+            else if(msg.toLowerCase().includes('sync') || msg.toLowerCase().includes('synced')) { icon = _svgToastSync; }
+            iconEl.innerHTML = `<span style="color:${color}">${icon}</span>`;
+            toast.style.borderLeftColor = color;
+            msgEl.innerText = msg;
+            if(_toastTimer) clearTimeout(_toastTimer);
+            toast.classList.add('show');
+            _toastTimer = setTimeout(() => { toast.classList.remove('show'); _toastTimer = null; }, 2800);
         };
         
         document.getElementById('confirm-yes-btn').onclick = () => { if(confirmActionCallback) confirmActionCallback(); window.closeConfirm(); };
@@ -1317,23 +1352,56 @@
         };
 
         // ================= GAME MANAGMENT =================
+        // ================= GLOBAL GAME ORDER LOCK =================
+        if(typeof state.gameOrderGlobalLocked === 'undefined') state.gameOrderGlobalLocked = false;
+        try {
+            const s = localStorage.getItem('pcaGameOrderGlobalLocked');
+            if(s !== null) state.gameOrderGlobalLocked = JSON.parse(s);
+        } catch(e) {}
+
+        function applyGlobalLockUI() {
+            const btn   = document.getElementById('global-lock-btn');
+            const icon  = document.getElementById('global-lock-icon');
+            const label = document.getElementById('global-lock-label');
+            if(!btn) return;
+            if(state.gameOrderGlobalLocked) {
+                icon.innerHTML  = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>`;
+                label.innerText = 'LOCKED';
+                btn.style.color       = '#f59e0b';
+                btn.style.borderColor = '#f59e0b';
+                btn.style.background  = 'rgba(245,158,11,0.08)';
+            } else {
+                icon.innerHTML  = `<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 9.9-1"/></svg>`;
+                label.innerText = 'LOCK';
+                btn.style.color       = 'var(--text-sec)';
+                btn.style.borderColor = 'var(--border)';
+                btn.style.background  = 'var(--bg)';
+            }
+        }
+
+        window.toggleGlobalLock = function() {
+            state.gameOrderGlobalLocked = !state.gameOrderGlobalLocked;
+            try { localStorage.setItem('pcaGameOrderGlobalLocked', JSON.stringify(state.gameOrderGlobalLocked)); } catch(e) {}
+            applyGlobalLockUI();
+            window.renderSidebarGames();
+            window.showToast(state.gameOrderGlobalLocked ? 'Game order locked' : 'Game order unlocked', state.gameOrderGlobalLocked ? 'lock' : 'unlock');
+        };
+
         window.renderSidebarGames = function() {
             const list = document.getElementById('sidebar-games-list'); list.innerHTML = '';
-            // Use gameOrder if available, else fallback to Object.keys
-            if(!state.gameOrder || state.gameOrder.length === 0) {
-                state.gameOrder = Object.keys(state.data);
-            }
-            // Ensure all games are in order array
+            if(!state.gameOrder || state.gameOrder.length === 0) state.gameOrder = Object.keys(state.data);
             Object.keys(state.data).forEach(g => { if(!state.gameOrder.includes(g)) state.gameOrder.push(g); });
+            const locked = !!state.gameOrderGlobalLocked;
 
             state.gameOrder.filter(gName => state.data[gName]).forEach(gName => {
-                const img = state.data[gName].image || defaultImg; const isActive = gName === state.activeGame ? 'active' : '';
+                const img = state.data[gName].image || defaultImg;
+                const isActive = gName === state.activeGame ? 'active' : '';
                 const item = document.createElement('div');
-                item.className = `game-item ${isActive}`;
-                item.draggable = true;
+                item.className = `game-item ${isActive}${locked ? ' locked' : ''}`;
+                item.draggable = !locked;
                 item.dataset.game = gName;
                 item.innerHTML = `
-                    <span class="drag-handle" title="Drag to reorder">
+                    <span class="drag-handle" title="${locked ? 'Unlock to reorder' : 'Drag to reorder'}" style="${locked ? 'opacity:0.2;cursor:not-allowed;' : ''}">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg>
                     </span>
                     <div style="display:flex; align-items:center; gap:12px; flex-grow:1;" onclick="window.selectGame('${gName}')"><img src="${img}" style="width:28px; height:28px; border-radius:8px; object-fit:cover;"><span>${gName}</span></div>
@@ -1341,27 +1409,26 @@
                         <button onclick="window.openEditGameModal('${gName}', event)" style="padding:6px; color:var(--primary);">${svgEdit}</button>
                         <button onclick="window.confirmDeleteGame('${gName}', event)" style="padding:6px; color:var(--red);">${svgTrash}</button>
                     </div>`;
-                // Drag events
-                item.addEventListener('dragstart', e => { e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', gName); setTimeout(()=>item.classList.add('dragging'),0); });
-                item.addEventListener('dragend', () => item.classList.remove('dragging'));
-                item.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; list.querySelectorAll('.game-item').forEach(el=>el.classList.remove('drag-over')); item.classList.add('drag-over'); });
-                item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
-                item.addEventListener('drop', e => {
-                    e.preventDefault(); item.classList.remove('drag-over');
-                    const from = e.dataTransfer.getData('text/plain');
-                    const to = gName;
-                    if(from === to) return;
-                    const fi = state.gameOrder.indexOf(from);
-                    const ti = state.gameOrder.indexOf(to);
-                    if(fi < 0 || ti < 0) return;
-                    state.gameOrder.splice(fi, 1);
-                    state.gameOrder.splice(ti, 0, from);
-                    saveDataToCloud();
-                    window.renderSidebarGames();
-                });
+                if(!locked) {
+                    item.addEventListener('dragstart', e => { e.dataTransfer.effectAllowed='move'; e.dataTransfer.setData('text/plain', gName); setTimeout(()=>item.classList.add('dragging'),0); });
+                    item.addEventListener('dragend', () => item.classList.remove('dragging'));
+                    item.addEventListener('dragover', e => { e.preventDefault(); e.dataTransfer.dropEffect='move'; list.querySelectorAll('.game-item').forEach(el=>el.classList.remove('drag-over')); item.classList.add('drag-over'); });
+                    item.addEventListener('dragleave', () => item.classList.remove('drag-over'));
+                    item.addEventListener('drop', e => {
+                        e.preventDefault(); item.classList.remove('drag-over');
+                        const from = e.dataTransfer.getData('text/plain'); const to = gName;
+                        if(from === to) return;
+                        const fi = state.gameOrder.indexOf(from); const ti = state.gameOrder.indexOf(to);
+                        if(fi < 0 || ti < 0) return;
+                        state.gameOrder.splice(fi, 1); state.gameOrder.splice(ti, 0, from);
+                        saveDataToCloud(); window.renderSidebarGames();
+                    });
+                } else {
+                    item.addEventListener('dragstart', e => { e.preventDefault(); window.showToast('Locked — tap LOCKED to unlock', 'lock'); });
+                }
                 // Touch drag support
                 let touchDragGame = null;
-                item.addEventListener('touchstart', e => { touchDragGame = gName; }, {passive:true});
+                item.addEventListener('touchstart', e => { if(locked) return; touchDragGame = gName; }, {passive:true});
                 item.addEventListener('touchend', e => {
                     if(!touchDragGame) return;
                     const touch = e.changedTouches[0];
@@ -1376,6 +1443,7 @@
                 }, {passive:true});
                 list.appendChild(item);
             });
+            applyGlobalLockUI();
         };
         window.selectGame = function(name) { state.activeGame = name; document.getElementById('search-input').value = ''; window.renderSidebarGames(); window.renderInventory(); window.loadExRate(); window.toggleSidebar(); };
         window.confirmDeleteGame = function(name, e) { e.stopPropagation(); window.showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { delete state.data[name]; state.gameOrder = (state.gameOrder||[]).filter(g=>g!==name); state.activeGame = state.gameOrder[0] || Object.keys(state.data)[0] || ''; saveDataToCloud(); applyGlobalUI(); }); };
@@ -1540,23 +1608,59 @@
         };
 
         window.renderSales = function() {
-            const today = new Date().toLocaleDateString(); let todayItems = state.sales.filter(s => s.date === today); let profit = 0;
-            const con = document.getElementById('sales-list-container'); if(!con) return; con.innerHTML = '';
-            
+            const today = new Date().toLocaleDateString();
+            let todayItems = state.sales.filter(s => s.date === today);
+            let profit = 0;
+            const con = document.getElementById('sales-list-container');
+            if(!con) return; con.innerHTML = '';
+
             if(todayItems.length === 0) {
                 con.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:600;">${t('no_sales')}</div>`;
             } else {
-                todayItems.slice().reverse().forEach(s => {
-                    profit += s.profit; let color = s.profit < 0 ? 'var(--red)' : 'var(--green)'; let sign = s.profit <= 0 ? '' : '+';
-                    con.innerHTML += `<div style="display:flex; justify-content:space-between; padding:12px 0; border-bottom:1px solid var(--border); align-items:center;">
-                        <div><strong style="color:var(--text);">${s.name}</strong> <span style="font-size:11px; color:var(--text-sec); font-weight:bold; margin-left:6px;">${s.time}</span></div>
-                        <strong style="color:${color}; font-size:15px;">${sign}${s.profit} KS</strong>
-                    </div>`;
+                todayItems.slice().reverse().forEach((s, idx) => {
+                    profit += (s.profit || 0);
+                    const color   = (s.profit||0) < 0 ? 'var(--red)' : 'var(--green)';
+                    const sign    = (s.profit||0) <= 0 ? '' : '+';
+                    const isOrder = !!s.txnId; // from store order
+                    const badge   = isOrder
+                        ? `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(24,119,242,0.1);color:var(--primary);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;letter-spacing:0.3px;margin-left:6px;">
+                               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+                               Store Order
+                           </span>` : '';
+                    const txnLine = isOrder
+                        ? `<div style="font-size:10px;color:var(--primary);font-weight:700;margin-top:2px;display:flex;align-items:center;gap:4px;">
+                               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+                               TXN: ${s.txnId}
+                           </div>` : '';
+                    const customerLine = (isOrder && s.customer)
+                        ? `<div style="font-size:10px;color:var(--text-sec);font-weight:600;margin-top:1px;">${s.customer} · ${s.game||''}</div>` : '';
+                    const receiptBtn = isOrder
+                        ? `<button onclick="window.reShowOrderReceipt(${JSON.stringify(s).replace(/"/g,'&quot;')})" title="View Receipt"
+                               style="padding:6px 8px;border-radius:8px;background:var(--bg);border:1px solid var(--border);color:var(--primary);margin-left:8px;flex-shrink:0;">
+                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                           </button>` : '';
+
+                    con.innerHTML += `
+                        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start;gap:8px;">
+                            <div style="flex:1;min-width:0;">
+                                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0;">
+                                    <strong style="color:var(--text);font-size:14px;">${s.name}</strong>
+                                    ${badge}
+                                    <span style="font-size:11px;color:var(--text-sec);font-weight:700;margin-left:6px;">${s.time}</span>
+                                </div>
+                                ${txnLine}
+                                ${customerLine}
+                            </div>
+                            <div style="display:flex;align-items:center;flex-shrink:0;">
+                                <strong style="color:${color};font-size:15px;">${sign}${s.profit||0} KS</strong>
+                                ${receiptBtn}
+                            </div>
+                        </div>`;
                 });
             }
-            const itemsEl = document.getElementById('sales-total-items');
+            const itemsEl  = document.getElementById('sales-total-items');
             const profitEl = document.getElementById('sales-total-profit');
-            if(itemsEl) animateCountUp(itemsEl, todayItems.length, '');
+            if(itemsEl)  animateCountUp(itemsEl, todayItems.length, '');
             if(profitEl) { animateCountUp(profitEl, profit); profitEl.style.color = profit < 0 ? 'var(--red)' : 'var(--text)'; }
         };
 
@@ -1663,11 +1767,12 @@
                 <style>body{margin:0;display:flex;justify-content:center;align-items:center;min-height:100vh;background:#f1f5f9;}
                 img{max-width:100%;border-radius:16px;box-shadow:0 8px 24px rgba(0,0,0,0.12);}
                 @media print{body{background:white;}}</style></head>
-                <body><img src="${canvas.toDataURL('image/png')}" onload="window.print();"></body></html>`);
+                <body><img src="${canvas.toDataURL('image/png')}" onload="window.print();">
+</body></html>`);
                 win.document.close();
-            }).catch(() => window.showToast("Print failed", "error"));
+            }).catch(()=>{});
         };
-        
+
         window.downloadImage = function(id, name) {
             const el = document.getElementById(id); const origShadow = el.style.boxShadow; const origTransform = el.style.transform;
             el.style.boxShadow = 'none'; el.style.transform = 'none'; window.showToast("Generating image...");
@@ -1991,10 +2096,303 @@
             try { localStorage.setItem(key, JSON.stringify({ sym, rate })); } catch(e) {}
             document.getElementById('ex-sym-label').innerText = sym;
             document.getElementById('ex-rate-badge').innerText = '1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK';
-            // Update item modal label too
-            const label = document.querySelector('label[for="mi-cost-rs"], #modal-item label');
             const rsLabel = document.getElementById('mi-cost-rs-label');
             if(rsLabel) rsLabel.innerText = 'Cost (' + sym + ')';
+            // NOTE: does NOT auto-recalc items — user must press Apply button
+        };
+
+        // Show "rate changed" state — highlight badge, show Apply button
+        window.previewRate = function() {
+            const rate = parseFloat(document.getElementById('ex-rate').value) || 0;
+            const sym  = (document.getElementById('ex-symbol').value || 'R$').trim();
+            const badge = document.getElementById('ex-rate-badge');
+            const wrap  = document.getElementById('ex-apply-wrap');
+            if(badge) { badge.innerText = '1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK ✏️'; badge.style.color = 'var(--primary)'; }
+            if(wrap)  wrap.style.display = 'block';
+        };
+
+        // Called on blur/Enter — just make sure Apply button is visible
+        window.promptApplyRate = function() {
+            window.saveExRate();
+            window.previewRate();
+        };
+
+        // User explicitly presses Apply — recalc all items
+        window.applyNewRate = function() {
+            const rate = parseFloat(document.getElementById('ex-rate').value) || 0;
+            const sym  = (document.getElementById('ex-symbol').value || 'R$').trim();
+            if(!rate || rate <= 0) { window.showToast('Valid rate ထည့်ပါ', 'error'); return; }
+
+            const items = (state.activeGame && state.data[state.activeGame]) ? (state.data[state.activeGame].items || []) : [];
+            const eligible = items.filter(i => parseFloat(i.costRS) > 0);
+            if(eligible.length === 0) { window.showToast('costRS ရှိတဲ့ item မရှိပါ', 'error'); return; }
+
+            window.showConfirm(
+                'Rate Apply လုပ်မည်',
+                eligible.length + ' items ရဲ့ costMMK ကို 1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK rate နဲ့ ပြောင်းမည်။',
+                function() {
+                    window.recalcAllMMK(rate);
+                    // Reset badge + hide apply button
+                    const badge = document.getElementById('ex-rate-badge');
+                    const wrap  = document.getElementById('ex-apply-wrap');
+                    if(badge) { badge.innerText = '1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK'; badge.style.color = ''; }
+                    if(wrap)  wrap.style.display = 'none';
+                }
+            );
+        };
+
+        // ================= ORDER RECEIPT LISTENER =================
+        let _orderQueue   = [];   // queued confirmed orders waiting to show
+        let _receiptShown = false; // is receipt modal currently open
+        let _seenOrders   = new Set(); // track already-shown order IDs this session
+        let _orderUnsubscribe = null;
+
+        function _formatOrderDateTime(ts) {
+            let d;
+            if (!ts) { d = new Date(); }
+            else if (ts.toDate) { d = ts.toDate(); }
+            else if (ts.seconds) { d = new Date(ts.seconds * 1000); }
+            else { d = new Date(ts); }
+            const pad = n => String(n).padStart(2, '0');
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            return `${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}  ${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+        }
+
+        function _generateTxnId(orderId) {
+            // Use first 8 chars of Firestore doc ID, then store prefix
+            const prefix = (state.profile.name || 'PCA').replace(/\s/g,'').substring(0,3).toUpperCase();
+            const suffix = (orderId || '').substring(0,8).toUpperCase();
+            return `${prefix}-${suffix}`;
+        }
+
+        function _showNextReceipt() {
+            if (_receiptShown || _orderQueue.length === 0) return;
+            const order = _orderQueue.shift();
+            _receiptShown = true;
+
+            const txnId    = _generateTxnId(order._id);
+            // Resolve confirm datetime
+            const tsRaw    = order.confirmedAt || order.createdAt || order.timestamp || null;
+            let confirmDate, confirmTime;
+            (function() {
+                let d;
+                if (!tsRaw) { d = new Date(); }
+                else if (tsRaw.toDate) { d = tsRaw.toDate(); }
+                else if (tsRaw.seconds) { d = new Date(tsRaw.seconds * 1000); }
+                else { d = new Date(tsRaw); }
+                const pad = n => String(n).padStart(2,'0');
+                const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                confirmDate = `${pad(d.getDate())} ${months[d.getMonth()]} ${d.getFullYear()}`;
+                confirmTime = `${pad(d.getHours())}:${pad(d.getMinutes())}:${pad(d.getSeconds())}`;
+            })();
+            const dtStr    = confirmDate + '  ' + confirmTime;
+            const customer = order.customerName || order.name || order.buyer || '-';
+            const game     = order.game || order.gameName || '-';
+            const playerId = order.playerId || order.uid || order.userId || order.gameId || '-';
+            const pkg      = order.package || order.item || order.packageName || order.pkg || '-';
+            const price    = order.price || order.amount || order.total || 0;
+
+            // ── Populate modal ──
+            document.getElementById('or-store-name').innerText  = state.profile.name || 'PCA Store';
+            document.getElementById('or-txn-id').innerText      = txnId;
+            document.getElementById('or-datetime').innerText    = dtStr;
+            document.getElementById('or-customer').innerText    = customer;
+            document.getElementById('or-game').innerText        = game;
+            document.getElementById('or-player-id').innerText   = playerId;
+            document.getElementById('or-package').innerText     = pkg;
+            document.getElementById('or-price').innerText       = Number(price).toLocaleString() + ' KS';
+
+            // ── Save to Daily Sales (state.sales) ──
+            const saleEntry = {
+                date:     confirmDate,          // e.g. "23 May 2026"
+                time:     confirmTime,          // e.g. "14:32:05"
+                name:     pkg,                  // package shown in sales list
+                profit:   0,                    // no cost data from store orders
+                txnId:    txnId,
+                customer: customer,
+                game:     game,
+                playerId: playerId,
+                price:    Number(price),
+                orderId:  order._id,
+                source:   'store'
+            };
+            // Dedup by orderId
+            const alreadySaved = state.sales.some(s => s.orderId === order._id);
+            if (!alreadySaved) {
+                state.sales.push(saleEntry);
+                saveDataToCloud();
+                window.renderSales();
+            }
+
+            // ── Queue indicator ──
+            const qBar  = document.getElementById('or-queue-bar');
+            const qText = document.getElementById('or-queue-text');
+            if (_orderQueue.length > 0) {
+                qBar.style.display  = 'flex';
+                qText.innerText     = `${_orderQueue.length} more order${_orderQueue.length > 1 ? 's' : ''} waiting`;
+            } else {
+                qBar.style.display  = 'none';
+            }
+
+            window.openModal('modal-order-receipt');
+            window.showToast('New order confirmed!', 'success');
+
+            // Mark receipt issued in Firestore
+            if (storeDb && order._id) {
+                storeDb.collection('orders').doc(order._id)
+                    .update({ receiptIssued: true })
+                    .catch(e => console.warn('receiptIssued update failed:', e));
+            }
+        }
+
+        window.closeOrderReceipt = function() {
+            window.closeModal('modal-order-receipt');
+            _receiptShown = false;
+            setTimeout(_showNextReceipt, 400);
+        };
+
+        // Re-open receipt from sales list
+        window.reShowOrderReceipt = function(s) {
+            if (typeof s === 'string') { try { s = JSON.parse(s); } catch(e) { return; } }
+            document.getElementById('or-store-name').innerText  = state.profile.name || 'PCA Store';
+            document.getElementById('or-txn-id').innerText      = s.txnId  || '-';
+            document.getElementById('or-datetime').innerText    = (s.date || '-') + '  ' + (s.time || '');
+            document.getElementById('or-customer').innerText    = s.customer || '-';
+            document.getElementById('or-game').innerText        = s.game    || '-';
+            document.getElementById('or-player-id').innerText   = s.playerId|| '-';
+            document.getElementById('or-package').innerText     = s.name    || '-';
+            document.getElementById('or-price').innerText       = Number(s.price||0).toLocaleString() + ' KS';
+            const qBar = document.getElementById('or-queue-bar');
+            if (qBar) qBar.style.display = 'none';
+            window.openModal('modal-order-receipt');
+        };
+
+        // Save receipt to device gallery (PNG download with share fallback)
+        window.saveReceiptToGallery = function() {
+            const el = document.getElementById('print-order-receipt');
+            if (!el) return;
+            const origBg     = el.style.background;
+            el.style.background = '#ffffff';
+            window.showToast('Saving to gallery...');
+            html2canvas(el, { scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false })
+                .then(canvas => {
+                    el.style.background = origBg;
+                    const txnId  = (document.getElementById('or-txn-id').innerText || 'receipt').replace(/[^a-zA-Z0-9-]/g,'');
+                    const fname  = `Receipt_${txnId}_${Date.now()}.png`;
+                    // Try Web Share API (mobile — saves to gallery / shares)
+                    canvas.toBlob(async blob => {
+                        const file = new File([blob], fname, { type: 'image/png' });
+                        if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                            try {
+                                await navigator.share({ files: [file], title: 'Order Receipt', text: txnId });
+                                window.showToast('Receipt shared / saved!');
+                                return;
+                            } catch(shareErr) {
+                                // User cancelled or share failed — fall through to download
+                            }
+                        }
+                        // Fallback: trigger download
+                        const url = URL.createObjectURL(blob);
+                        const a   = document.createElement('a');
+                        a.href = url; a.download = fname;
+                        document.body.appendChild(a); a.click();
+                        setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+                        window.showToast('Receipt downloaded!');
+                    }, 'image/png');
+                })
+                .catch(() => { el.style.background = origBg; window.showToast('Failed to save image', 'error'); });
+        };
+
+        window.printOrderReceipt = function() {
+            const el = document.getElementById('print-order-receipt');
+            if (!el) return;
+            const w = window.open('', '_blank', 'width=400,height=600');
+            w.document.write(`<!DOCTYPE html><html><head><meta charset="UTF-8"><style>
+                body{margin:0;padding:20px;background:#f4f6f8;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;}
+                .receipt-card{background:#fff;border-radius:20px;overflow:hidden;max-width:300px;margin:0 auto;box-shadow:0 8px 32px rgba(0,0,0,0.12);}
+                .receipt-header{padding:24px 20px 8px;text-align:center;}
+                .check-circle{width:52px;height:52px;border-radius:50%;background:#dcfce7;display:flex;align-items:center;justify-content:center;margin:0 auto 12px;}
+                .store-name{font-size:16px;font-weight:800;color:#1e293b;margin-bottom:4px;}
+                .label{font-size:12px;color:#94a3b8;}
+                .divider{display:flex;align-items:center;margin:16px 0 0;}
+                .notch{width:18px;height:18px;border-radius:50%;background:#f1f5f9;flex-shrink:0;}
+                .notch-l{margin-left:-9px;} .notch-r{margin-right:-9px;}
+                .dashed{flex:1;border-top:2px dashed #e2e8f0;}
+                .body{padding:14px 20px 6px;}
+                .row{display:flex;justify-content:space-between;padding:7px 0;font-size:13px;border-bottom:1px solid #f1f5f9;}
+                .row span:first-child{color:#94a3b8;font-weight:600;font-size:12px;}
+                .row span:last-child{font-weight:700;color:#1e293b;}
+                .txn{font-size:11px;letter-spacing:0.5px;color:#1877f2;}
+                .total{background:#f8fafc;margin:10px 16px 16px;padding:12px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;border:1px solid #e2e8f0;}
+                .total-lbl{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;}
+                .total-amt{font-size:17px;font-weight:900;color:#1877f2;}
+            </style></head><body><div class="receipt-card">${el.innerHTML}</div></body></html>`);
+            w.document.close();
+            setTimeout(() => { w.print(); w.close(); }, 500);
+        };
+
+        function _startOrderListener() {
+            if (!storeDb) return;
+            if (_orderUnsubscribe) { _orderUnsubscribe(); _orderUnsubscribe = null; }
+
+            _orderUnsubscribe = storeDb.collection('orders')
+                .where('status', '==', 'confirmed')
+                .where('receiptIssued', '==', false)
+                .onSnapshot(snapshot => {
+                    snapshot.docChanges().forEach(change => {
+                        if (change.type === 'added' || change.type === 'modified') {
+                            const id  = change.doc.id;
+                            const dat = change.doc.data();
+                            // Skip if already seen this session
+                            if (_seenOrders.has(id)) return;
+                            _seenOrders.add(id);
+                            _orderQueue.push({ ...dat, _id: id });
+                        }
+                    });
+                    _showNextReceipt();
+                }, err => {
+                    // Fallback: receiptIssued field might not exist yet — query without it
+                    _orderUnsubscribe = storeDb.collection('orders')
+                        .where('status', '==', 'confirmed')
+                        .onSnapshot(snapshot => {
+                            snapshot.docChanges().forEach(change => {
+                                if (change.type === 'added' || change.type === 'modified') {
+                                    const id  = change.doc.id;
+                                    const dat = change.doc.data();
+                                    if (_seenOrders.has(id)) return;
+                                    if (dat.receiptIssued === true) return;
+                                    _seenOrders.add(id);
+                                    _orderQueue.push({ ...dat, _id: id });
+                                }
+                            });
+                            _showNextReceipt();
+                        }, e2 => console.warn('Order listener failed:', e2));
+                });
+        }
+
+        // Start listener once storeDb is ready (called after storeDb init)
+        setTimeout(_startOrderListener, 1500);
+
+        window.recalcAllMMK = function(rate) {
+            if(!state.activeGame || !state.data[state.activeGame]) return;
+            if(!rate || rate <= 0) return;
+            const items = state.data[state.activeGame].items || [];
+            let changed = 0;
+            items.forEach(function(itm) {
+                const rs = parseFloat(itm.costRS) || 0;
+                if(rs > 0) {
+                    const newMMK = Math.round(rs * rate);
+                    if(itm.costMMK !== newMMK) {
+                        itm.costMMK = newMMK;
+                        changed++;
+                    }
+                }
+            });
+            if(changed > 0) {
+                saveDataToCloud();
+                window.renderInventory();
+                window.showToast('Updated ' + changed + ' item' + (changed > 1 ? 's' : '') + ' → new rate applied');
+            }
         };
 
         window.loadExRate = function() {
@@ -2007,7 +2405,11 @@
             document.getElementById('ex-symbol').value = cfg.sym;
             document.getElementById('ex-rate').value   = cfg.rate;
             document.getElementById('ex-sym-label').innerText = cfg.sym;
-            document.getElementById('ex-rate-badge').innerText = '1 ' + cfg.sym + ' = ' + (cfg.rate||0).toLocaleString() + ' MMK';
+            const badge = document.getElementById('ex-rate-badge');
+            if(badge) { badge.innerText = '1 ' + cfg.sym + ' = ' + (cfg.rate||0).toLocaleString() + ' MMK'; badge.style.color = ''; }
+            // Hide apply button when switching game
+            const wrap = document.getElementById('ex-apply-wrap');
+            if(wrap) wrap.style.display = 'none';
             document.getElementById('ex-amount').value = '';
             document.getElementById('ex-result').innerText = '— MMK';
         };
@@ -2021,6 +2423,89 @@
             }
         };
 
+    
     </script>
+
+    <!-- ================= AUTO ORDER RECEIPT MODAL ================= -->
+    <div class="modal" id="modal-order-receipt" style="z-index:99998;">
+        <div class="modal-content" style="max-width:380px; padding:0; overflow:hidden; border-radius:20px;">
+            <!-- Header -->
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border); background:var(--card);">
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width:34px; height:34px; border-radius:10px; background:rgba(16,185,129,0.12); display:flex; align-items:center; justify-content:center;">
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-weight:900; font-size:15px;">Order Confirmed</div>
+                        <div style="font-size:11px; color:var(--text-sec); font-weight:600;">New order received from store</div>
+                    </div>
+                </div>
+                <button onclick="window.closeOrderReceipt()" style="padding:6px; color:var(--text-sec);">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+                </button>
+            </div>
+            <!-- Receipt Card -->
+            <div style="padding:20px; background:var(--bg); overflow-y:auto; max-height:70vh;">
+                <div class="receipt-card" id="print-order-receipt">
+                    <div class="receipt-header">
+                        <div class="receipt-check-circle">
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                        </div>
+                        <div class="receipt-store-name" id="or-store-name">PCA Store</div>
+                        <span class="receipt-label">Order confirmed successfully</span>
+                    </div>
+                    <div class="receipt-divider">
+                        <div class="receipt-notch-left"></div>
+                        <div class="receipt-dashed"></div>
+                        <div class="receipt-notch-right"></div>
+                    </div>
+                    <div class="receipt-body">
+                        <div class="receipt-row">
+                            <span>Transaction ID</span>
+                            <span id="or-txn-id" style="font-size:11px; letter-spacing:0.5px; color:var(--primary);">-</span>
+                        </div>
+                        <div class="receipt-row">
+                            <span>Date &amp; Time</span>
+                            <span id="or-datetime" style="font-size:12px;">-</span>
+                        </div>
+                        <div class="receipt-row"><span>Customer</span> <span id="or-customer">-</span></div>
+                        <div class="receipt-row"><span>Game</span> <span id="or-game">-</span></div>
+                        <div class="receipt-row"><span>Player ID</span> <span id="or-player-id">-</span></div>
+                        <div class="receipt-row"><span>Package</span> <span id="or-package">-</span></div>
+                        <div class="receipt-row"><span>Status</span>
+                            <span style="color:#16a34a; font-weight:800; display:inline-flex; align-items:center; gap:4px;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                                Confirmed
+                            </span>
+                        </div>
+                    </div>
+                    <div class="receipt-total">
+                        <span class="receipt-total-label">Total Paid</span>
+                        <span class="receipt-total-amount" id="or-price">0 KS</span>
+                    </div>
+                </div>
+                <!-- Queue indicator -->
+                <div id="or-queue-bar" style="display:none; margin-top:12px; background:var(--card); border-radius:10px; padding:10px 14px; border:1px solid var(--border); align-items:center; gap:8px;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                    <span id="or-queue-text" style="font-size:12px; font-weight:700; color:var(--text-sec);"></span>
+                </div>
+            </div>
+            <!-- Actions -->
+            <div style="padding:14px 20px 20px; background:var(--card); border-top:1px solid var(--border); display:flex; gap:8px; flex-wrap:wrap;">
+                <button class="btn" style="flex:1; min-width:120px; background:var(--green); font-size:13px;" onclick="window.saveReceiptToGallery()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Save to Gallery
+                </button>
+                <button class="btn" style="flex:1; min-width:100px; background:var(--primary); font-size:13px;" onclick="window.printOrderReceipt()">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 6 2 18 2 18 9"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>
+                    Print
+                </button>
+                <button onclick="window.closeOrderReceipt()" style="padding:12px 14px; border-radius:10px; border:1.5px solid var(--border); font-weight:700; font-size:13px; color:var(--text-sec); flex-shrink:0;">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div>
+
 </body>
 </html>
