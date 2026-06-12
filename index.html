@@ -630,41 +630,6 @@
             <div><span style="font-size:12px; color:var(--text-sec); font-weight:700;">TODAY'S PROFIT</span><br><strong style="font-size:24px;" id="sales-total-profit">0 KS</strong></div>
             <div style="text-align:right;"><span style="font-size:12px; color:var(--text-sec); font-weight:700;">ITEMS SOLD</span><br><strong style="font-size:20px;" id="sales-total-items">0</strong></div>
         </div>
-
-        <!-- Profit Chart -->
-        <div class="card" id="chart-card">
-            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
-                <h3 style="font-size:14px; font-weight:800; color:var(--text);">Profit Trend</h3>
-                <div style="display:flex; gap:6px;">
-                    <button id="chart-btn-7" onclick="window.renderProfitChart(7)" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid var(--primary);background:var(--primary);color:white;">7D</button>
-                    <button id="chart-btn-14" onclick="window.renderProfitChart(14)" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid var(--border);background:var(--card);color:var(--text-sec);">14D</button>
-                    <button id="chart-btn-30" onclick="window.renderProfitChart(30)" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid var(--border);background:var(--card);color:var(--text-sec);">30D</button>
-                </div>
-            </div>
-            <canvas id="profit-chart" height="160" style="width:100%;max-width:100%;"></canvas>
-            <div id="chart-empty" style="display:none;text-align:center;padding:28px;color:var(--text-sec);font-weight:700;font-size:13px;">No sales history yet</div>
-        </div>
-
-        <!-- Best Selling Items -->
-        <div class="card">
-            <h3 style="font-size:14px; font-weight:800; color:var(--text); margin-bottom:14px;">🏆 Best Selling Items</h3>
-            <div id="best-items-container"></div>
-        </div>
-
-        <!-- Recent Sales -->
-        <div class="card">
-            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:12px;">
-                <h3 style="font-size:15px;color:var(--text-sec);">Recent Sales Activity</h3>
-                <!-- Date Filter -->
-                <div style="display:flex;align-items:center;gap:6px;">
-                    <input type="date" id="sales-date-filter" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12px;font-weight:700;" onchange="window.renderSales()">
-                    <button onclick="document.getElementById('sales-date-filter').value='';window.renderSales();" style="padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text-sec);font-size:11px;font-weight:800;">All</button>
-                </div>
-            </div>
-            <!-- Game Filter -->
-            <div id="sales-game-filter-row" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>
-            <div id="sales-list-container"></div>
-        </div>
     </main>
 
     <main class="view" id="view-vc">
@@ -859,47 +824,6 @@
             <div id="publish-last" style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:8px;"></div>
         </div>
 
-        <!-- SUMMARY DASHBOARD -->
-        <div class="card">
-            <h3 style="font-size:15px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Summary Dashboard</h3>
-            <div class="stats-grid" id="dash-summary-grid" style="margin-bottom:0;">
-                <div class="stat-box"><span>Total Games</span><strong id="dash-total-games">0</strong></div>
-                <div class="stat-box"><span>Total Packages</span><strong id="dash-total-packages">0</strong></div>
-                <div class="stat-box" style="border-color: var(--primary); background: rgba(24,119,242,0.05);"><span style="color:var(--primary)">All-Time Profit</span><strong id="dash-alltime-profit">0</strong></div>
-            </div>
-        </div>
-
-        <!-- PER-GAME PROFIT BREAKDOWN -->
-        <div class="card">
-            <h3 style="font-size:15px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10h-10z" fill="currentColor"/></svg> Per-Game Profit Breakdown</h3>
-            <canvas id="game-profit-chart" height="180"></canvas>
-            <div id="game-profit-empty" style="display:none; text-align:center; padding:28px; color:var(--text-sec); font-weight:700; font-size:13px;">No sales recorded yet</div>
-        </div>
-
-        <!-- PROFIT GOAL -->
-        <div class="card">
-            <h3 style="font-size:15px; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Today's Profit Goal</h3>
-            <div class="input-group" style="margin-bottom:10px;">
-                <label>Goal (KS)</label>
-                <input type="number" class="input-field" id="set-profit-goal" oninput="window.saveProfitGoal()" placeholder="e.g. 50000">
-            </div>
-            <div style="background:var(--bg); border-radius:10px; height:14px; overflow:hidden; position:relative; margin-bottom:6px;">
-                <div id="profit-goal-bar" style="background:var(--green); height:100%; width:0%; transition:width 0.4s;"></div>
-            </div>
-            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; color:var(--text-sec);">
-                <span id="profit-goal-current">0 KS</span>
-                <span id="profit-goal-pct">0%</span>
-            </div>
-        </div>
-
-        <!-- LOW STOCK / LOW PROFIT ALERT THRESHOLD -->
-        <div class="card">
-            <h3 style="font-size:15px; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Low-Profit Alert</h3>
-            <div style="font-size:12px; color:var(--text-sec); font-weight:600; margin-bottom:10px;">Items with profit margin below this % will show a warning badge</div>
-            <input type="range" id="margin-threshold-slider" min="0" max="50" value="10" oninput="window.saveLowMarginThreshold(this.value)" style="width:100%;">
-            <span id="margin-threshold-value" style="font-size:12px; font-weight:700; color:var(--text-sec)">10%</span>
-        </div>
-
         <!-- AUTO TELEGRAM DAILY REPORT -->
         <div class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
@@ -914,33 +838,6 @@
                 <input type="time" class="input-field" id="auto-report-time" value="00:00" onchange="window.saveAutoReportTime()">
             </div>
             <div id="auto-report-last" style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:8px;"></div>
-        </div>
-
-        <!-- BACKUP & RESTORE -->
-        <div class="card">
-            <h3 style="font-size:15px; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Backup & Restore</h3>
-            <div style="font-size:12px; color:var(--text-sec); font-weight:600; margin-bottom:12px;">Export your inventory and sales data as a JSON file, or restore from a previous backup.</div>
-            <div style="display:flex; gap:10px;">
-                <button class="btn" style="flex:1; background:var(--green);" onclick="window.exportBackupJSON()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
-                    Export
-                </button>
-                <button class="btn" style="flex:1; background:var(--card); color:var(--text); border:1px solid var(--border);" onclick="document.getElementById('restore-file-input').click()">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
-                    Import
-                </button>
-                <input type="file" id="restore-file-input" accept=".json" style="display:none;" onchange="window.restoreBackupJSON(this.files[0])">
-            </div>
-        </div>
-
-        <!-- DATA USAGE INFO -->
-        <div class="card">
-            <h3 style="font-size:15px; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> Firestore Data Usage</h3>
-            <div class="stats-grid" style="margin-bottom:0;">
-                <div class="stat-box"><span>Reads</span><strong id="dash-reads">0</strong></div>
-                <div class="stat-box"><span>Writes</span><strong id="dash-writes">0</strong></div>
-            </div>
-            <button class="btn" style="width:100%; margin-top:12px; background:var(--card); color:var(--text-sec); border:1px solid var(--border);" onclick="window.resetDataUsage()">Reset Counter</button>
         </div>
 
         <div class="card">
@@ -1169,7 +1066,10 @@
     <script>
         let state = {
             viewMode: 'mobile', theme: 'light', activeGame: '', fontSize: 14,
-            profile: { name: 'PCA Store', tgToken: '', tgChatId: '' }, data: {}, sales: [], uid: null
+            profile: { name: 'PCA Store', tgToken: '', tgChatId: '' }, data: {}, sales: [], uid: null,
+            // settings = everything that used to live ONLY in localStorage.
+            // This now gets synced to Firestore too, so it survives "clear browser data".
+            settings: { profitGoal: 0, lowMarginThreshold: 10, autoReportEnabled: false, autoReportTime: '00:00', gameOrderGlobalLocked: false, exRates: {} }
         };
         let tempEditIdx = -1; let tempBase64Image = ""; let confirmActionCallback = null; let isEditingGame = false; let editingGameOriginalName = "";
 
@@ -1182,11 +1082,6 @@
                 localStorage.setItem(key, JSON.stringify(usage));
             } catch(e) {}
         }
-        window.getDataUsage = function() {
-            try { return JSON.parse(localStorage.getItem('pcaDataUsage') || '{"reads":0,"writes":0}'); }
-            catch(e) { return {reads:0, writes:0}; }
-        };
-        window.resetDataUsage = function() { localStorage.setItem('pcaDataUsage', JSON.stringify({reads:0,writes:0})); window.renderDataUsage(); window.showToast('Data usage counter reset'); };
 
         // SVGs for dynamic injection
         const svgTrash = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
@@ -1359,6 +1254,40 @@
                 var sGoal = localStorage.getItem('pcaProfitGoal'); state.profitGoal = sGoal !== null ? parseFloat(sGoal) : 0;
                 state.autoReportEnabled = localStorage.getItem('pcaAutoReportEnabled') === '1';
                 state.autoReportTime = localStorage.getItem('pcaAutoReportTime') || '00:00';
+
+                // ---- Cloud-syncable settings (fallback from localStorage, will be overridden by cloud if logged in) ----
+                var sSettings = localStorage.getItem('pcaSettings');
+                if(sSettings) {
+                    try { state.settings = { ...state.settings, ...JSON.parse(sSettings) }; } catch(e) {}
+                } else {
+                    // Migrate old separate localStorage keys into the new settings object
+                    state.settings.profitGoal = state.profitGoal;
+                    state.settings.lowMarginThreshold = state.lowMarginThreshold;
+                    state.settings.autoReportEnabled = state.autoReportEnabled;
+                    state.settings.autoReportTime = state.autoReportTime;
+                    try {
+                        var sLock = localStorage.getItem('pcaGameOrderGlobalLocked');
+                        if(sLock !== null) state.settings.gameOrderGlobalLocked = JSON.parse(sLock);
+                    } catch(e) {}
+                    // Migrate per-game exchange rates (exRate_<game>)
+                    state.settings.exRates = state.settings.exRates || {};
+                    try {
+                        for(var i = 0; i < localStorage.length; i++) {
+                            var lk = localStorage.key(i);
+                            if(lk && lk.indexOf('exRate_') === 0) {
+                                var gKey = lk.substring(7);
+                                var val = JSON.parse(localStorage.getItem(lk));
+                                if(val) state.settings.exRates[gKey] = val;
+                            }
+                        }
+                    } catch(e) {}
+                }
+                // Keep legacy state fields in sync with settings (used elsewhere in the app)
+                state.profitGoal = state.settings.profitGoal;
+                state.lowMarginThreshold = state.settings.lowMarginThreshold;
+                state.autoReportEnabled = state.settings.autoReportEnabled;
+                state.autoReportTime = state.settings.autoReportTime;
+                state.gameOrderGlobalLocked = state.settings.gameOrderGlobalLocked;
             } catch(e) {}
 
             var games = Object.keys(state.data); 
@@ -1387,6 +1316,18 @@
                     let cloudProf = cData.profile || {};
                     let cloudSales = cData.salesHistory || [];
                     let cloudOrder = cData.gameOrder || [];
+                    let cloudSettings = cData.settings || null;
+
+                    // Settings: cloud is master (same approach as inventory/profile)
+                    if(cloudSettings) {
+                        state.settings = { ...state.settings, ...cloudSettings, exRates: { ...(state.settings.exRates || {}), ...(cloudSettings.exRates || {}) } };
+                        state.profitGoal = state.settings.profitGoal;
+                        state.lowMarginThreshold = state.settings.lowMarginThreshold;
+                        state.autoReportEnabled = state.settings.autoReportEnabled;
+                        state.autoReportTime = state.settings.autoReportTime;
+                        state.gameOrderGlobalLocked = state.settings.gameOrderGlobalLocked;
+                        applyLoadedSettingsToUI();
+                    }
 
                     // 1. Merge Inventory (Cloud is master; local additions layered on top)
                     if (Object.keys(state.data).length === 0) {
@@ -1435,14 +1376,38 @@
             localStorage.setItem('pcaStoreProfile', JSON.stringify(state.profile));
             localStorage.setItem('pcaSalesData', JSON.stringify(state.sales));
             localStorage.setItem('pcaGameOrder', JSON.stringify(state.gameOrder || []));
+            localStorage.setItem('pcaSettings', JSON.stringify(state.settings || {}));
         }
 
         function saveDataToCloud() {
             saveDataToLocal();
             if(auth && state.uid && db) {
                 _trackFirestore('writes');
-                db.collection("stores").doc(state.uid).set({ inventory: state.data, data: state.data, profile: state.profile, salesHistory: state.sales, gameOrder: state.gameOrder || [] }, {merge: true}).catch(e=>{});
+                db.collection("stores").doc(state.uid).set({ inventory: state.data, data: state.data, profile: state.profile, salesHistory: state.sales, gameOrder: state.gameOrder || [], settings: state.settings || {} }, {merge: true}).catch(e=>{});
             }
+        }
+
+        // Debounced version for settings that change rapidly (sliders, typing) — avoids spamming Firestore writes
+        let _settingsSaveTimer = null;
+        function saveSettingsDebounced() {
+            saveDataToLocal();
+            if(_settingsSaveTimer) clearTimeout(_settingsSaveTimer);
+            _settingsSaveTimer = setTimeout(() => { saveDataToCloud(); }, 800);
+        }
+
+        // Apply state.settings values to the visible UI controls (called after settings load/sync)
+        function applyLoadedSettingsToUI() {
+            try {
+                var autoToggle = document.getElementById('auto-report-toggle');
+                if(autoToggle) autoToggle.checked = !!state.settings.autoReportEnabled;
+                var autoTime = document.getElementById('auto-report-time');
+                if(autoTime) autoTime.value = state.settings.autoReportTime || '00:00';
+
+                applyGlobalLockUI && applyGlobalLockUI();
+                window.renderSidebarGames && window.renderSidebarGames();
+                if(state.activeGame) window.loadExRate && window.loadExRate();
+                window.renderInventory && window.renderInventory();
+            } catch(e) {}
         }
 
         function applyGlobalUI() {
@@ -1461,10 +1426,7 @@
             else { document.getElementById('inv-mobile-container').style.display = 'block'; document.getElementById('inv-desktop-container').style.display = 'none'; }
             const cbtn = document.getElementById('btn-compact-toggle'); if(cbtn) cbtn.style.color = state.compactView ? 'var(--primary)' : 'var(--text-sec)';
             window.renderSidebarGames(); window.renderInventory(); window.renderSales(); window.loadExRate();
-            window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar(); window.renderDataUsage();
 
-            const marginSlider = document.getElementById('margin-threshold-slider');
-            if(marginSlider) { marginSlider.value = state.lowMarginThreshold !== undefined ? state.lowMarginThreshold : 10; document.getElementById('margin-threshold-value').innerText = marginSlider.value + '%'; }
             const autoToggle = document.getElementById('auto-report-toggle'); if(autoToggle) autoToggle.checked = !!state.autoReportEnabled;
             const autoTime = document.getElementById('auto-report-time'); if(autoTime) autoTime.value = state.autoReportTime || '00:00';
         }
@@ -1623,7 +1585,7 @@
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); if(document.getElementById('nav-' + v)) document.getElementById('nav-' + v).classList.add('active');
             document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show');
             if(v === 'inventory') window.renderInventory(); if(v === 'sales') window.renderSales();
-            if(v === 'settings') { window.updatePublishPreview(); window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar(); window.renderDataUsage(); }
+            if(v === 'settings') { window.updatePublishPreview(); }
         };
 
         // ================= GAME MANAGMENT =================
@@ -1656,7 +1618,8 @@
 
         window.toggleGlobalLock = function() {
             state.gameOrderGlobalLocked = !state.gameOrderGlobalLocked;
-            try { localStorage.setItem('pcaGameOrderGlobalLocked', JSON.stringify(state.gameOrderGlobalLocked)); } catch(e) {}
+            state.settings.gameOrderGlobalLocked = state.gameOrderGlobalLocked;
+            saveDataToCloud();
             applyGlobalLockUI();
             window.renderSidebarGames();
             window.showToast(state.gameOrderGlobalLocked ? 'Game order locked' : 'Game order unlocked', state.gameOrderGlobalLocked ? 'lock' : 'unlock');
@@ -1790,7 +1753,7 @@
                     let color = profit < 0 ? 'var(--red)' : 'var(--green)'; let sign = profit <= 0 ? '' : '+';
                     let comboBadgeMobile = itm.combo ? `<span style="background:var(--bg); color:var(--text-sec); font-size:11px; padding:4px 8px; border-radius:6px; border:1px solid var(--border); font-weight:700; margin-left:8px;">${itm.combo}</span>` : '';
                     let comboBadgeDesktop = itm.combo ? `<br><span style="font-size:11px; color:var(--text-sec); font-weight:600;">${itm.combo}</span>` : '';
-                    let exSym = (function(){ try{ var k='exRate_'+state.activeGame; var s=localStorage.getItem(k); return s?JSON.parse(s).sym:'R$'; }catch(e){return 'R$';} })();
+                    let exSym = (function(){ try{ var s=(state.settings.exRates||{})[state.activeGame]; return s?s.sym:'R$'; }catch(e){return 'R$';} })();
                     let costString = costRS > 0 ? `${exSym} ${costRS} / ${costMMK} KS` : `${costMMK} KS`;
                     let costDesktop = costRS > 0 ? `<b>${costMMK} KS</b><br><span style="font-size:11px; color:var(--text-sec);">${exSym} ${costRS}</span>` : `<b>${costMMK} KS</b>`;
 
@@ -1876,7 +1839,7 @@
         window.openItemModal = function(idx = -1) {
             tempEditIdx = idx;
             // Refresh currency label from active game's exchange setting
-            const exSym2 = (function(){ try{ var k='exRate_'+state.activeGame; var s=localStorage.getItem(k); return s?JSON.parse(s).sym:'R$'; }catch(e){return 'R$';} })();
+            const exSym2 = (function(){ try{ var s=(state.settings.exRates||{})[state.activeGame]; return s?s.sym:'R$'; }catch(e){return 'R$';} })();
             const rsLbl = document.getElementById('mi-cost-rs-label');
             if(rsLbl) rsLbl.innerText = 'Cost (' + exSym2 + ')';
             if(idx > -1) {
@@ -1957,7 +1920,7 @@
             const itm = state.data[game].items[idx]; let cMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
             state.sales.push({ date: new Date().toLocaleDateString(), game: game, name: itm.name, profit: (itm.sell||0)-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
             saveDataToCloud(); window.showToast(`Sold 1x ${itm.name}`); window.renderSales(); updateNotifBadge();
-            window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar();
+           
             if(game === state.activeGame) window.renderInventory();
         };
 
@@ -1968,95 +1931,25 @@
             const itm = state.data[state.activeGame].items[idx]; let cMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
             state.sales.push({ date: new Date().toLocaleDateString(), game: state.activeGame, name: itm.name, profit: (itm.sell||0)-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
             saveDataToCloud(); window.showToast(`Sold 1x ${itm.name}`); window.renderSales(); updateNotifBadge();
-            window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar();
+           
         };
 
         window.renderSales = function() {
             const today = new Date().toLocaleDateString();
-            const filterDateInput = document.getElementById('sales-date-filter');
-            const filterDate = filterDateInput ? filterDateInput.value : '';
-            const activeFilterDate = filterDate ? new Date(filterDate).toLocaleDateString() : today;
-
-            // Game filter state
-            if (!window._salesGameFilter) window._salesGameFilter = 'all';
-
-            // Build game filter buttons
-            const gameFilterRow = document.getElementById('sales-game-filter-row');
-            if (gameFilterRow) {
-                const games = [...new Set(state.sales.map(s => s.game).filter(Boolean))];
-                let btns = `<button onclick="window._salesGameFilter='all';window.renderSales();" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid ${window._salesGameFilter==='all'?'var(--primary)':'var(--border)'};background:${window._salesGameFilter==='all'?'var(--primary)':'var(--card)'};color:${window._salesGameFilter==='all'?'white':'var(--text-sec)'};">All</button>`;
-                games.forEach(g => {
-                    const isActive = window._salesGameFilter === g;
-                    btns += `<button onclick="window._salesGameFilter='${g}';window.renderSales();" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid ${isActive?'var(--primary)':'var(--border)'};background:${isActive?'var(--primary)':'var(--card)'};color:${isActive?'white':'var(--text-sec)'};">${g}</button>`;
-                });
-                gameFilterRow.innerHTML = btns;
-            }
-
-            let filtered = state.sales.filter(s => s.date === activeFilterDate);
-            if (window._salesGameFilter && window._salesGameFilter !== 'all') {
-                filtered = filtered.filter(s => s.game === window._salesGameFilter);
-            }
+            const filtered = state.sales.filter(s => s.date === today);
 
             let profit = 0;
-            const con = document.getElementById('sales-list-container');
-            if(!con) return; con.innerHTML = '';
+            filtered.forEach(s => { profit += (s.profit || 0); });
 
-            if(filtered.length === 0) {
-                con.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:600;">${t('no_sales')}</div>`;
-            } else {
-                filtered.slice().reverse().forEach((s, idx) => {
-                    profit += (s.profit || 0);
-                    const color   = (s.profit||0) < 0 ? 'var(--red)' : 'var(--green)';
-                    const sign    = (s.profit||0) <= 0 ? '' : '+';
-                    const isOrder = !!s.txnId;
-                    const badge   = isOrder
-                        ? `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(24,119,242,0.1);color:var(--primary);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;letter-spacing:0.3px;margin-left:6px;">
-                               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-                               Store Order
-                           </span>` : '';
-                    const txnLine = isOrder
-                        ? `<div style="font-size:10px;color:var(--primary);font-weight:700;margin-top:2px;display:flex;align-items:center;gap:4px;">
-                               <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
-                               TXN: ${s.txnId}
-                           </div>` : '';
-                    const customerLine = (isOrder && s.customer)
-                        ? `<div style="font-size:10px;color:var(--text-sec);font-weight:600;margin-top:1px;">${s.customer} · ${s.game||''}</div>` : '';
-                    const receiptBtn = isOrder
-                        ? `<button onclick="window.reShowOrderReceipt(${JSON.stringify(s).replace(/"/g,'&quot;')})" title="View Receipt"
-                               style="padding:6px 8px;border-radius:8px;background:var(--bg);border:1px solid var(--border);color:var(--primary);margin-left:8px;flex-shrink:0;">
-                               <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                           </button>` : '';
-
-                    con.innerHTML += `
-                        <div style="display:flex;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border);align-items:flex-start;gap:8px;">
-                            <div style="flex:1;min-width:0;">
-                                <div style="display:flex;align-items:center;flex-wrap:wrap;gap:0;">
-                                    <strong style="color:var(--text);font-size:14px;">${s.name}</strong>
-                                    ${badge}
-                                    <span style="font-size:11px;color:var(--text-sec);font-weight:700;margin-left:6px;">${s.time}</span>
-                                </div>
-                                ${txnLine}
-                                ${customerLine}
-                            </div>
-                            <div style="display:flex;align-items:center;flex-shrink:0;">
-                                <strong style="color:${color};font-size:15px;">${sign}${s.profit||0} KS</strong>
-                                ${receiptBtn}
-                            </div>
-                        </div>`;
-                });
-            }
             const itemsEl  = document.getElementById('sales-total-items');
             const profitEl = document.getElementById('sales-total-profit');
             if(itemsEl)  animateCountUp(itemsEl, filtered.length, '');
             if(profitEl) { animateCountUp(profitEl, profit); profitEl.style.color = profit < 0 ? 'var(--red)' : 'var(--text)'; }
 
-            // Update analytics
-            window.renderProfitChart(_chartDays);
-            window.renderBestItems();
             updateNotifBadge();
         };
 
-        window.confirmClearSales = function() { window.showConfirm("Clear Sales", "Reset daily transaction history for today?", () => { state.sales = state.sales.filter(s => s.date !== new Date().toLocaleDateString()); saveDataToCloud(); window.renderSales(); window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar(); window.showToast("Cleared"); }); };
+        window.confirmClearSales = function() { window.showConfirm("Clear Sales", "Reset daily transaction history for today?", () => { state.sales = state.sales.filter(s => s.date !== new Date().toLocaleDateString()); saveDataToCloud(); window.renderSales(); window.showToast("Cleared"); }); };
 
         // ================= UNDO SYSTEM =================
         let _undoStack = [];
@@ -2103,103 +1996,6 @@
                 badge.classList.remove('show');
             }
         }
-
-        // ================= PROFIT CHART =================
-        let _profitChart = null;
-        let _chartDays = 7;
-
-        window.renderProfitChart = function(days) {
-            _chartDays = days || 7;
-            // Update button states
-            [7, 14, 30].forEach(d => {
-                const btn = document.getElementById('chart-btn-' + d);
-                if (!btn) return;
-                if (d === _chartDays) {
-                    btn.style.background = 'var(--primary)'; btn.style.color = 'white'; btn.style.borderColor = 'var(--primary)';
-                } else {
-                    btn.style.background = 'var(--card)'; btn.style.color = 'var(--text-sec)'; btn.style.borderColor = 'var(--border)';
-                }
-            });
-
-            const labels = [], profits = [];
-            for (let i = _chartDays - 1; i >= 0; i--) {
-                const d = new Date(); d.setDate(d.getDate() - i);
-                const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
-                const dayStr = d.toLocaleDateString();
-                const dayProfit = state.sales.filter(s => s.date === dayStr).reduce((sum, s) => sum + (s.profit || 0), 0);
-                labels.push(label);
-                profits.push(dayProfit);
-            }
-
-            const hasData = profits.some(p => p !== 0);
-            const emptyEl = document.getElementById('chart-empty');
-            const canvas = document.getElementById('profit-chart');
-            if (!hasData) {
-                if (emptyEl) emptyEl.style.display = 'block';
-                if (canvas) canvas.style.display = 'none';
-                return;
-            }
-            if (emptyEl) emptyEl.style.display = 'none';
-            if (canvas) canvas.style.display = 'block';
-
-            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
-            const textColor = isDark ? '#94a3b8' : '#64748b';
-
-            if (_profitChart) { _profitChart.destroy(); _profitChart = null; }
-            const ctx = canvas.getContext('2d');
-            const gradient = ctx.createLinearGradient(0, 0, 0, 160);
-            gradient.addColorStop(0, 'rgba(24,119,242,0.35)');
-            gradient.addColorStop(1, 'rgba(24,119,242,0.0)');
-
-            _profitChart = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels,
-                    datasets: [{
-                        label: 'Profit (KS)',
-                        data: profits,
-                        borderColor: '#1877f2',
-                        backgroundColor: gradient,
-                        borderWidth: 2.5,
-                        pointRadius: 4,
-                        pointBackgroundColor: '#1877f2',
-                        tension: 0.4,
-                        fill: true,
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y.toLocaleString() + ' KS' } } },
-                    scales: {
-                        x: { ticks: { color: textColor, font: { size: 10, weight: '700' }, maxTicksLimit: 7 }, grid: { color: gridColor } },
-                        y: { ticks: { color: textColor, font: { size: 10, weight: '700' }, callback: v => v.toLocaleString() }, grid: { color: gridColor } }
-                    }
-                }
-            });
-        };
-
-        // ================= BEST SELLING ITEMS =================
-        window.renderBestItems = function() {
-            const con = document.getElementById('best-items-container');
-            if (!con) return;
-            const counts = {};
-            state.sales.forEach(s => { counts[s.name] = (counts[s.name] || 0) + 1; });
-            const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
-            if (sorted.length === 0) { con.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-sec);font-weight:700;font-size:13px;">No sales data yet</div>'; return; }
-            const max = sorted[0][1];
-            const rankClass = ['gold', 'silver', 'bronze', '', ''];
-            con.innerHTML = sorted.map(([name, count], i) => `
-                <div class="best-item-row">
-                    <div class="best-item-rank ${rankClass[i] || ''}">${i + 1}</div>
-                    <div class="best-item-bar-wrap">
-                        <div class="best-item-name">${name}</div>
-                        <div class="best-item-bar" style="width:${Math.round((count/max)*100)}%"></div>
-                    </div>
-                    <div class="best-item-count">${count}x</div>
-                </div>`).join('');
-        };
 
         // ================= EXPORT CSV =================
         window.exportSalesCSV = function() {
@@ -2268,128 +2064,19 @@
             } catch(e) { window.showToast("Connection failed", "error"); }
         };
 
-        // ================= SUMMARY DASHBOARD =================
-        window.renderSummaryDashboard = function() {
-            const games = Object.keys(state.data);
-            let totalPackages = 0;
-            games.forEach(g => { totalPackages += (state.data[g].items || []).length; });
-            const allTimeProfit = state.sales.reduce((sum, s) => sum + (s.profit || 0), 0);
-
-            const elGames = document.getElementById('dash-total-games');
-            const elPackages = document.getElementById('dash-total-packages');
-            const elProfit = document.getElementById('dash-alltime-profit');
-            if(elGames) elGames.innerText = games.length;
-            if(elPackages) elPackages.innerText = totalPackages;
-            if(elProfit) { elProfit.innerText = (allTimeProfit>=0?'+':'') + allTimeProfit + ' KS'; elProfit.style.color = allTimeProfit < 0 ? 'var(--red)' : 'var(--primary)'; }
-        };
-
-        // ================= PER-GAME PROFIT BREAKDOWN =================
-        let _gameProfitChart = null;
-        window.renderGameProfitChart = function() {
-            const canvas = document.getElementById('game-profit-chart');
-            const emptyEl = document.getElementById('game-profit-empty');
-            if(!canvas) return;
-            const totals = {};
-            state.sales.forEach(s => { totals[s.game] = (totals[s.game] || 0) + (s.profit || 0); });
-            const labels = Object.keys(totals);
-            const values = labels.map(l => totals[l]);
-
-            if(labels.length === 0) {
-                canvas.style.display = 'none'; emptyEl.style.display = 'block';
-                if(_gameProfitChart) { _gameProfitChart.destroy(); _gameProfitChart = null; }
-                return;
-            }
-            canvas.style.display = 'block'; emptyEl.style.display = 'none';
-
-            const palette = ['#1877f2','#10b981','#f59e0b','#ef4444','#a855f7','#06b6d4','#ec4899','#84cc16'];
-            const colors = labels.map((_, i) => palette[i % palette.length]);
-
-            if(_gameProfitChart) _gameProfitChart.destroy();
-            _gameProfitChart = new Chart(canvas.getContext('2d'), {
-                type: 'pie',
-                data: { labels: labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
-                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text'), font: { weight: 700, size: 11 } } } } }
-            });
-        };
-
-        // ================= PROFIT GOAL =================
-        window.saveProfitGoal = function() {
-            const val = parseFloat(document.getElementById('set-profit-goal').value) || 0;
-            state.profitGoal = val;
-            localStorage.setItem('pcaProfitGoal', val);
-            window.renderProfitGoalBar();
-        };
-        window.renderProfitGoalBar = function() {
-            const goal = state.profitGoal || 0;
-            const today = new Date().toLocaleDateString();
-            const todayProfit = state.sales.filter(s => s.date === today).reduce((sum, s) => sum + (s.profit || 0), 0);
-            const pct = goal > 0 ? Math.min(100, Math.max(0, Math.round((todayProfit / goal) * 100))) : 0;
-            const bar = document.getElementById('profit-goal-bar');
-            const goalInput = document.getElementById('set-profit-goal');
-            if(bar) { bar.style.width = pct + '%'; bar.style.background = todayProfit < 0 ? 'var(--red)' : 'var(--green)'; }
-            if(goalInput && document.activeElement !== goalInput) goalInput.value = goal || '';
-            const curEl = document.getElementById('profit-goal-current'); if(curEl) curEl.innerText = todayProfit + ' KS / ' + goal + ' KS';
-            const pctEl = document.getElementById('profit-goal-pct'); if(pctEl) pctEl.innerText = pct + '%';
-        };
-
-        // ================= LOW MARGIN THRESHOLD =================
-        window.saveLowMarginThreshold = function(val) {
-            state.lowMarginThreshold = parseFloat(val);
-            localStorage.setItem('pcaLowMarginThreshold', val);
-            document.getElementById('margin-threshold-value').innerText = val + '%';
-            window.renderInventory();
-        };
-
-        // ================= DATA USAGE =================
-        window.renderDataUsage = function() {
-            const usage = window.getDataUsage();
-            const r = document.getElementById('dash-reads'); if(r) r.innerText = usage.reads || 0;
-            const w = document.getElementById('dash-writes'); if(w) w.innerText = usage.writes || 0;
-        };
-
-        // ================= BACKUP & RESTORE =================
-        window.exportBackupJSON = function() {
-            const backup = { exportedAt: new Date().toISOString(), data: state.data, sales: state.sales, gameOrder: state.gameOrder || [], profile: state.profile };
-            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url; a.download = `pca-store-backup-${new Date().toISOString().slice(0,10)}.json`;
-            document.body.appendChild(a); a.click(); document.body.removeChild(a);
-            URL.revokeObjectURL(url);
-            window.showToast('Backup exported');
-        };
-
-        window.restoreBackupJSON = function(file) {
-            if(!file) return;
-            const reader = new FileReader();
-            reader.onload = (e) => {
-                try {
-                    const backup = JSON.parse(e.target.result);
-                    window.showConfirm('Restore Backup', 'This will overwrite your current inventory and sales data. Continue?', () => {
-                        if(backup.data) state.data = backup.data;
-                        if(backup.sales) state.sales = backup.sales;
-                        if(backup.gameOrder) state.gameOrder = backup.gameOrder;
-                        if(backup.profile) state.profile = { ...state.profile, ...backup.profile };
-                        if(!state.activeGame || !state.data[state.activeGame]) state.activeGame = (state.gameOrder && state.gameOrder[0]) || Object.keys(state.data)[0] || '';
-                        saveDataToCloud(); applyGlobalUI(); window.showToast('Backup restored!');
-                    });
-                } catch(err) { window.showToast('Invalid backup file', 'error'); }
-                document.getElementById('restore-file-input').value = '';
-            };
-            reader.readAsText(file);
-        };
-
         // ================= AUTO TELEGRAM DAILY REPORT =================
         window.toggleAutoReport = function() {
             const enabled = document.getElementById('auto-report-toggle').checked;
             state.autoReportEnabled = enabled;
-            localStorage.setItem('pcaAutoReportEnabled', enabled ? '1' : '0');
+            state.settings.autoReportEnabled = enabled;
+            saveDataToCloud();
             window.showToast(enabled ? 'Auto Daily Report enabled' : 'Auto Daily Report disabled');
         };
         window.saveAutoReportTime = function() {
             const val = document.getElementById('auto-report-time').value || '00:00';
             state.autoReportTime = val;
-            localStorage.setItem('pcaAutoReportTime', val);
+            state.settings.autoReportTime = val;
+            saveDataToCloud();
         };
         function _checkAutoReport() {
             try {
@@ -2840,8 +2527,10 @@
         window.saveExRate = function() {
             const sym  = (document.getElementById('ex-symbol').value || 'R$').trim();
             const rate = parseFloat(document.getElementById('ex-rate').value) || 0;
-            const key  = 'exRate_' + (state.activeGame || '__default__');
-            try { localStorage.setItem(key, JSON.stringify({ sym, rate })); } catch(e) {}
+            const key  = state.activeGame || '__default__';
+            state.settings.exRates = state.settings.exRates || {};
+            state.settings.exRates[key] = { sym, rate };
+            saveSettingsDebounced();
             document.getElementById('ex-sym-label').innerText = sym;
             document.getElementById('ex-rate-badge').innerText = '1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK';
             const rsLabel = document.getElementById('mi-cost-rs-label');
@@ -3162,9 +2851,11 @@
             const widget = document.getElementById('exchange-widget');
             if(!state.activeGame) { if(widget) widget.style.display = 'none'; return; }
             if(widget) widget.style.display = 'block';
-            const key = 'exRate_' + state.activeGame;
             let cfg = { sym: 'R$', rate: 2000 };
-            try { const saved = localStorage.getItem(key); if(saved) cfg = JSON.parse(saved); } catch(e) {}
+            try {
+                const saved = (state.settings.exRates || {})[state.activeGame];
+                if(saved) cfg = saved;
+            } catch(e) {}
             document.getElementById('ex-symbol').value = cfg.sym;
             document.getElementById('ex-rate').value   = cfg.rate;
             document.getElementById('ex-sym-label').innerText = cfg.sym;
