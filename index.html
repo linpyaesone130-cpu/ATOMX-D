@@ -128,109 +128,207 @@
         }
         .vc-tab:not(.active):active { transform: scale(0.96); }
 
-        /* Receipt Voucher Card - Modern Clean Style */
+        /* ===== RECEIPT CARD — MINIMAL CLEAN + APPLE PAY AMOUNT ===== */
+        @keyframes receiptPop {
+            0%   { opacity:0; transform:scale(0.94) translateY(10px); }
+            65%  { transform:scale(1.015) translateY(-1px); }
+            100% { opacity:1; transform:scale(1) translateY(0); }
+        }
+        @keyframes checkDraw {
+            0%   { stroke-dashoffset: 40; opacity:0; }
+            40%  { opacity:1; }
+            100% { stroke-dashoffset: 0; }
+        }
+        @keyframes circlePop {
+            0%   { transform:scale(0); opacity:0; }
+            60%  { transform:scale(1.12); }
+            100% { transform:scale(1); opacity:1; }
+        }
+
+        /* Card */
         .receipt-card {
-            background: #fff;
-            border-radius: 20px;
+            background: #ffffff;
+            border-radius: 24px;
             overflow: visible;
-            max-width: 300px;
+            max-width: 340px;
             margin: 0 auto;
-            box-shadow: 0 8px 32px rgba(100,116,139,0.15), 0 2px 8px rgba(0,0,0,0.06);
+            box-shadow:
+                0 2px 8px rgba(0,0,0,0.06),
+                0 8px 24px rgba(0,0,0,0.08),
+                0 0 0 1px rgba(0,0,0,0.04);
             color: #1e293b;
             position: relative;
+            animation: receiptPop 0.4s cubic-bezier(0.34,1.4,0.64,1) both;
         }
-        [data-theme="dark"] .receipt-card { background: #1e293b; color: #f1f5f9; box-shadow: 0 8px 32px rgba(0,0,0,0.4); }
+        [data-theme="dark"] .receipt-card {
+            background: #1e293b;
+            color: #f1f5f9;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
+        }
 
-        /* Green check circle on top */
+        /* ── Header — clean white, no gradient ── */
         .receipt-header {
-            background: transparent;
-            padding: 28px 20px 8px;
+            background: #ffffff;
+            padding: 32px 24px 26px;
             text-align: center;
+            border-radius: 24px 24px 0 0;
             position: relative;
-            color: #1e293b;
-            overflow: visible;
+            overflow: hidden;
+            border-bottom: 1px solid #f1f5f9;
         }
-        [data-theme="dark"] .receipt-header { color: #f1f5f9; }
-        .receipt-header::after { display: none; }
-        .receipt-header::before { display: none; }
+        .receipt-header::before {
+            content: '';
+            position: absolute;
+            top: -35px; right: -35px;
+            width: 120px; height: 120px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.10);
+            pointer-events: none;
+        }
+        .receipt-header::after {
+            content: '';
+            position: absolute;
+            bottom: -25px; left: -25px;
+            width: 90px; height: 90px;
+            border-radius: 50%;
+            background: rgba(255,255,255,0.07);
+            pointer-events: none;
+        }
+        [data-theme="dark"] .receipt-header {
+            background: #1e293b;
+        }
 
+        /* Animated check circle — glassy on gradient */
         .receipt-check-circle {
-            width: 52px; height: 52px; border-radius: 50%;
-            background: #dcfce7;
+            width: 64px; height: 64px; border-radius: 50%;
+            background: #f0fdf4;
+            border: 2px solid #bbf7d0;
             display: flex; align-items: center; justify-content: center;
-            margin: 0 auto 12px;
+            margin: 0 auto 14px;
+            animation: circlePop 0.4s cubic-bezier(0.34,1.56,0.64,1) 0.1s both;
         }
-        .receipt-check-circle svg { color: #16a34a; }
-        .receipt-store-name { font-size: 16px; font-weight: 800; color: #1e293b; margin-bottom: 4px; }
+        [data-theme="dark"] .receipt-check-circle {
+            background: rgba(16,185,129,0.12);
+            border-color: rgba(16,185,129,0.35);
+        }
+        .receipt-check-circle svg polyline {
+            stroke: #10b981;
+            stroke-dasharray: 40;
+            stroke-dashoffset: 40;
+            animation: checkDraw 0.45s ease-out 0.3s forwards;
+        }
+        .receipt-store-name {
+            font-size: 18px; font-weight: 800; color: #0f172a;
+            margin-bottom: 4px; letter-spacing: -0.2px;
+        }
         [data-theme="dark"] .receipt-store-name { color: #f1f5f9; }
-        .receipt-label { font-size: 12px; font-weight: 500; color: #94a3b8; display: block; margin-bottom: 4px; }
+        .receipt-label {
+            font-size: 12px; font-weight: 500;
+            color: #64748b;
+            display: block;
+        }
         .receipt-store-emoji { display: none; }
 
-        /* Divider with notches */
+        /* ── Apple Pay–style centered amount block ── */
+        .receipt-amount-block {
+            text-align: center;
+            padding: 20px 24px 4px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        [data-theme="dark"] .receipt-amount-block { border-bottom-color: rgba(255,255,255,0.06); }
+        .receipt-amount-label {
+            font-size: 11px; font-weight: 700; color: #94a3b8;
+            text-transform: uppercase; letter-spacing: 1px; margin-bottom: 6px;
+        }
+        .receipt-amount-big {
+            font-size: 24px; font-weight: 800; color: #0f172a;
+            letter-spacing: -0.5px; line-height: 1;
+        }
+        [data-theme="dark"] .receipt-amount-big { color: #f8fafc; }
+
+        /* ── Tear divider ── */
         .receipt-divider {
             display: flex; align-items: center;
-            margin: 16px 0 0; position: relative;
+            margin: 0; position: relative;
         }
         .receipt-notch-left {
-            width: 18px; height: 18px; border-radius: 50%;
-            background: #f1f5f9; flex-shrink: 0; margin-left: -9px;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: var(--bg); flex-shrink: 0; margin-left: -12px;
             box-shadow: inset 1px 0 3px rgba(0,0,0,0.06);
         }
         .receipt-notch-right {
-            width: 18px; height: 18px; border-radius: 50%;
-            background: #f1f5f9; flex-shrink: 0; margin-right: -9px;
+            width: 24px; height: 24px; border-radius: 50%;
+            background: var(--bg); flex-shrink: 0; margin-right: -12px;
             box-shadow: inset -1px 0 3px rgba(0,0,0,0.06);
         }
         [data-theme="dark"] .receipt-notch-left,
         [data-theme="dark"] .receipt-notch-right { background: #0f172a; }
-        .receipt-dashed { flex: 1; border-top: 2px dashed #e2e8f0; }
+        .receipt-dashed { flex: 1; border-top: 1.5px dashed #e2e8f0; }
         [data-theme="dark"] .receipt-dashed { border-color: #334155; }
 
-        .receipt-body { padding: 14px 20px 6px; }
+        /* ── Body rows — clean & airy ── */
+        .receipt-body { padding: 6px 24px 10px; }
         .receipt-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 7px 0; font-size: 13px;
+            display: flex; justify-content: space-between; align-items: flex-start;
+            padding: 12px 0; font-size: 13px;
+            border-bottom: 1px solid #f8fafc;
         }
-        .receipt-row span:first-child { color: #94a3b8; font-weight: 600; font-size: 12px; }
-        .receipt-row span:last-child { font-weight: 700; color: #1e293b; font-size: 13px; }
-        [data-theme="dark"] .receipt-row span:last-child { color: #f1f5f9; }
-
-        /* Total box at bottom */
-        .receipt-total {
-            background: #f8fafc;
-            margin: 10px 16px 16px;
-            padding: 12px 16px;
-            border-radius: 12px;
-            display: flex; justify-content: space-between; align-items: center;
-            border: 1px solid #e2e8f0;
+        .receipt-row:last-child { border-bottom: none; }
+        [data-theme="dark"] .receipt-row { border-color: rgba(255,255,255,0.04); }
+        .receipt-row span:first-child {
+            color: #94a3b8; font-weight: 600; font-size: 11.5px;
+            text-transform: uppercase; letter-spacing: 0.5px;
+            padding-top: 1px; flex-shrink: 0;
         }
-        [data-theme="dark"] .receipt-total { background: #0f172a; border-color: #334155; }
-        .receipt-total-label { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-        .receipt-total-amount { font-size: 17px; font-weight: 900; color: #1877f2; }
+        .receipt-row span:last-child {
+            font-weight: 700; color: #1e293b; font-size: 13px;
+            max-width: 62%; text-align: right; word-break: break-word;
+            line-height: 1.4;
+        }
+        [data-theme="dark"] .receipt-row span:last-child { color: #e2e8f0; }
 
-        /* hide old perforation holes */
+        /* ── Old total box — hidden (replaced by amount block above) ── */
+        .receipt-total { display: none !important; }
+        .receipt-total::after { display: none; }
+        .receipt-total-label { display: none; }
+        .receipt-total-amount { display: none; }
+
+        /* hide old holes */
         .receipt-perforation { display: none; }
         .receipt-hole { display: none; }
+        .receipt-top-bar { display: none; }
 
-        /* New corner title + branding footer */
-        .receipt-top-bar {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 16px 20px 0;
-        }
-        .receipt-brand-title { font-size: 15px; font-weight: 900; color: #1e293b; letter-spacing: 0.3px; }
-        [data-theme="dark"] .receipt-brand-title { color: #f1f5f9; }
-        .receipt-status-pill {
-            display: inline-flex; align-items: center; gap: 4px;
-            background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 800;
-            padding: 4px 10px; border-radius: 20px;
-        }
-        [data-theme="dark"] .receipt-status-pill { background: rgba(22,163,74,0.18); }
+        /* ── Footer brand ── */
         .receipt-footer-brand {
-            display: flex; flex-direction: column; align-items: center; gap: 10px;
-            padding: 4px 20px 22px; text-align: center;
+            display: flex; flex-direction: row; align-items: center; gap: 14px;
+            padding: 14px 22px 22px; border-top: 1.5px dashed #e8edf4;
+            margin-top: 6px;
         }
-        .receipt-footer-logo { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
-        .receipt-footer-qr { background: #fff; padding: 6px; border-radius: 10px; display: inline-block; }
+        [data-theme="dark"] .receipt-footer-brand { border-color: #334155; }
+        .receipt-footer-logo { width: 52px; height: 52px; border-radius: 12px; object-fit: cover; flex-shrink: 0; box-shadow: 0 2px 8px rgba(0,0,0,0.10); }
+        .receipt-footer-qr {
+            background: #ffffff;
+            padding: 6px;
+            border-radius: 10px;
+            display: inline-block;
+            flex-shrink: 0;
+            border: 1.5px solid #e2e8f0;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        }
+        .receipt-footer-qr canvas,
+        .receipt-footer-qr img {
+            display: block;
+            border-radius: 4px;
+        }
+        .receipt-footer-scan-text {
+            font-size: 9px;
+            font-weight: 700;
+            color: #94a3b8;
+            letter-spacing: 0.5px;
+            margin-top: 4px;
+            text-align: center;
+            text-transform: uppercase;
+        }
         .receipt-row.split-row { flex-direction: column; align-items: flex-start; gap: 2px; }
         .receipt-row.split-row span:first-child { font-size: 11px; }
         .receipt-row.split-row span:last-child { font-size: 13px; }
@@ -260,37 +358,34 @@
 
         /* Coupon Card */
         .coupon-card {
-            background: linear-gradient(135deg, #fc466b 0%, #ff9a44 50%, #f7971e 100%);
+            background: #0d0d0d;
             border-radius: 24px;
             padding: 0;
             max-width: 360px;
             margin: 0 auto;
             overflow: hidden;
-            box-shadow: 0 10px 40px rgba(252,70,107,0.4);
+            box-shadow: 0 0 0 1px rgba(0,255,180,0.15), 0 8px 32px rgba(0,0,0,0.5), 0 2px 8px rgba(0,0,0,0.4);
             position: relative;
-            color: #fff;
+            color: #f1f5f9;
         }
         .coupon-top {
             padding: 28px 28px 20px;
             text-align: center;
             position: relative;
+            border-bottom: 1px solid rgba(0,255,180,0.12);
         }
         .coupon-circles {
             position: absolute;
             top: -30px; right: -30px;
             width: 120px; height: 120px;
             border-radius: 50%;
-            background: rgba(255,255,255,0.12);
+            display: none;
         }
         .coupon-circles2 {
-            position: absolute;
-            bottom: -20px; left: -20px;
-            width: 80px; height: 80px;
-            border-radius: 50%;
-            background: rgba(255,255,255,0.10);
+            display: none;
         }
-        .coupon-store { font-size: 11px; font-weight: 900; letter-spacing: 3px; opacity: 0.85; text-transform: uppercase; margin-bottom: 8px; }
-        .coupon-desc { font-size: 28px; font-weight: 900; line-height: 1.1; text-shadow: 0 2px 8px rgba(0,0,0,0.15); }
+        .coupon-store { font-size: 11px; font-weight: 900; letter-spacing: 3px; color: rgba(0,255,180,0.7); text-transform: uppercase; margin-bottom: 8px; }
+        .coupon-desc { font-size: 28px; font-weight: 900; line-height: 1.1; color: #ffffff; text-shadow: 0 0 20px rgba(0,255,180,0.25); }
         .coupon-divider {
             display: flex; align-items: center; margin: 0 -1px;
             position: relative;
@@ -299,7 +394,7 @@
             content: '';
             flex: 1;
             height: 1px;
-            border-top: 2px dashed rgba(255,255,255,0.4);
+            border-top: 2px dashed rgba(0,255,180,0.2);
         }
         .coupon-notch-left, .coupon-notch-right {
             width: 28px; height: 28px; border-radius: 50%;
@@ -308,20 +403,22 @@
             margin: 0 -1px;
         }
         [data-theme="dark"] .coupon-notch-left, [data-theme="dark"] .coupon-notch-right { background: #0f172a; }
+        .coupon-notch-left, .coupon-notch-right { background: var(--bg) !important; }
         .coupon-bottom { padding: 16px 28px 24px; text-align: center; }
         .coupon-code-badge {
             display: inline-block;
-            background: rgba(255,255,255,0.25);
-            border: 2px dashed rgba(255,255,255,0.7);
+            background: rgba(0,255,180,0.08);
+            border: 2px dashed rgba(0,255,180,0.5);
             border-radius: 12px;
             font-family: 'Courier New', monospace;
             font-size: 22px; font-weight: 900;
             letter-spacing: 5px;
             padding: 10px 24px;
             margin-bottom: 10px;
-            backdrop-filter: blur(4px);
+            color: #00ffb4;
+            text-shadow: 0 0 16px rgba(0,255,180,0.45);
         }
-        .coupon-exp { font-size: 11px; font-weight: 700; opacity: 0.8; letter-spacing: 1px; }
+        .coupon-exp { font-size: 11px; font-weight: 700; color: rgba(255,255,255,0.45); letter-spacing: 1px; }
 
         /* ================= INVENTORY ================= */
         .stats-grid { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-bottom: 14px; }
@@ -499,7 +596,7 @@
             </div>
             <div class="menu-item" id="nav-sales" onclick="window.switchView('sales')" style="position:relative;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
-                Daily Sales
+                <span id="nav-sales-label">Daily Sale</span>
                 <span id="notif-badge"></span>
             </div>
             <div class="menu-item" id="nav-vc" onclick="window.switchView('vc')">
@@ -606,7 +703,7 @@
 
     <main class="view" id="view-sales">
         <div class="title-row">
-            <h2>Daily Sales</h2>
+            <h2>Daily Sale</h2>
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <button class="btn" style="background: #0088cc;" onclick="window.sendTelegram()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
@@ -642,9 +739,11 @@
         <div id="sec-v" style="display:block;">
             <div class="card">
                 <div class="input-group"><label>Customer Name</label><input type="text" class="input-field" id="v-name" oninput="window.updateV()"></div>
-                <div class="input-group"><label>Game / Player ID</label><input type="text" class="input-field" id="v-game" oninput="window.updateV()"></div>
+                <div class="input-group"><label>In-Game Name</label><input type="text" class="input-field" id="v-ign" oninput="window.updateV()"></div>
+                <div class="input-group"><label>In-Game ID</label><input type="text" class="input-field" id="v-game" oninput="window.updateV()"></div>
                 <div class="input-group"><label>Package</label><input type="text" class="input-field" id="v-item" oninput="window.updateV()"></div>
-                <div class="input-group"><label>Total Amount (KS)</label><input type="number" class="input-field" id="v-price" oninput="window.updateV()"></div>
+                <div class="input-group"><label>Order ID (optional)</label><input type="text" class="input-field" id="v-orderid" placeholder="e.g. ORD-20250612" oninput="window.updateV()"></div>
+                <div class="input-group"><label>Amount (KS)</label><input type="number" class="input-field" id="v-price" oninput="window.updateV()"></div>
                 <div class="input-group"><label>QR Code Text / Link (optional)</label><input type="text" class="input-field" id="v-qr" placeholder="e.g. t.me/yourstore" oninput="window.updateV()"></div>
                 <div class="input-group">
                     <label>Store Logo (optional)</label>
@@ -662,16 +761,17 @@
                 </div>
             </div>
             <div class="receipt-card" id="print-v">
-                <!-- Logo -->
-                <div id="vo-logo-wrap" style="display:none; text-align:center; padding:16px 0 0;">
-                    <img id="vo-logo" src="" style="width:56px; height:56px; border-radius:12px; object-fit:cover;">
-                </div>
                 <div class="receipt-header">
                     <div class="receipt-check-circle">
-                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                        <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                     </div>
-                    <div class="receipt-store-name">Top up successfully</div>
-                    <span class="receipt-label">Thank you! Your payment is complete.</span>
+                    <div class="receipt-store-name" id="vo-store">PCA Store</div>
+                    <span class="receipt-label">Top-up confirmed successfully</span>
+                </div>
+                <!-- Apple Pay amount -->
+                <div class="receipt-amount-block">
+                    <div class="receipt-amount-label">Amount Paid</div>
+                    <div class="receipt-amount-big" id="vo-price">0 KS</div>
                 </div>
                 <div class="receipt-divider">
                     <div class="receipt-notch-left"></div>
@@ -679,21 +779,23 @@
                     <div class="receipt-notch-right"></div>
                 </div>
                 <div class="receipt-body">
-                    <div class="receipt-row"><span>Store</span> <span id="vo-store">PCA Store</span></div>
-                    <div class="receipt-row"><span>Date</span> <span id="vo-date">-</span></div>
                     <div class="receipt-row"><span>Customer</span> <span id="vo-name">-</span></div>
-                    <div class="receipt-row"><span>Game / ID</span> <span id="vo-game">-</span></div>
+                    <div class="receipt-row"><span>In-Game Name</span> <span id="vo-ign">-</span></div>
+                    <div class="receipt-row"><span>Player ID</span> <span id="vo-game">-</span></div>
                     <div class="receipt-row"><span>Package</span> <span id="vo-item">-</span></div>
-                    <div class="receipt-row"><span>Status</span> <span style="color:#16a34a; font-weight:800; display:inline-flex; align-items:center; gap:4px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Successful</span></div>
+                    <div class="receipt-row" id="vo-orderid-row" style="display:none;"><span>Order ID</span> <span id="vo-orderid" style="font-size:11px; color:#94a3b8;">-</span></div>
+                    <div class="receipt-row" id="vo-date-row"><span>Date</span> <span id="vo-date">-</span></div>
                 </div>
-                <div class="receipt-total">
-                    <span class="receipt-total-label">Total Paid</span>
-                    <span class="receipt-total-amount" id="vo-price">0 KS</span>
-                </div>
-                <!-- QR Code -->
-                <div id="vo-qr-wrap" style="display:none; text-align:center; padding:14px 20px 18px;">
-                    <div style="font-size:10px; font-weight:700; color:#94a3b8; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Scan to Contact</div>
-                    <div id="vo-qr-code" style="display:inline-block;"></div>
+                <!-- Footer: Logo + QR side by side (KBZ style) -->
+                <div id="vo-footer-brand" style="display:none; flex-direction:row; align-items:center; gap:14px; padding:14px 20px 20px; border-top:2px dashed #e2e8f0; margin-top:4px;">
+                    <div id="vo-logo-wrap" style="display:none; flex-direction:column; align-items:center; gap:4px;">
+                        <img id="vo-logo" src="" style="width:52px; height:52px; border-radius:12px; object-fit:cover;">
+                    </div>
+                    <div id="vo-qr-wrap" style="display:none; flex-direction:column; align-items:center; gap:4px;">
+                        <div id="vo-qr-code" style="background:#fff; padding:6px; border-radius:10px; display:inline-block; border:1.5px solid #e2e8f0; box-shadow:0 2px 8px rgba(0,0,0,0.08);"></div>
+                        <div style="font-size:9px; font-weight:700; color:#94a3b8; letter-spacing:0.5px; text-transform:uppercase; margin-top:4px;">Scan to verify</div>
+                    </div>
+                    <div id="vo-footer-tagline" style="flex:1; font-size:12px; font-weight:700; color:#64748b; line-height:1.4;"></div>
                 </div>
             </div>
             <div style="display:flex; gap:10px; margin-top:16px;">
@@ -731,7 +833,7 @@
             </div>
             <div class="coupon-card" id="print-c">
                 <div class="coupon-top">
-                    <img id="co-logo" src="" style="display:none; width:48px; height:48px; border-radius:10px; object-fit:cover; margin:0 auto 10px; border:2px solid rgba(255,255,255,0.3);">
+                    <img id="co-logo" src="" style="display:none; width:48px; height:48px; border-radius:10px; object-fit:cover; margin:0 auto 10px; border:2px solid rgba(0,255,180,0.3);">
                     <div class="coupon-store" id="co-store">PCA STORE</div>
                     <div class="coupon-desc" id="co-desc">GIFT VOUCHER</div>
                 </div>
@@ -741,12 +843,12 @@
                     <div class="coupon-notch-right"></div>
                 </div>
                 <div class="coupon-bottom">
-                    <div style="font-size:11px; font-weight:800; color:var(--text-sec); letter-spacing:3px; text-transform:uppercase; margin-bottom:10px;">Promo Code</div>
+                    <div style="font-size:11px; font-weight:800; color:rgba(0,255,180,0.6); letter-spacing:3px; text-transform:uppercase; margin-bottom:10px;">Promo Code</div>
                     <div class="coupon-code-badge" id="co-code">XXXX</div>
                     <div class="coupon-exp">Valid Until: <span id="co-exp">-</span></div>
                     <div id="co-qr-wrap" style="display:none; margin-top:14px;">
-                        <div style="font-size:10px; font-weight:700; color:#94a3b8; letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Scan to Contact</div>
-                        <div id="co-qr-code" style="display:inline-block;"></div>
+                        <div style="font-size:10px; font-weight:800; color:rgba(0,255,180,0.6); letter-spacing:2px; text-transform:uppercase; margin-bottom:8px;">Scan to Contact</div>
+                        <div id="co-qr-code" style="display:inline-block; background:#fff; padding:8px; border-radius:14px; box-shadow:0 0 0 2px rgba(0,255,180,0.35), 0 0 24px rgba(0,255,180,0.15);"></div>
                     </div>
                 </div>
             </div>
@@ -845,17 +947,42 @@
             <div class="input-group"><label>Store Name</label><input type="text" class="input-field" id="set-name"></div>
 
             <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 12px;">Receipt Branding</h3>
+
+            <!-- Logo row -->
             <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
-                <img id="receipt-logo-preview" src="" style="display:none; width:56px; height:56px; border-radius:14px; object-fit:cover; border:1px solid var(--border);">
+                <div style="position:relative; flex-shrink:0;">
+                    <img id="receipt-logo-preview" src="" style="display:none; width:56px; height:56px; border-radius:14px; object-fit:cover; border:1px solid var(--border);">
+                    <div id="logo-lock-badge" style="display:none; position:absolute; bottom:-5px; right:-5px; width:20px; height:20px; border-radius:50%; background:#10b981; border:2px solid var(--card); align-items:center; justify-content:center;">
+                        <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                </div>
                 <div style="flex:1;">
-                    <div style="border: 2px dashed var(--border); padding: 12px; text-align: center; border-radius: 12px; cursor: pointer;" onclick="document.getElementById('receipt-logo-file').click()">
-                        <span style="font-size:12px; font-weight:700; color:var(--primary);">Upload Receipt Logo</span>
+                    <div id="logo-upload-btn" style="border: 2px dashed var(--border); padding: 12px; text-align: center; border-radius: 12px; cursor: pointer;" onclick="document.getElementById('receipt-logo-file').click()">
+                        <span style="font-size:12px; font-weight:700; color:var(--primary);">📷 Upload Receipt Logo</span>
                         <input type="file" id="receipt-logo-file" accept="image/*" style="display:none;" onchange="window.uploadReceiptLogo(this)">
                     </div>
-                    <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:6px;">Saved once — shown on every receipt automatically</div>
+                    <div id="logo-locked-ui" style="display:none; background:rgba(16,185,129,0.08); border:1.5px solid rgba(16,185,129,0.25); border-radius:12px; padding:10px 14px; align-items:center; justify-content:space-between; gap:10px;">
+                        <div>
+                            <div style="font-size:12px; font-weight:800; color:#10b981;">🔒 Logo Locked</div>
+                            <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:2px;">Shows on every receipt</div>
+                        </div>
+                        <button onclick="window.unlockReceiptLogo()" style="font-size:11px; font-weight:700; color:var(--text-sec); border:1px solid var(--border); padding:5px 10px; border-radius:8px; background:var(--card);">Change</button>
+                    </div>
+                    <div id="logo-upload-hint" style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:6px;">Saved once — shown on every receipt automatically</div>
                 </div>
             </div>
-            <div class="input-group"><label>Receipt QR Content (e.g. Telegram link, payment info)</label><input type="text" class="input-field" id="set-receipt-qr" placeholder="https://t.me/yourstore"></div>
+
+            <!-- QR row -->
+            <div class="input-group">
+                <label>Receipt QR Content (e.g. Telegram link, payment info)</label>
+                <div style="display:flex; gap:8px; align-items:center;">
+                    <input type="text" class="input-field" id="set-receipt-qr" placeholder="https://t.me/yourstore" style="flex:1;">
+                    <div id="qr-lock-badge" style="display:none; width:36px; height:46px; border-radius:10px; background:rgba(16,185,129,0.10); border:1.5px solid rgba(16,185,129,0.3); flex-shrink:0; align-items:center; justify-content:center;" title="QR Locked">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                </div>
+                <div id="qr-lock-hint" style="display:none; font-size:11px; color:#10b981; font-weight:700; margin-top:5px;">🔒 QR saved — edit field above &amp; Save to update</div>
+            </div>
 
             <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 16px; color: #0088cc;">Telegram Bot Setup</h3>
             <div class="input-group"><label>Bot Token</label><input type="password" class="input-field" id="set-tg-token"></div>
@@ -1157,7 +1284,11 @@
         } catch(e) { console.log("Store Firebase init failed:", e); }
 
         window.onload = () => {
-            loadLocalDataFallback(); // Make sure offline works 100% instantly
+            loadFromIDBIfNeeded().then(() => {
+                loadLocalDataFallback(); // Make sure offline works 100% instantly
+            }).catch(() => {
+                loadLocalDataFallback();
+            });
             
             if(auth) {
                 auth.onAuthStateChanged(user => {
@@ -1371,12 +1502,80 @@
             });
         }
 
+        // ================= INDEXEDDB BACKUP (survives "Clear browsing data") =================
+        const IDB_NAME = 'pcaStoreBackup';
+        const IDB_STORE = 'kv';
+        let _idb = null;
+
+        function _openIDB() {
+            return new Promise((resolve, reject) => {
+                if (_idb) { resolve(_idb); return; }
+                const req = indexedDB.open(IDB_NAME, 1);
+                req.onupgradeneeded = e => { e.target.result.createObjectStore(IDB_STORE); };
+                req.onsuccess = e => { _idb = e.target.result; resolve(_idb); };
+                req.onerror = e => reject(e);
+            });
+        }
+
+        function idbSet(key, value) {
+            _openIDB().then(db => {
+                const tx = db.transaction(IDB_STORE, 'readwrite');
+                tx.objectStore(IDB_STORE).put(value, key);
+            }).catch(() => {});
+        }
+
+        function idbGet(key) {
+            return _openIDB().then(db => new Promise((resolve, reject) => {
+                const req = db.transaction(IDB_STORE, 'readonly').objectStore(IDB_STORE).get(key);
+                req.onsuccess = e => resolve(e.target.result);
+                req.onerror = e => reject(e);
+            })).catch(() => null);
+        }
+
+        function saveToIDB() {
+            try {
+                idbSet('pcaStoreData',    JSON.stringify(state.data));
+                idbSet('pcaStoreProfile', JSON.stringify(state.profile));
+                idbSet('pcaSalesData',    JSON.stringify(state.sales));
+                idbSet('pcaGameOrder',    JSON.stringify(state.gameOrder || []));
+                idbSet('pcaSettings',     JSON.stringify(state.settings || {}));
+            } catch(e) {}
+        }
+
+        async function loadFromIDBIfNeeded() {
+            // Only restore from IDB if localStorage is empty (e.g. after clear)
+            try {
+                if (!localStorage.getItem('pcaStoreData')) {
+                    const d = await idbGet('pcaStoreData');
+                    if (d) localStorage.setItem('pcaStoreData', d);
+                }
+                if (!localStorage.getItem('pcaStoreProfile')) {
+                    const d = await idbGet('pcaStoreProfile');
+                    if (d) localStorage.setItem('pcaStoreProfile', d);
+                }
+                if (!localStorage.getItem('pcaSalesData')) {
+                    const d = await idbGet('pcaSalesData');
+                    if (d) localStorage.setItem('pcaSalesData', d);
+                }
+                if (!localStorage.getItem('pcaGameOrder')) {
+                    const d = await idbGet('pcaGameOrder');
+                    if (d) localStorage.setItem('pcaGameOrder', d);
+                }
+                if (!localStorage.getItem('pcaSettings')) {
+                    const d = await idbGet('pcaSettings');
+                    if (d) localStorage.setItem('pcaSettings', d);
+                }
+            } catch(e) {}
+        }
+        // ================= END INDEXEDDB BACKUP =================
+
         function saveDataToLocal() {
             localStorage.setItem('pcaStoreData', JSON.stringify(state.data));
             localStorage.setItem('pcaStoreProfile', JSON.stringify(state.profile));
             localStorage.setItem('pcaSalesData', JSON.stringify(state.sales));
             localStorage.setItem('pcaGameOrder', JSON.stringify(state.gameOrder || []));
             localStorage.setItem('pcaSettings', JSON.stringify(state.settings || {}));
+            saveToIDB(); // Backup to IndexedDB too
         }
 
         function saveDataToCloud() {
@@ -1416,8 +1615,8 @@
             document.getElementById('set-tg-token').value = state.profile.tgToken || "";
             document.getElementById('set-tg-chat').value = state.profile.tgChatId || "";
             const qrInput = document.getElementById('set-receipt-qr'); if(qrInput) qrInput.value = state.profile.receiptQR || "";
-            const logoPrev = document.getElementById('receipt-logo-preview');
-            if(logoPrev) { if(state.profile.receiptLogo) { logoPrev.src = state.profile.receiptLogo; logoPrev.style.display = 'block'; } else { logoPrev.style.display = 'none'; } }
+            // Refresh branding lock UI (logo + QR lock state)
+            window._refreshBrandingLockUI && window._refreshBrandingLockUI();
             document.getElementById('vo-store').innerText = state.profile.name;
             document.getElementById('co-store').innerText = state.profile.name;
             document.getElementById('vo-date').innerText = new Date().toLocaleDateString();
@@ -1442,17 +1641,82 @@
             if(btn) btn.style.color = state.compactView ? 'var(--primary)' : 'var(--text-sec)';
             window.renderInventory();
         };
-        window.saveSettings = function() { state.profile.name = document.getElementById('set-name').value || "PCA Store"; state.profile.tgToken = document.getElementById('set-tg-token').value.trim(); state.profile.tgChatId = document.getElementById('set-tg-chat').value.trim(); state.profile.receiptQR = document.getElementById('set-receipt-qr').value.trim(); saveDataToCloud(); applyGlobalUI(); window.showToast("Settings Configured!"); };
+        // ── Receipt branding lock UI ──
+        window._refreshBrandingLockUI = function() {
+            const hasLogo = !!state.profile.receiptLogo;
+            const hasQR   = !!(state.profile.receiptQR || '').trim();
+
+            // Logo elements
+            const logoPrev    = document.getElementById('receipt-logo-preview');
+            const logoUpBtn   = document.getElementById('logo-upload-btn');
+            const logoLockedUI= document.getElementById('logo-locked-ui');
+            const logoLockBdg = document.getElementById('logo-lock-badge');
+            const logoHint    = document.getElementById('logo-upload-hint');
+
+            if (hasLogo) {
+                if (logoPrev)     { logoPrev.src = state.profile.receiptLogo; logoPrev.style.display = 'block'; }
+                if (logoUpBtn)    { logoUpBtn.style.display = 'none'; }
+                if (logoLockedUI) { logoLockedUI.style.display = 'flex'; }
+                if (logoLockBdg)  { logoLockBdg.style.display = 'flex'; }
+                if (logoHint)     { logoHint.style.display = 'none'; }
+            } else {
+                if (logoPrev)     { logoPrev.style.display = 'none'; }
+                if (logoUpBtn)    { logoUpBtn.style.display = 'block'; }
+                if (logoLockedUI) { logoLockedUI.style.display = 'none'; }
+                if (logoLockBdg)  { logoLockBdg.style.display = 'none'; }
+                if (logoHint)     { logoHint.style.display = 'block'; }
+            }
+
+            // QR elements
+            const qrBadge = document.getElementById('qr-lock-badge');
+            const qrHint  = document.getElementById('qr-lock-hint');
+            const qrInput = document.getElementById('set-receipt-qr');
+            if (hasQR) {
+                if (qrBadge) { qrBadge.style.display = 'flex'; }
+                if (qrHint)  { qrHint.style.display = 'block'; }
+                if (qrInput) { qrInput.style.borderColor = 'rgba(16,185,129,0.4)'; }
+            } else {
+                if (qrBadge) { qrBadge.style.display = 'none'; }
+                if (qrHint)  { qrHint.style.display = 'none'; }
+                if (qrInput) { qrInput.style.borderColor = ''; }
+            }
+        };
+
+        window.saveSettings = function() {
+            state.profile.name    = document.getElementById('set-name').value || "PCA Store";
+            state.profile.tgToken = document.getElementById('set-tg-token').value.trim();
+            state.profile.tgChatId= document.getElementById('set-tg-chat').value.trim();
+            const newQR = document.getElementById('set-receipt-qr').value.trim();
+            state.profile.receiptQR = newQR;
+            saveDataToCloud(); applyGlobalUI();
+            window._refreshBrandingLockUI();
+            window.showToast("Settings Configured!");
+        };
+
         window.uploadReceiptLogo = function(input) {
-            if(input.files && input.files[0]) {
+            if (input.files && input.files[0]) {
                 const reader = new FileReader();
                 reader.onload = e => {
                     state.profile.receiptLogo = e.target.result;
                     saveDataToCloud(); applyGlobalUI();
-                    window.showToast('Receipt logo saved');
+                    window._refreshBrandingLockUI();
+                    window.showToast('🔒 Logo saved & locked!', 'success');
                 };
                 reader.readAsDataURL(input.files[0]);
             }
+        };
+
+        window.unlockReceiptLogo = function() {
+            // Allow changing logo by showing upload button again temporarily
+            const logoUpBtn    = document.getElementById('logo-upload-btn');
+            const logoLockedUI = document.getElementById('logo-locked-ui');
+            const logoLockBdg  = document.getElementById('logo-lock-badge');
+            const logoHint     = document.getElementById('logo-upload-hint');
+            if (logoUpBtn)    { logoUpBtn.style.display = 'block'; }
+            if (logoLockedUI) { logoLockedUI.style.display = 'none'; }
+            if (logoLockBdg)  { logoLockBdg.style.display = 'none'; }
+            if (logoHint)     { logoHint.style.display = 'block'; logoHint.innerText = 'Select a new logo to replace the current one'; }
+            document.getElementById('receipt-logo-file').click();
         };
 
         // ================= PUBLISH TO STORE =================
@@ -1720,6 +1984,21 @@
             isEditingGame = false; saveDataToCloud(); applyGlobalUI(); window.closeModal('modal-game');
         };
 
+        // ================= FORMULA SUM HELPER =================
+        // If combo is like "40+40" or "100+10+5", sums all numbers → returns total as string
+        // Used to display calculated total next to formula in package name area
+        function calcFormulaSum(formula) {
+            if (!formula) return null;
+            const trimmed = formula.trim();
+            // Match patterns like "40+40", "100+10+5", "86+10 Bonus" (ignore non-numeric parts)
+            if (!/^\d[\d\s+\-*×x]+/.test(trimmed)) return null;
+            // Extract all numbers and sum (only + supported for display)
+            const nums = trimmed.match(/\d+(\.\d+)?/g);
+            if (!nums || nums.length < 2) return null;
+            const sum = nums.reduce((a, b) => a + parseFloat(b), 0);
+            return Number.isInteger(sum) ? String(sum) : sum.toFixed(1);
+        }
+
         // ================= INVENTORY GRID & REALTIME SEARCH =================
         window.renderInventory = function() {
             const titleEl = document.getElementById('inv-game-title'); const mobileCon = document.getElementById('inv-mobile-container'); const desktopBody = document.getElementById('inv-table-body');
@@ -1751,8 +2030,10 @@
                     tc += costMMK; tr += sell;
                     
                     let color = profit < 0 ? 'var(--red)' : 'var(--green)'; let sign = profit <= 0 ? '' : '+';
-                    let comboBadgeMobile = itm.combo ? `<span style="background:var(--bg); color:var(--text-sec); font-size:11px; padding:4px 8px; border-radius:6px; border:1px solid var(--border); font-weight:700; margin-left:8px;">${itm.combo}</span>` : '';
-                    let comboBadgeDesktop = itm.combo ? `<br><span style="font-size:11px; color:var(--text-sec); font-weight:600;">${itm.combo}</span>` : '';
+                    const formulaSum = calcFormulaSum(itm.combo);
+                    const formulaSumBadge = formulaSum ? `<span style="background:rgba(24,119,242,0.1); color:var(--primary); font-size:12px; padding:3px 9px; border-radius:6px; font-weight:900; margin-left:6px;">${formulaSum}</span>` : '';
+                    let comboBadgeMobile = itm.combo ? `<span style="background:var(--bg); color:var(--text-sec); font-size:11px; padding:4px 8px; border-radius:6px; border:1px solid var(--border); font-weight:700; margin-left:8px;">${itm.combo}</span>${formulaSumBadge}` : '';
+                    let comboBadgeDesktop = itm.combo ? `<br><span style="font-size:11px; color:var(--text-sec); font-weight:600;">${itm.combo}${formulaSum ? ` <span style="color:var(--primary); font-weight:900;">=&nbsp;${formulaSum}</span>` : ''}</span>` : '';
                     let exSym = (function(){ try{ var s=(state.settings.exRates||{})[state.activeGame]; return s?s.sym:'R$'; }catch(e){return 'R$';} })();
                     let costString = costRS > 0 ? `${exSym} ${costRS} / ${costMMK} KS` : `${costMMK} KS`;
                     let costDesktop = costRS > 0 ? `<b>${costMMK} KS</b><br><span style="font-size:11px; color:var(--text-sec);">${exSym} ${costRS}</span>` : `<b>${costMMK} KS</b>`;
@@ -2107,35 +2388,81 @@
             const el = document.getElementById(elId);
             el.innerHTML = '';
             if (!text) return null;
-            return new QRCode(el, { text, width: 90, height: 90, colorDark: '#1e293b', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
+            return new QRCode(el, { text, width: 40, height: 40, colorDark: '#0f172a', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
         }
 
         // ================= ORDER RECEIPT BRANDING (logo + QR, set once in Settings) =================
         window.renderReceiptBranding = function() {
-            const wrap = document.getElementById('or-footer-brand');
-            const logoEl = document.getElementById('or-footer-logo');
-            const qrEl = document.getElementById('or-footer-qr');
+            const wrap      = document.getElementById('or-footer-brand');
             if (!wrap) return;
-            const logo = state.profile.receiptLogo || '';
-            const qrText = state.profile.receiptQR || '';
-            let show = false;
-            if (logo) { logoEl.src = logo; logoEl.style.display = 'block'; show = true; }
-            else { logoEl.style.display = 'none'; }
-            if (qrText) { makeQR('or-footer-qr', qrText); qrEl.style.display = 'inline-block'; show = true; }
-            else { qrEl.innerHTML = ''; qrEl.style.display = 'none'; }
-            wrap.style.display = show ? 'flex' : 'none';
+
+            const logoUrl   = (state.profile && state.profile.receiptLogo) || '';
+            const qrText    = (state.profile && (state.profile.receiptQR || '').trim()) || '';
+            const hasLogo   = !!logoUrl;
+            const hasQR     = !!qrText;
+
+            if (!hasLogo && !hasQR) {
+                wrap.style.display = 'none';
+                return;
+            }
+
+            // Show footer brand section
+            wrap.style.display = 'flex';
+
+            // ── Logo ──
+            const logoWrap = document.getElementById('or-footer-logo-wrap');
+            const logoImg  = document.getElementById('or-footer-logo');
+            if (hasLogo) {
+                logoImg.src = logoUrl;
+                logoWrap.style.display = 'flex';
+            } else {
+                logoWrap.style.display = 'none';
+            }
+
+            // ── QR Code ──
+            const qrWrap = document.getElementById('or-footer-qr-wrap');
+            const qrEl   = document.getElementById('or-footer-qr');
+            if (hasQR) {
+                qrEl.innerHTML = '';
+                new QRCode(qrEl, {
+                    text:         qrText,
+                    width:        64,
+                    height:       64,
+                    colorDark:    '#0f172a',
+                    colorLight:   '#ffffff',
+                    correctLevel: QRCode.CorrectLevel.M
+                });
+                qrWrap.style.display = 'flex';
+            } else {
+                qrWrap.style.display = 'none';
+            }
         };
 
         window.updateV = function() {
+            const storeName = state.profile.name || 'PCA Store';
+            document.getElementById('vo-store').innerText = storeName;
             document.getElementById('vo-name').innerText = document.getElementById('v-name').value || "-";
+            document.getElementById('vo-ign').innerText = document.getElementById('v-ign').value || "-";
             document.getElementById('vo-game').innerText = document.getElementById('v-game').value || "-";
             document.getElementById('vo-item').innerText = document.getElementById('v-item').value || "-";
             document.getElementById('vo-price').innerText = (document.getElementById('v-price').value || "0") + " KS";
-            // QR
-            const qrText = document.getElementById('v-qr').value.trim();
-            const wrap = document.getElementById('vo-qr-wrap');
-            if (qrText) { wrap.style.display = 'block'; makeQR('vo-qr-code', qrText); }
-            else { wrap.style.display = 'none'; document.getElementById('vo-qr-code').innerHTML = ''; }
+            // Order ID row
+            const oidVal = document.getElementById('v-orderid').value.trim();
+            const oidRow = document.getElementById('vo-orderid-row');
+            if (oidVal) { document.getElementById('vo-orderid').innerText = oidVal; oidRow.style.display = 'flex'; }
+            else { oidRow.style.display = 'none'; }
+            // Date
+            const now = new Date();
+            const pad = n => String(n).padStart(2,'0');
+            const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+            document.getElementById('vo-date').innerText = `${pad(now.getDate())} ${months[now.getMonth()]} ${now.getFullYear()}`;
+            // Footer brand: show if logo or QR present
+            _updateVFooter();
+        };
+
+        function _updateVFooter() {
+            const footerEl = document.getElementById('vo-footer-brand');
+            if (footerEl) footerEl.style.display = 'none';
         };
 
         window.updateC = function() {
@@ -2143,10 +2470,8 @@
             document.getElementById('co-code').innerText = document.getElementById('c-code').value.toUpperCase() || "XXXX";
             document.getElementById('co-exp').innerText = document.getElementById('c-exp').value || "-";
             // QR
-            const qrText = document.getElementById('c-qr').value.trim();
             const wrap = document.getElementById('co-qr-wrap');
-            if (qrText) { wrap.style.display = 'block'; makeQR('co-qr-code', qrText); }
-            else { wrap.style.display = 'none'; document.getElementById('co-qr-code').innerHTML = ''; }
+            if (wrap) wrap.style.display = 'none';
         };
 
         // Logo upload — Voucher
@@ -2158,14 +2483,14 @@
                 document.getElementById('v-logo-preview').src = src;
                 document.getElementById('v-logo-preview').style.display = 'block';
                 document.getElementById('vo-logo').src = src;
-                document.getElementById('vo-logo-wrap').style.display = 'block';
+                _updateVFooter();
             };
             reader.readAsDataURL(input.files[0]);
         };
         window.clearVoucherLogo = function() {
             document.getElementById('v-logo-preview').style.display = 'none';
-            document.getElementById('vo-logo-wrap').style.display = 'none';
             document.getElementById('vo-logo').src = '';
+            _updateVFooter();
         };
 
         // Logo upload — Coupon
@@ -2217,7 +2542,7 @@
         // ================= LANGUAGE SYSTEM =================
         const LANG = {
             en: {
-                menu_inventory: "Game Grid", menu_sales: "Daily Sales", menu_vc: "Voucher & Coupon", menu_settings: "Settings",
+                menu_inventory: "Game Grid", menu_sales: "Daily Sale", menu_vc: "Voucher & Coupon", menu_settings: "Settings",
                 games_category: "GAMES CATEGORY", add_new_game: "Add New Game",
                 search_placeholder: "Search Package or Formula...",
                 lbl_total_cost: "TOTAL COST", lbl_total_rev: "TOTAL REVENUE", lbl_net_profit: "NET PROFIT",
@@ -2236,7 +2561,7 @@
                 bulk_import_btn: "Import Items", bulk_count: "items ready to import",
             },
             my: {
-                menu_inventory: "ဂိမ်းဂရစ်", menu_sales: "နေ့စဉ်အရောင်း", menu_vc: "ဘောင်ချာ နှင့် ကူပွန်", menu_settings: "ဆက်တင်",
+                menu_inventory: "ဂိမ်းဂရစ်", menu_sales: "Daily Sale", menu_vc: "ဘောင်ချာ နှင့် ကူပွန်", menu_settings: "ဆက်တင်",
                 games_category: "ဂိမ်းအမျိုးအစား", add_new_game: "ဂိမ်းသစ်ထည့်ရန်",
                 search_placeholder: "ပက်ကေ့ဂျ် သို့ ဖော်မြူလာ ရှာပါ...",
                 lbl_total_cost: "စုစုပေါင်းကုန်ကျ", lbl_total_rev: "စုစုပေါင်းဝင်ငွေ", lbl_net_profit: "အမြတ်ငွေ",
@@ -2265,7 +2590,7 @@
             // Nav
             const mi = document.querySelectorAll('.menu-item');
             if(mi[0]) mi[0].childNodes[mi[0].childNodes.length-1].textContent = ' ' + t('menu_inventory');
-            if(mi[1]) mi[1].childNodes[mi[1].childNodes.length-1].textContent = ' ' + t('menu_sales');
+            const navSalesLbl = document.getElementById('nav-sales-label'); if(navSalesLbl) navSalesLbl.textContent = t('menu_sales');
             if(mi[2]) mi[2].childNodes[mi[2].childNodes.length-1].textContent = ' ' + t('menu_vc');
             if(mi[3]) mi[3].childNodes[mi[3].childNodes.length-1].textContent = ' ' + t('menu_settings');
             // Stats
@@ -2775,9 +3100,9 @@
                 .receipt-top-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 0;}
                 .receipt-brand-title{font-size:15px;font-weight:900;color:#1e293b;letter-spacing:0.3px;}
                 .receipt-status-pill{display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#16a34a;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;}
-                .receipt-footer-brand{display:flex;flex-direction:column;align-items:center;gap:10px;padding:4px 20px 22px;text-align:center;}
-                .receipt-footer-logo{width:40px;height:40px;border-radius:10px;object-fit:cover;}
-                .receipt-footer-qr{background:#fff;padding:6px;border-radius:10px;display:inline-block;}
+                .receipt-footer-brand{display:flex;flex-direction:row;align-items:center;gap:14px;padding:14px 20px 20px;border-top:2px dashed #e2e8f0;margin-top:4px;}
+                .receipt-footer-logo{width:52px;height:52px;border-radius:12px;object-fit:cover;}
+                .receipt-footer-qr{background:#fff;padding:8px;border-radius:14px;display:inline-block;box-shadow:0 0 0 2px rgba(24,119,242,0.15),0 4px 14px rgba(0,0,0,0.10);}
             </style></head><body><div class="receipt-card">${el.innerHTML}</div></body></html>`);
             w.document.close();
             setTimeout(() => { w.print(); w.close(); }, 500);
@@ -2884,14 +3209,14 @@
     <div class="modal" id="modal-order-receipt" style="z-index:99998;">
         <div class="modal-content" style="max-width:380px; padding:0; overflow:hidden; border-radius:20px;">
             <!-- Header -->
-            <div style="display:flex; justify-content:space-between; align-items:center; padding:16px 20px; border-bottom:1px solid var(--border); background:var(--card);">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 18px; border-bottom:1px solid var(--border); background:var(--card);">
                 <div style="display:flex; align-items:center; gap:10px;">
-                    <div style="width:34px; height:34px; border-radius:10px; background:rgba(16,185,129,0.12); display:flex; align-items:center; justify-content:center;">
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                    <div style="width:32px; height:32px; border-radius:9px; background:linear-gradient(135deg,#1877f2,#0d47a1); display:flex; align-items:center; justify-content:center;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                     </div>
                     <div>
-                        <div style="font-weight:900; font-size:15px;">Order Confirmed</div>
-                        <div style="font-size:11px; color:var(--text-sec); font-weight:600;">New order received from store</div>
+                        <div style="font-weight:900; font-size:14px;">New Order</div>
+                        <div style="font-size:11px; color:var(--text-sec); font-weight:600;">Confirmed from store</div>
                     </div>
                 </div>
                 <button onclick="window.closeOrderReceipt()" style="padding:6px; color:var(--text-sec);">
@@ -2899,20 +3224,19 @@
                 </button>
             </div>
             <!-- Receipt Card -->
-            <div style="padding:20px; background:var(--bg); overflow-y:auto; max-height:70vh;">
+            <div style="padding:16px; background:var(--bg); overflow-y:auto; max-height:72vh;">
                 <div class="receipt-card" id="print-order-receipt">
-                    <div class="receipt-top-bar">
-                        <div class="receipt-brand-title" id="or-store-name">PCA Store</div>
-                        <span class="receipt-status-pill">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                            Confirmed
-                        </span>
-                    </div>
-                    <div class="receipt-header" style="padding-top:14px;">
+                    <div class="receipt-header">
                         <div class="receipt-check-circle">
-                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.8" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         </div>
-                        <span class="receipt-label">Order confirmed successfully</span>
+                        <div class="receipt-store-name" id="or-store-name">PCA Store</div>
+                        <span class="receipt-label">Top-up confirmed successfully</span>
+                    </div>
+                    <!-- Apple Pay–style amount -->
+                    <div class="receipt-amount-block">
+                        <div class="receipt-amount-label">Amount Paid</div>
+                        <div class="receipt-amount-big" id="or-price">0 KS</div>
                     </div>
                     <div class="receipt-divider">
                         <div class="receipt-notch-left"></div>
@@ -2920,31 +3244,27 @@
                         <div class="receipt-notch-right"></div>
                     </div>
                     <div class="receipt-body">
-                        <div class="receipt-row">
-                            <span>Order ID</span>
-                            <span id="or-order-id" style="font-size:11px; letter-spacing:0.5px; color:var(--text);">-</span>
-                        </div>
-                        <div class="receipt-row">
-                            <span>Transaction ID</span>
-                            <span id="or-txn-id" style="font-size:11px; letter-spacing:0.5px; color:var(--primary);">-</span>
-                        </div>
-                        <div class="receipt-row">
-                            <span>Date &amp; Time</span>
-                            <span id="or-datetime" style="font-size:12px;">-</span>
-                        </div>
-                        <div class="receipt-row"><span>Customer Name</span> <span id="or-customer">-</span></div>
+                        <div class="receipt-row"><span>Customer</span> <span id="or-customer">-</span></div>
                         <div class="receipt-row"><span>In-Game Name</span> <span id="or-ign">-</span></div>
-                        <div class="receipt-row"><span>Game</span> <span id="or-game">-</span></div>
                         <div class="receipt-row"><span>Player ID</span> <span id="or-player-id">-</span></div>
                         <div class="receipt-row"><span>Package</span> <span id="or-package">-</span></div>
-                    </div>
-                    <div class="receipt-total">
-                        <span class="receipt-total-label">Total Paid</span>
-                        <span class="receipt-total-amount" id="or-price">0 KS</span>
+                        <div class="receipt-row">
+                            <span>Order ID</span>
+                            <span id="or-order-id" style="font-size:11px; letter-spacing:0.5px; color:#94a3b8;">-</span>
+                        </div>
+                        <div class="receipt-row" style="display:none;"><span>Game</span> <span id="or-game">-</span></div>
+                        <div class="receipt-row" style="display:none;"><span>TXN</span> <span id="or-txn-id">-</span></div>
+                        <div style="display:none;" id="or-datetime">-</div>
                     </div>
                     <div class="receipt-footer-brand" id="or-footer-brand" style="display:none;">
-                        <img id="or-footer-logo" src="" style="display:none;" class="receipt-footer-logo">
-                        <div id="or-footer-qr" class="receipt-footer-qr" style="display:none;"></div>
+                        <div id="or-footer-logo-wrap" style="display:none; flex-direction:column; align-items:center; gap:4px;">
+                            <img id="or-footer-logo" src="" class="receipt-footer-logo" onerror="this.style.display='none'">
+                        </div>
+                        <div id="or-footer-qr-wrap" style="display:none; flex-direction:column; align-items:center; gap:4px;">
+                            <div id="or-footer-qr" class="receipt-footer-qr"></div>
+                            <div class="receipt-footer-scan-text">Scan to verify</div>
+                        </div>
+                        <div id="or-footer-tagline" style="flex:1; font-size:12px; font-weight:700; color:#64748b; line-height:1.4;">Thank you for your purchase!</div>
                     </div>
                 </div>
                 <!-- Queue indicator -->
