@@ -12,6 +12,7 @@
     <script src="https://www.gstatic.com/firebasejs/10.8.1/firebase-storage-compat.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js"></script>
 
     <style>
         /* ================= THEME VARIABLES ================= */
@@ -211,6 +212,52 @@
         .receipt-perforation { display: none; }
         .receipt-hole { display: none; }
 
+        /* New corner title + branding footer */
+        .receipt-top-bar {
+            display: flex; justify-content: space-between; align-items: center;
+            padding: 16px 20px 0;
+        }
+        .receipt-brand-title { font-size: 15px; font-weight: 900; color: #1e293b; letter-spacing: 0.3px; }
+        [data-theme="dark"] .receipt-brand-title { color: #f1f5f9; }
+        .receipt-status-pill {
+            display: inline-flex; align-items: center; gap: 4px;
+            background: #dcfce7; color: #16a34a; font-size: 11px; font-weight: 800;
+            padding: 4px 10px; border-radius: 20px;
+        }
+        [data-theme="dark"] .receipt-status-pill { background: rgba(22,163,74,0.18); }
+        .receipt-footer-brand {
+            display: flex; flex-direction: column; align-items: center; gap: 10px;
+            padding: 4px 20px 22px; text-align: center;
+        }
+        .receipt-footer-logo { width: 40px; height: 40px; border-radius: 10px; object-fit: cover; }
+        .receipt-footer-qr { background: #fff; padding: 6px; border-radius: 10px; display: inline-block; }
+        .receipt-row.split-row { flex-direction: column; align-items: flex-start; gap: 2px; }
+        .receipt-row.split-row span:first-child { font-size: 11px; }
+        .receipt-row.split-row span:last-child { font-size: 13px; }
+
+        /* ================= BEST SELLING ITEMS ================= */
+        .best-item-row { display:flex; align-items:center; gap:10px; padding:9px 0; border-bottom:1px solid var(--border); }
+        .best-item-rank { width:24px; height:24px; border-radius:50%; background:var(--bg); display:flex; align-items:center; justify-content:center; font-size:11px; font-weight:900; color:var(--text-sec); flex-shrink:0; }
+        .best-item-rank.gold { background:rgba(251,191,36,0.15); color:#f59e0b; }
+        .best-item-rank.silver { background:rgba(148,163,184,0.15); color:#94a3b8; }
+        .best-item-rank.bronze { background:rgba(180,83,9,0.1); color:#b45309; }
+        .best-item-bar-wrap { flex:1; }
+        .best-item-name { font-size:12px; font-weight:800; color:var(--text); margin-bottom:4px; }
+        .best-item-bar { height:6px; border-radius:4px; background:linear-gradient(90deg,var(--primary),#6366f1); transition:width 0.6s cubic-bezier(.34,1.56,.64,1); }
+        .best-item-count { font-size:11px; font-weight:800; color:var(--text-sec); white-space:nowrap; }
+
+        /* ================= CHART BTN ACTIVE ================= */
+        .chart-period-btn.active { background:var(--primary)!important; color:white!important; border-color:var(--primary)!important; }
+
+        /* ================= UNDO TOAST ================= */
+        #undo-bar { position:fixed; bottom:90px; left:50%; transform:translateX(-50%) translateY(20px); background:#1e293b; color:#f8fafc; padding:10px 18px; border-radius:14px; font-size:13px; font-weight:700; display:flex; align-items:center; gap:12px; z-index:99999; opacity:0; transition:0.3s; pointer-events:none; white-space:nowrap; box-shadow:0 8px 24px rgba(0,0,0,0.25); }
+        #undo-bar.show { opacity:1; transform:translateX(-50%) translateY(0); pointer-events:all; }
+        #undo-bar button { background:var(--primary); color:white; padding:5px 12px; border-radius:8px; font-size:12px; font-weight:800; border:none; cursor:pointer; }
+
+        /* ================= NOTIFICATION BADGE ================= */
+        #notif-badge { position:absolute; top:-4px; right:-4px; background:var(--red); color:white; border-radius:50%; width:18px; height:18px; font-size:10px; font-weight:900; display:none; align-items:center; justify-content:center; }
+        #notif-badge.show { display:flex; }
+
         /* Coupon Card */
         .coupon-card {
             background: linear-gradient(135deg, #fc466b 0%, #ff9a44 50%, #f7971e 100%);
@@ -303,6 +350,8 @@
         .modal { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; background: rgba(0,0,0,0.5); backdrop-filter: blur(2px); display: none; align-items: center; justify-content: center; z-index: 9999; opacity: 0; transition: 0.3s; }
         .modal.show { display: flex; opacity: 1; }
         .modal-content { background: var(--card); width: 90%; max-width: 400px; border-radius: 20px; padding: 24px; box-shadow: 0 20px 40px rgba(0,0,0,0.2); max-height: 90vh; overflow-y: auto; border: 1px solid var(--border); transform: scale(0.95); transition: 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);}
+        .color-tag-opt.selected { box-shadow: 0 0 0 3px var(--primary); transform: scale(1.1); }
+        .item-color-strip { width: 5px; border-radius: 4px; flex-shrink: 0; align-self: stretch; }
         .modal.show .modal-content { transform: scale(1); }
         
 
@@ -407,6 +456,12 @@
         <span id="toast-msg"></span>
     </div>
 
+    <!-- Undo Bar -->
+    <div id="undo-bar">
+        <span id="undo-msg">Item deleted</span>
+        <button onclick="window.undoLastAction()">Undo</button>
+    </div>
+
     <!-- Pull to Refresh Indicator -->
     <div id="ptr-indicator">
         <svg id="ptr-spin" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 4v6h-6"/><path d="M1 20v-6h6"/><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"/></svg>
@@ -442,9 +497,10 @@
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="3" width="7" height="7" rx="1"></rect><rect x="14" y="14" width="7" height="7" rx="1"></rect><rect x="3" y="14" width="7" height="7" rx="1"></rect></svg>
                 Game Grid
             </div>
-            <div class="menu-item" id="nav-sales" onclick="window.switchView('sales')">
+            <div class="menu-item" id="nav-sales" onclick="window.switchView('sales')" style="position:relative;">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
                 Daily Sales
+                <span id="notif-badge"></span>
             </div>
             <div class="menu-item" id="nav-vc" onclick="window.switchView('vc')">
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>
@@ -506,6 +562,9 @@
         <div class="title-row">
             <h2 id="inv-game-title">Select Game</h2>
             <div style="display:flex; gap:8px;">
+                <button class="btn" id="btn-compact-toggle" style="background: var(--card); color: var(--text-sec); border: 1px solid var(--border);" onclick="window.toggleCompactView()" title="Compact / Expanded View">
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="3" y1="6" x2="21" y2="6"></line><line x1="3" y1="12" x2="21" y2="12"></line><line x1="3" y1="18" x2="21" y2="18"></line></svg>
+                </button>
                 <button class="btn" style="background: var(--card); color: var(--text-sec); border: 1px solid var(--border);" onclick="window.openBulkModal()" title="Bulk Import CSV">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
                 </button>
@@ -537,6 +596,9 @@
             </table>
         </div>
 
+        <button class="fab" style="bottom:104px; background:var(--green); box-shadow: 0 10px 20px rgba(16,185,129,0.4);" onclick="window.openQuickSell()" title="Quick Sell">
+            <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+        </button>
         <button class="fab" onclick="window.openItemModal()">
             <svg width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>
         </button>
@@ -545,21 +607,62 @@
     <main class="view" id="view-sales">
         <div class="title-row">
             <h2>Daily Sales</h2>
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
                 <button class="btn" style="background: #0088cc;" onclick="window.sendTelegram()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
+                </button>
+                <button class="btn" style="background:var(--card);color:var(--green);border:1px solid var(--border);" onclick="window.exportSalesCSV()" title="Export CSV">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                    CSV
+                </button>
+                <button class="btn" style="background:var(--card);color:var(--primary);border:1px solid var(--border);" onclick="window.exportSalesPDF()" title="Export PDF">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><path d="M9 15h6"/><path d="M9 11h3"/></svg>
+                    PDF
                 </button>
                 <button class="btn" style="background: var(--card); color: var(--red); border: 1px solid var(--border);" onclick="window.confirmClearSales()">
                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>
                 </button>
             </div>
         </div>
+
+        <!-- Stats row -->
         <div class="card" style="display: flex; justify-content: space-between; align-items: center; border-left: 4px solid var(--green);">
             <div><span style="font-size:12px; color:var(--text-sec); font-weight:700;">TODAY'S PROFIT</span><br><strong style="font-size:24px;" id="sales-total-profit">0 KS</strong></div>
             <div style="text-align:right;"><span style="font-size:12px; color:var(--text-sec); font-weight:700;">ITEMS SOLD</span><br><strong style="font-size:20px;" id="sales-total-items">0</strong></div>
         </div>
+
+        <!-- Profit Chart -->
+        <div class="card" id="chart-card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:14px;">
+                <h3 style="font-size:14px; font-weight:800; color:var(--text);">Profit Trend</h3>
+                <div style="display:flex; gap:6px;">
+                    <button id="chart-btn-7" onclick="window.renderProfitChart(7)" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid var(--primary);background:var(--primary);color:white;">7D</button>
+                    <button id="chart-btn-14" onclick="window.renderProfitChart(14)" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid var(--border);background:var(--card);color:var(--text-sec);">14D</button>
+                    <button id="chart-btn-30" onclick="window.renderProfitChart(30)" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid var(--border);background:var(--card);color:var(--text-sec);">30D</button>
+                </div>
+            </div>
+            <canvas id="profit-chart" height="160" style="width:100%;max-width:100%;"></canvas>
+            <div id="chart-empty" style="display:none;text-align:center;padding:28px;color:var(--text-sec);font-weight:700;font-size:13px;">No sales history yet</div>
+        </div>
+
+        <!-- Best Selling Items -->
         <div class="card">
-            <h3 style="font-size: 15px; border-bottom: 1px solid var(--border); padding-bottom: 12px; margin-bottom: 12px; color: var(--text-sec);">Recent Sales Activity</h3>
+            <h3 style="font-size:14px; font-weight:800; color:var(--text); margin-bottom:14px;">🏆 Best Selling Items</h3>
+            <div id="best-items-container"></div>
+        </div>
+
+        <!-- Recent Sales -->
+        <div class="card">
+            <div style="display:flex;justify-content:space-between;align-items:center;border-bottom:1px solid var(--border);padding-bottom:12px;margin-bottom:12px;">
+                <h3 style="font-size:15px;color:var(--text-sec);">Recent Sales Activity</h3>
+                <!-- Date Filter -->
+                <div style="display:flex;align-items:center;gap:6px;">
+                    <input type="date" id="sales-date-filter" style="padding:6px 10px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text);font-size:12px;font-weight:700;" onchange="window.renderSales()">
+                    <button onclick="document.getElementById('sales-date-filter').value='';window.renderSales();" style="padding:6px 8px;border-radius:8px;border:1.5px solid var(--border);background:var(--card);color:var(--text-sec);font-size:11px;font-weight:800;">All</button>
+                </div>
+            </div>
+            <!-- Game Filter -->
+            <div id="sales-game-filter-row" style="display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px;"></div>
             <div id="sales-list-container"></div>
         </div>
     </main>
@@ -756,10 +859,107 @@
             <div id="publish-last" style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:8px;"></div>
         </div>
 
+        <!-- SUMMARY DASHBOARD -->
+        <div class="card">
+            <h3 style="font-size:15px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg> Summary Dashboard</h3>
+            <div class="stats-grid" id="dash-summary-grid" style="margin-bottom:0;">
+                <div class="stat-box"><span>Total Games</span><strong id="dash-total-games">0</strong></div>
+                <div class="stat-box"><span>Total Packages</span><strong id="dash-total-packages">0</strong></div>
+                <div class="stat-box" style="border-color: var(--primary); background: rgba(24,119,242,0.05);"><span style="color:var(--primary)">All-Time Profit</span><strong id="dash-alltime-profit">0</strong></div>
+            </div>
+        </div>
+
+        <!-- PER-GAME PROFIT BREAKDOWN -->
+        <div class="card">
+            <h3 style="font-size:15px; font-weight:800; margin-bottom:14px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 2a10 10 0 0 1 10 10h-10z" fill="currentColor"/></svg> Per-Game Profit Breakdown</h3>
+            <canvas id="game-profit-chart" height="180"></canvas>
+            <div id="game-profit-empty" style="display:none; text-align:center; padding:28px; color:var(--text-sec); font-weight:700; font-size:13px;">No sales recorded yet</div>
+        </div>
+
+        <!-- PROFIT GOAL -->
+        <div class="card">
+            <h3 style="font-size:15px; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg> Today's Profit Goal</h3>
+            <div class="input-group" style="margin-bottom:10px;">
+                <label>Goal (KS)</label>
+                <input type="number" class="input-field" id="set-profit-goal" oninput="window.saveProfitGoal()" placeholder="e.g. 50000">
+            </div>
+            <div style="background:var(--bg); border-radius:10px; height:14px; overflow:hidden; position:relative; margin-bottom:6px;">
+                <div id="profit-goal-bar" style="background:var(--green); height:100%; width:0%; transition:width 0.4s;"></div>
+            </div>
+            <div style="display:flex; justify-content:space-between; font-size:12px; font-weight:700; color:var(--text-sec);">
+                <span id="profit-goal-current">0 KS</span>
+                <span id="profit-goal-pct">0%</span>
+            </div>
+        </div>
+
+        <!-- LOW STOCK / LOW PROFIT ALERT THRESHOLD -->
+        <div class="card">
+            <h3 style="font-size:15px; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg> Low-Profit Alert</h3>
+            <div style="font-size:12px; color:var(--text-sec); font-weight:600; margin-bottom:10px;">Items with profit margin below this % will show a warning badge</div>
+            <input type="range" id="margin-threshold-slider" min="0" max="50" value="10" oninput="window.saveLowMarginThreshold(this.value)" style="width:100%;">
+            <span id="margin-threshold-value" style="font-size:12px; font-weight:700; color:var(--text-sec)">10%</span>
+        </div>
+
+        <!-- AUTO TELEGRAM DAILY REPORT -->
+        <div class="card">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+                <div>
+                    <span style="font-weight:800; font-size:15px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg> Auto Telegram Daily Report</span>
+                    <div style="font-size:12px; color:var(--text-sec); font-weight:600; margin-top:3px;">Automatically send a daily sales summary via Telegram</div>
+                </div>
+                <label class="toggle-switch"><input type="checkbox" id="auto-report-toggle" onchange="window.toggleAutoReport()"><span class="slider"></span></label>
+            </div>
+            <div class="input-group" style="margin-bottom:0;">
+                <label>Send Time (24h)</label>
+                <input type="time" class="input-field" id="auto-report-time" value="00:00" onchange="window.saveAutoReportTime()">
+            </div>
+            <div id="auto-report-last" style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:8px;"></div>
+        </div>
+
+        <!-- BACKUP & RESTORE -->
+        <div class="card">
+            <h3 style="font-size:15px; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><polyline points="17 21 17 13 7 13 7 21"/><polyline points="7 3 7 8 15 8"/></svg> Backup & Restore</h3>
+            <div style="font-size:12px; color:var(--text-sec); font-weight:600; margin-bottom:12px;">Export your inventory and sales data as a JSON file, or restore from a previous backup.</div>
+            <div style="display:flex; gap:10px;">
+                <button class="btn" style="flex:1; background:var(--green);" onclick="window.exportBackupJSON()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+                    Export
+                </button>
+                <button class="btn" style="flex:1; background:var(--card); color:var(--text); border:1px solid var(--border);" onclick="document.getElementById('restore-file-input').click()">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+                    Import
+                </button>
+                <input type="file" id="restore-file-input" accept=".json" style="display:none;" onchange="window.restoreBackupJSON(this.files[0])">
+            </div>
+        </div>
+
+        <!-- DATA USAGE INFO -->
+        <div class="card">
+            <h3 style="font-size:15px; font-weight:800; margin-bottom:10px; display:flex; align-items:center; gap:8px;"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><ellipse cx="12" cy="5" rx="9" ry="3"/><path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"/><path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"/></svg> Firestore Data Usage</h3>
+            <div class="stats-grid" style="margin-bottom:0;">
+                <div class="stat-box"><span>Reads</span><strong id="dash-reads">0</strong></div>
+                <div class="stat-box"><span>Writes</span><strong id="dash-writes">0</strong></div>
+            </div>
+            <button class="btn" style="width:100%; margin-top:12px; background:var(--card); color:var(--text-sec); border:1px solid var(--border);" onclick="window.resetDataUsage()">Reset Counter</button>
+        </div>
+
         <div class="card">
             <h3 style="font-size: 16px; margin-bottom: 16px;">Store Information</h3>
             <div class="input-group"><label>Store Name</label><input type="text" class="input-field" id="set-name"></div>
-            
+
+            <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 12px;">Receipt Branding</h3>
+            <div style="display:flex; align-items:center; gap:14px; margin-bottom:16px;">
+                <img id="receipt-logo-preview" src="" style="display:none; width:56px; height:56px; border-radius:14px; object-fit:cover; border:1px solid var(--border);">
+                <div style="flex:1;">
+                    <div style="border: 2px dashed var(--border); padding: 12px; text-align: center; border-radius: 12px; cursor: pointer;" onclick="document.getElementById('receipt-logo-file').click()">
+                        <span style="font-size:12px; font-weight:700; color:var(--primary);">Upload Receipt Logo</span>
+                        <input type="file" id="receipt-logo-file" accept="image/*" style="display:none;" onchange="window.uploadReceiptLogo(this)">
+                    </div>
+                    <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:6px;">Saved once — shown on every receipt automatically</div>
+                </div>
+            </div>
+            <div class="input-group"><label>Receipt QR Content (e.g. Telegram link, payment info)</label><input type="text" class="input-field" id="set-receipt-qr" placeholder="https://t.me/yourstore"></div>
+
             <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 16px; color: #0088cc;">Telegram Bot Setup</h3>
             <div class="input-group"><label>Bot Token</label><input type="password" class="input-field" id="set-tg-token"></div>
             <div class="input-group"><label>Chat ID</label><input type="text" class="input-field" id="set-tg-chat"></div>
@@ -823,10 +1023,42 @@
                 <div class="input-group" style="flex:1;"><label>Cost (MMK)</label><input type="number" class="input-field" id="mi-cost-mmk"></div>
             </div>
             <div class="input-group"><label>Sell (MMK)</label><input type="number" class="input-field" id="mi-sell"></div>
+            <div class="input-group">
+                <label>Color Tag</label>
+                <div id="mi-color-tags" style="display:flex; gap:10px; margin-top:4px;">
+                    <div class="color-tag-opt" data-color="" style="width:32px;height:32px;border-radius:50%;background:var(--bg);border:2px solid var(--border);cursor:pointer;display:flex;align-items:center;justify-content:center;" onclick="window.selectColorTag('')"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg></div>
+                    <div class="color-tag-opt" data-color="red" style="width:32px;height:32px;border-radius:50%;background:#ef4444;border:2px solid var(--border);cursor:pointer;" onclick="window.selectColorTag('red')"></div>
+                    <div class="color-tag-opt" data-color="green" style="width:32px;height:32px;border-radius:50%;background:#10b981;border:2px solid var(--border);cursor:pointer;" onclick="window.selectColorTag('green')"></div>
+                    <div class="color-tag-opt" data-color="yellow" style="width:32px;height:32px;border-radius:50%;background:#f59e0b;border:2px solid var(--border);cursor:pointer;" onclick="window.selectColorTag('yellow')"></div>
+                    <div class="color-tag-opt" data-color="blue" style="width:32px;height:32px;border-radius:50%;background:#3b82f6;border:2px solid var(--border);cursor:pointer;" onclick="window.selectColorTag('blue')"></div>
+                    <div class="color-tag-opt" data-color="purple" style="width:32px;height:32px;border-radius:50%;background:#a855f7;border:2px solid var(--border);cursor:pointer;" onclick="window.selectColorTag('purple')"></div>
+                </div>
+                <input type="hidden" id="mi-color">
+            </div>
             <div style="display: flex; gap: 12px; margin-top: 24px;">
                 <button class="btn" id="mi-btn-del" style="background: var(--bg); color: var(--red); border: 1px solid var(--border); display: none;" onclick="window.confirmDeleteItem()">Delete</button>
+                <button class="btn" id="mi-btn-dup" style="background: var(--bg); color: var(--text-sec); border: 1px solid var(--border); display: none;" onclick="window.duplicateItem()" title="Duplicate">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                </button>
                 <button class="btn" style="flex: 1;" onclick="window.saveItem()">Save Item</button>
             </div>
+        </div>
+    </div>
+
+    <!-- QUICK SELL MODAL -->
+    <div class="modal" id="modal-quicksell" style="z-index:10001;">
+        <div class="modal-content" style="max-width:420px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
+                <h3 style="font-size:17px; font-weight:800; display:flex; align-items:center; gap:8px;"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"/></svg> Quick Sell</h3>
+                <button onclick="window.closeModal('modal-quicksell')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div class="search-box" style="margin-bottom:12px;">
+                <input type="text" id="qs-search-input" placeholder="Search package across all games..." oninput="window.renderQuickSellResults()" autocomplete="off">
+                <svg class="search-icon" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+            </div>
+            <div id="qs-results" style="max-height:50vh; overflow-y:auto; display:flex; flex-direction:column; gap:8px;"></div>
         </div>
     </div>
 
@@ -940,6 +1172,21 @@
             profile: { name: 'PCA Store', tgToken: '', tgChatId: '' }, data: {}, sales: [], uid: null
         };
         let tempEditIdx = -1; let tempBase64Image = ""; let confirmActionCallback = null; let isEditingGame = false; let editingGameOriginalName = "";
+
+        // ================= DATA USAGE TRACKING (Firestore reads/writes) =================
+        function _trackFirestore(type) {
+            try {
+                const key = 'pcaDataUsage';
+                let usage = JSON.parse(localStorage.getItem(key) || '{"reads":0,"writes":0}');
+                usage[type] = (usage[type] || 0) + 1;
+                localStorage.setItem(key, JSON.stringify(usage));
+            } catch(e) {}
+        }
+        window.getDataUsage = function() {
+            try { return JSON.parse(localStorage.getItem('pcaDataUsage') || '{"reads":0,"writes":0}'); }
+            catch(e) { return {reads:0, writes:0}; }
+        };
+        window.resetDataUsage = function() { localStorage.setItem('pcaDataUsage', JSON.stringify({reads:0,writes:0})); window.renderDataUsage(); window.showToast('Data usage counter reset'); };
 
         // SVGs for dynamic injection
         const svgTrash = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>`;
@@ -1107,6 +1354,11 @@
                 var sTheme = localStorage.getItem('pcaTheme'); if(sTheme) { state.theme = sTheme; document.documentElement.setAttribute('data-theme', sTheme); document.getElementById('theme-toggle').checked = (sTheme==='dark');}
                 var sView = localStorage.getItem('pcaViewMode'); if(sView && sView !== 'desktop') { state.viewMode = sView; document.getElementById('view-toggle').checked = false; } else { state.viewMode = 'mobile'; localStorage.setItem('pcaViewMode','mobile'); document.getElementById('view-toggle').checked = false; }
                 var sFont = localStorage.getItem('pcaFontSize'); if(sFont) { state.fontSize = parseInt(sFont); window.changeFontSize(state.fontSize); }
+                var sCompact = localStorage.getItem('pcaCompactView'); state.compactView = sCompact === '1';
+                var sLowMargin = localStorage.getItem('pcaLowMarginThreshold'); state.lowMarginThreshold = sLowMargin !== null ? parseFloat(sLowMargin) : 10;
+                var sGoal = localStorage.getItem('pcaProfitGoal'); state.profitGoal = sGoal !== null ? parseFloat(sGoal) : 0;
+                state.autoReportEnabled = localStorage.getItem('pcaAutoReportEnabled') === '1';
+                state.autoReportTime = localStorage.getItem('pcaAutoReportTime') || '00:00';
             } catch(e) {}
 
             var games = Object.keys(state.data); 
@@ -1128,6 +1380,7 @@
             if(!db || !state.uid) return;
             
             db.collection("stores").doc(state.uid).get().then(snap => {
+                _trackFirestore("reads");
                 if(snap.exists) {
                     let cData = snap.data();
                     let cloudInv = cData.data || cData.inventory || {};
@@ -1187,6 +1440,7 @@
         function saveDataToCloud() {
             saveDataToLocal();
             if(auth && state.uid && db) {
+                _trackFirestore('writes');
                 db.collection("stores").doc(state.uid).set({ inventory: state.data, data: state.data, profile: state.profile, salesHistory: state.sales, gameOrder: state.gameOrder || [] }, {merge: true}).catch(e=>{});
             }
         }
@@ -1196,20 +1450,48 @@
             document.getElementById('set-name').value = state.profile.name;
             document.getElementById('set-tg-token').value = state.profile.tgToken || "";
             document.getElementById('set-tg-chat').value = state.profile.tgChatId || "";
+            const qrInput = document.getElementById('set-receipt-qr'); if(qrInput) qrInput.value = state.profile.receiptQR || "";
+            const logoPrev = document.getElementById('receipt-logo-preview');
+            if(logoPrev) { if(state.profile.receiptLogo) { logoPrev.src = state.profile.receiptLogo; logoPrev.style.display = 'block'; } else { logoPrev.style.display = 'none'; } }
             document.getElementById('vo-store').innerText = state.profile.name;
             document.getElementById('co-store').innerText = state.profile.name;
             document.getElementById('vo-date').innerText = new Date().toLocaleDateString();
             const lms = document.getElementById('login-modal-store-name'); if(lms) lms.innerText = state.profile.name;
             if(state.viewMode === 'desktop') { document.getElementById('inv-mobile-container').style.display = 'none'; document.getElementById('inv-desktop-container').style.display = 'block'; } 
             else { document.getElementById('inv-mobile-container').style.display = 'block'; document.getElementById('inv-desktop-container').style.display = 'none'; }
+            const cbtn = document.getElementById('btn-compact-toggle'); if(cbtn) cbtn.style.color = state.compactView ? 'var(--primary)' : 'var(--text-sec)';
             window.renderSidebarGames(); window.renderInventory(); window.renderSales(); window.loadExRate();
+            window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar(); window.renderDataUsage();
+
+            const marginSlider = document.getElementById('margin-threshold-slider');
+            if(marginSlider) { marginSlider.value = state.lowMarginThreshold !== undefined ? state.lowMarginThreshold : 10; document.getElementById('margin-threshold-value').innerText = marginSlider.value + '%'; }
+            const autoToggle = document.getElementById('auto-report-toggle'); if(autoToggle) autoToggle.checked = !!state.autoReportEnabled;
+            const autoTime = document.getElementById('auto-report-time'); if(autoTime) autoTime.value = state.autoReportTime || '00:00';
         }
 
         // ================= CONFIGURATION =================
         window.toggleTheme = function() { state.theme = document.getElementById('theme-toggle').checked ? 'dark' : 'light'; if(state.theme === 'dark') document.documentElement.setAttribute('data-theme', 'dark'); else document.documentElement.removeAttribute('data-theme'); localStorage.setItem('pcaTheme', state.theme); };
         window.toggleViewMode = function() { state.viewMode = document.getElementById('view-toggle').checked ? 'desktop' : 'mobile'; localStorage.setItem('pcaViewMode', state.viewMode); applyGlobalUI(); };
         window.changeFontSize = function(val) { state.fontSize = val; document.documentElement.style.setProperty('--font-size', val + 'px'); document.getElementById('font-slider').value = val; document.getElementById('font-value').innerText = val + "px"; localStorage.setItem('pcaFontSize', val); };
-        window.saveSettings = function() { state.profile.name = document.getElementById('set-name').value || "PCA Store"; state.profile.tgToken = document.getElementById('set-tg-token').value.trim(); state.profile.tgChatId = document.getElementById('set-tg-chat').value.trim(); saveDataToCloud(); applyGlobalUI(); window.showToast("Settings Configured!"); };
+        window.toggleCompactView = function() {
+            state.compactView = !state.compactView;
+            localStorage.setItem('pcaCompactView', state.compactView ? '1' : '0');
+            const btn = document.getElementById('btn-compact-toggle');
+            if(btn) btn.style.color = state.compactView ? 'var(--primary)' : 'var(--text-sec)';
+            window.renderInventory();
+        };
+        window.saveSettings = function() { state.profile.name = document.getElementById('set-name').value || "PCA Store"; state.profile.tgToken = document.getElementById('set-tg-token').value.trim(); state.profile.tgChatId = document.getElementById('set-tg-chat').value.trim(); state.profile.receiptQR = document.getElementById('set-receipt-qr').value.trim(); saveDataToCloud(); applyGlobalUI(); window.showToast("Settings Configured!"); };
+        window.uploadReceiptLogo = function(input) {
+            if(input.files && input.files[0]) {
+                const reader = new FileReader();
+                reader.onload = e => {
+                    state.profile.receiptLogo = e.target.result;
+                    saveDataToCloud(); applyGlobalUI();
+                    window.showToast('Receipt logo saved');
+                };
+                reader.readAsDataURL(input.files[0]);
+            }
+        };
 
         // ================= PUBLISH TO STORE =================
         // Admin credentials mirror admin.html
@@ -1341,7 +1623,7 @@
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); if(document.getElementById('nav-' + v)) document.getElementById('nav-' + v).classList.add('active');
             document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show');
             if(v === 'inventory') window.renderInventory(); if(v === 'sales') window.renderSales();
-            if(v === 'settings') window.updatePublishPreview();
+            if(v === 'settings') { window.updatePublishPreview(); window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar(); window.renderDataUsage(); }
         };
 
         // ================= GAME MANAGMENT =================
@@ -1439,7 +1721,7 @@
             applyGlobalLockUI();
         };
         window.selectGame = function(name) { state.activeGame = name; document.getElementById('search-input').value = ''; window.renderSidebarGames(); window.renderInventory(); window.loadExRate(); window.toggleSidebar(); };
-        window.confirmDeleteGame = function(name, e) { e.stopPropagation(); window.showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { delete state.data[name]; state.gameOrder = (state.gameOrder||[]).filter(g=>g!==name); state.activeGame = state.gameOrder[0] || Object.keys(state.data)[0] || ''; saveDataToCloud(); applyGlobalUI(); }); };
+        window.confirmDeleteGame = function(name, e) { e.stopPropagation(); window.showConfirm("Delete Game", `Are you sure you want to delete ${name}?`, () => { const gameData = JSON.parse(JSON.stringify(state.data[name])); delete state.data[name]; state.gameOrder = (state.gameOrder||[]).filter(g=>g!==name); state.activeGame = state.gameOrder[0] || Object.keys(state.data)[0] || ''; saveDataToCloud(); applyGlobalUI(); pushUndo('deleteGame', { game: name, gameData }); }); };
         
         window.openEditGameModal = function(name, e) {
             if(e) e.stopPropagation();
@@ -1512,11 +1794,32 @@
                     let costString = costRS > 0 ? `${exSym} ${costRS} / ${costMMK} KS` : `${costMMK} KS`;
                     let costDesktop = costRS > 0 ? `<b>${costMMK} KS</b><br><span style="font-size:11px; color:var(--text-sec);">${exSym} ${costRS}</span>` : `<b>${costMMK} KS</b>`;
 
-                    mobileCon.innerHTML += `<div class="card" style="padding:16px; margin-bottom:12px; border-radius:14px; display:flex; flex-direction:column; gap:12px; overflow:hidden;">
+                    const colorMap = {red:'#ef4444',green:'#10b981',yellow:'#f59e0b',blue:'#3b82f6',purple:'#a855f7'};
+                    let colorStrip = itm.color && colorMap[itm.color] ? `<div class="item-color-strip" style="background:${colorMap[itm.color]};"></div>` : '';
+                    const lowMarginThreshold = state.lowMarginThreshold !== undefined ? state.lowMarginThreshold : 10;
+                    const itemMargin = sell > 0 ? ((sell - costMMK) / sell) * 100 : 0;
+                    let lowProfitBadge = (sell > 0 && itemMargin < lowMarginThreshold) ? `<span title="Low margin" style="margin-left:6px; color:var(--red); display:inline-flex; vertical-align:middle;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg></span>` : '';
+
+                    const compact = state.compactView;
+                    if(compact) {
+                        mobileCon.innerHTML += `<div class="card" style="padding:10px 14px; margin-bottom:8px; border-radius:12px; display:flex; align-items:center; gap:10px; overflow:hidden;">
+                            ${colorStrip}
+                            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:2px; cursor:pointer;" onclick="window.openItemModal(${idx})">
+                                <div style="font-weight:800; font-size:13px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;"><span style="color:var(--text-sec); font-weight:700;">${idx+1}.</span> ${itm.name}${comboBadgeMobile}${lowProfitBadge}</div>
+                                <div style="font-size:11px; color:var(--text-sec); font-weight:700;">${costString} → <span style="color:var(--primary);">${sell} KS</span> <span style="color:${color};">(${sign}${profit})</span></div>
+                            </div>
+                            <button onclick="window.recordSale(${idx}, event)" style="background:rgba(16,185,129,0.1); color:var(--green); padding:7px 10px; border-radius:8px; font-size:12px; font-weight:800; flex-shrink:0;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="9" cy="21" r="1"></circle><circle cx="20" cy="21" r="1"></circle><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"></path></svg>
+                            </button>
+                        </div>`;
+                    } else {
+                    mobileCon.innerHTML += `<div class="card" style="padding:16px; margin-bottom:12px; border-radius:14px; display:flex; gap:12px; overflow:hidden;">
+                            ${colorStrip}
+                            <div style="flex:1; min-width:0; display:flex; flex-direction:column; gap:12px;">
                             <div style="display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                                 <span style="font-weight:800; font-size:15px; cursor:pointer; flex:1; min-width:0; display:flex; align-items:center; flex-wrap:wrap; gap:6px;" onclick="window.openItemModal(${idx})">
                                     <span style="background:var(--bg); padding:4px 10px; border-radius:6px; font-size:13px; color:var(--text-sec); border:1px solid var(--border); flex-shrink:0;">${idx+1}</span>
-                                    <span style="word-break:break-word;">${itm.name}</span> ${comboBadgeMobile}
+                                    <span style="word-break:break-word;">${itm.name}</span> ${comboBadgeMobile}${lowProfitBadge}
                                     ${getMarginBadge(sell, costMMK)}
                                 </span>
                                 <button onclick="window.recordSale(${idx}, event)" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 12px; border-radius:8px; font-size:13px; font-weight:800; display:flex; align-items:center; gap:6px; flex-shrink:0;">
@@ -1535,11 +1838,13 @@
                                 </div>
                             </div>
                             <div style="display:flex; justify-content:space-between; background:var(--bg); padding:12px; border-radius:8px; align-items:center;" onclick="window.openItemModal(${idx})"><span style="font-size:12px; font-weight:700; color:var(--text-sec); text-transform:uppercase;">${t('net_profit')}</span><strong style="color:${color}; font-size:16px;">${sign}${profit} KS</strong></div>
+                            </div>
                         </div>`;
+                    }
                     
                     desktopBody.innerHTML += `<tr>
-                            <td style="color:var(--text-sec); font-weight:bold;">${idx+1}</td>
-                            <td style="font-weight:800; cursor:pointer;" onclick="window.openItemModal(${idx})">${itm.name} ${comboBadgeDesktop}</td>
+                            <td style="color:var(--text-sec); font-weight:bold; ${itm.color && colorMap[itm.color] ? `border-left:4px solid ${colorMap[itm.color]};` : ''}">${idx+1}</td>
+                            <td style="font-weight:800; cursor:pointer;" onclick="window.openItemModal(${idx})">${itm.name}${lowProfitBadge} ${comboBadgeDesktop}</td>
                             <td onclick="window.openItemModal(${idx})" style="cursor:pointer;">${costDesktop}</td>
                             <td onclick="window.openItemModal(${idx})" style="font-weight:bold; cursor:pointer;">${sell} KS</td>
                             <td style="color:${color}; font-weight:900; font-size:16px;">${sign}${profit}</td>
@@ -1575,46 +1880,135 @@
             const rsLbl = document.getElementById('mi-cost-rs-label');
             if(rsLbl) rsLbl.innerText = 'Cost (' + exSym2 + ')';
             if(idx > -1) {
-                const itm = state.data[state.activeGame].items[idx]; document.getElementById('mi-title').innerText = "Edit Item Details"; document.getElementById('mi-name').value = itm.name; document.getElementById('mi-combo').value = itm.combo || ''; document.getElementById('mi-cost-rs').value = itm.costRS || ''; document.getElementById('mi-cost-mmk').value = itm.costMMK !== undefined ? itm.costMMK : (itm.cost || ''); document.getElementById('mi-sell').value = itm.sell; document.getElementById('mi-btn-del').style.display = 'block';
+                const itm = state.data[state.activeGame].items[idx]; document.getElementById('mi-title').innerText = "Edit Item Details"; document.getElementById('mi-name').value = itm.name; document.getElementById('mi-combo').value = itm.combo || ''; document.getElementById('mi-cost-rs').value = itm.costRS || ''; document.getElementById('mi-cost-mmk').value = itm.costMMK !== undefined ? itm.costMMK : (itm.cost || ''); document.getElementById('mi-sell').value = itm.sell; document.getElementById('mi-btn-del').style.display = 'block'; document.getElementById('mi-btn-dup').style.display = 'block';
+                window.selectColorTag(itm.color || '');
             } else {
                 if(!state.activeGame) return window.showToast("Add a game first", "error");
-                document.getElementById('mi-title').innerText = "Add Package Item"; document.getElementById('mi-name').value = ''; document.getElementById('mi-combo').value = ''; document.getElementById('mi-cost-rs').value = ''; document.getElementById('mi-cost-mmk').value = ''; document.getElementById('mi-sell').value = ''; document.getElementById('mi-btn-del').style.display = 'none';
+                document.getElementById('mi-title').innerText = "Add Package Item"; document.getElementById('mi-name').value = ''; document.getElementById('mi-combo').value = ''; document.getElementById('mi-cost-rs').value = ''; document.getElementById('mi-cost-mmk').value = ''; document.getElementById('mi-sell').value = ''; document.getElementById('mi-btn-del').style.display = 'none'; document.getElementById('mi-btn-dup').style.display = 'none';
+                window.selectColorTag('');
             }
             window.openModal('modal-item');
         };
 
+        window.selectColorTag = function(color) {
+            document.getElementById('mi-color').value = color;
+            document.querySelectorAll('#mi-color-tags .color-tag-opt').forEach(el => {
+                el.classList.toggle('selected', el.getAttribute('data-color') === color);
+            });
+        };
+
+        window.duplicateItem = function() {
+            if(tempEditIdx < 0) return;
+            const itm = JSON.parse(JSON.stringify(state.data[state.activeGame].items[tempEditIdx]));
+            itm.name = itm.name + ' (Copy)';
+            state.data[state.activeGame].items.push(itm);
+            saveDataToCloud(); window.renderInventory(); window.closeModal('modal-item');
+            window.showToast('Item duplicated');
+        };
+
         window.saveItem = function() {
-            const ni = { name: document.getElementById('mi-name').value.trim(), combo: document.getElementById('mi-combo').value.trim(), costRS: parseFloat(document.getElementById('mi-cost-rs').value)||0, costMMK: parseFloat(document.getElementById('mi-cost-mmk').value)||0, sell: parseFloat(document.getElementById('mi-sell').value)||0 };
+            const ni = { name: document.getElementById('mi-name').value.trim(), combo: document.getElementById('mi-combo').value.trim(), costRS: parseFloat(document.getElementById('mi-cost-rs').value)||0, costMMK: parseFloat(document.getElementById('mi-cost-mmk').value)||0, sell: parseFloat(document.getElementById('mi-sell').value)||0, color: document.getElementById('mi-color').value || '' };
             if(!ni.name) return window.showToast("Enter Package Name", "error"); if(!state.data[state.activeGame].items) state.data[state.activeGame].items = [];
             if(tempEditIdx > -1) state.data[state.activeGame].items[tempEditIdx] = ni; else state.data[state.activeGame].items.push(ni);
             saveDataToCloud(); window.renderInventory(); window.closeModal('modal-item');
         };
-        window.confirmDeleteItem = function() { window.showConfirm("Delete Item", "Are you sure you want to delete this package?", () => { state.data[state.activeGame].items.splice(tempEditIdx, 1); saveDataToCloud(); window.renderInventory(); window.closeModal('modal-item'); }); };
+        window.confirmDeleteItem = function() { window.showConfirm("Delete Item", "Are you sure you want to delete this package?", () => { const item = state.data[state.activeGame].items[tempEditIdx]; const game = state.activeGame; state.data[state.activeGame].items.splice(tempEditIdx, 1); saveDataToCloud(); window.renderInventory(); window.closeModal('modal-item'); pushUndo('deleteItem', { game, idx: tempEditIdx, item }); }); };
         window.copyPriceList = function() { if(!state.activeGame || !state.data[state.activeGame] || !state.data[state.activeGame].items || state.data[state.activeGame].items.length === 0) return window.showToast("No items found", "error"); let str = `*${state.activeGame}*\n`; state.data[state.activeGame].items.forEach(i => str += `${i.name} - ${i.sell} KS\n`); navigator.clipboard.writeText(str).then(() => window.showToast("Price list copied!")); };
+
+        // ================= QUICK SELL =================
+        window.openQuickSell = function() {
+            document.getElementById('qs-search-input').value = '';
+            document.getElementById('qs-results').innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:700; font-size:13px;">Type to search packages...</div>`;
+            window.openModal('modal-quicksell');
+            setTimeout(() => document.getElementById('qs-search-input').focus(), 200);
+        };
+
+        window.renderQuickSellResults = function() {
+            const q = document.getElementById('qs-search-input').value.toLowerCase().trim();
+            const resultsEl = document.getElementById('qs-results');
+            if(!q) { resultsEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:700; font-size:13px;">Type to search packages...</div>`; return; }
+
+            let matches = [];
+            Object.keys(state.data).forEach(gameName => {
+                const items = state.data[gameName].items || [];
+                items.forEach((itm, idx) => {
+                    const nameMatch = itm.name && itm.name.toLowerCase().includes(q);
+                    const comboMatch = itm.combo && itm.combo.toLowerCase().includes(q);
+                    if(nameMatch || comboMatch) matches.push({ game: gameName, idx, itm });
+                });
+            });
+
+            if(matches.length === 0) { resultsEl.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:700; font-size:13px;">No results found</div>`; return; }
+
+            resultsEl.innerHTML = matches.slice(0, 30).map(m => {
+                const cMMK = parseFloat(m.itm.costMMK) || parseFloat(m.itm.cost) || 0;
+                const profit = (m.itm.sell || 0) - cMMK;
+                return `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-radius:12px; background:var(--bg); border:1px solid var(--border);">
+                    <div style="min-width:0;">
+                        <div style="font-weight:800; font-size:14px;">${m.itm.name}</div>
+                        <div style="font-size:11px; color:var(--text-sec); font-weight:700; margin-top:2px;">${m.game} • ${m.itm.sell || 0} KS • profit ${profit}</div>
+                    </div>
+                    <button onclick="window.quickSellRecord('${m.game.replace(/'/g,"\\'")}', ${m.idx})" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 14px; border-radius:8px; font-size:12px; font-weight:800; flex-shrink:0;">Sell</button>
+                </div>`;
+            }).join('');
+        };
+
+        window.quickSellRecord = function(game, idx) {
+            const itm = state.data[game].items[idx]; let cMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
+            state.sales.push({ date: new Date().toLocaleDateString(), game: game, name: itm.name, profit: (itm.sell||0)-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+            saveDataToCloud(); window.showToast(`Sold 1x ${itm.name}`); window.renderSales(); updateNotifBadge();
+            window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar();
+            if(game === state.activeGame) window.renderInventory();
+        };
+
 
         // ================= SALES TRACKER =================
         window.recordSale = function(idx, e) {
             if(e) e.stopPropagation();
             const itm = state.data[state.activeGame].items[idx]; let cMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
             state.sales.push({ date: new Date().toLocaleDateString(), game: state.activeGame, name: itm.name, profit: (itm.sell||0)-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
-            saveDataToCloud(); window.showToast(`Sold 1x ${itm.name}`); window.renderSales();
+            saveDataToCloud(); window.showToast(`Sold 1x ${itm.name}`); window.renderSales(); updateNotifBadge();
+            window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar();
         };
 
         window.renderSales = function() {
             const today = new Date().toLocaleDateString();
-            let todayItems = state.sales.filter(s => s.date === today);
+            const filterDateInput = document.getElementById('sales-date-filter');
+            const filterDate = filterDateInput ? filterDateInput.value : '';
+            const activeFilterDate = filterDate ? new Date(filterDate).toLocaleDateString() : today;
+
+            // Game filter state
+            if (!window._salesGameFilter) window._salesGameFilter = 'all';
+
+            // Build game filter buttons
+            const gameFilterRow = document.getElementById('sales-game-filter-row');
+            if (gameFilterRow) {
+                const games = [...new Set(state.sales.map(s => s.game).filter(Boolean))];
+                let btns = `<button onclick="window._salesGameFilter='all';window.renderSales();" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid ${window._salesGameFilter==='all'?'var(--primary)':'var(--border)'};background:${window._salesGameFilter==='all'?'var(--primary)':'var(--card)'};color:${window._salesGameFilter==='all'?'white':'var(--text-sec)'};">All</button>`;
+                games.forEach(g => {
+                    const isActive = window._salesGameFilter === g;
+                    btns += `<button onclick="window._salesGameFilter='${g}';window.renderSales();" style="padding:5px 12px;border-radius:20px;font-size:11px;font-weight:800;border:1.5px solid ${isActive?'var(--primary)':'var(--border)'};background:${isActive?'var(--primary)':'var(--card)'};color:${isActive?'white':'var(--text-sec)'};">${g}</button>`;
+                });
+                gameFilterRow.innerHTML = btns;
+            }
+
+            let filtered = state.sales.filter(s => s.date === activeFilterDate);
+            if (window._salesGameFilter && window._salesGameFilter !== 'all') {
+                filtered = filtered.filter(s => s.game === window._salesGameFilter);
+            }
+
             let profit = 0;
             const con = document.getElementById('sales-list-container');
             if(!con) return; con.innerHTML = '';
 
-            if(todayItems.length === 0) {
+            if(filtered.length === 0) {
                 con.innerHTML = `<div style="text-align:center; padding:30px; color:var(--text-sec); font-weight:600;">${t('no_sales')}</div>`;
             } else {
-                todayItems.slice().reverse().forEach((s, idx) => {
+                filtered.slice().reverse().forEach((s, idx) => {
                     profit += (s.profit || 0);
                     const color   = (s.profit||0) < 0 ? 'var(--red)' : 'var(--green)';
                     const sign    = (s.profit||0) <= 0 ? '' : '+';
-                    const isOrder = !!s.txnId; // from store order
+                    const isOrder = !!s.txnId;
                     const badge   = isOrder
                         ? `<span style="display:inline-flex;align-items:center;gap:3px;background:rgba(24,119,242,0.1);color:var(--primary);border-radius:6px;padding:2px 7px;font-size:10px;font-weight:800;letter-spacing:0.3px;margin-left:6px;">
                                <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
@@ -1653,11 +2047,207 @@
             }
             const itemsEl  = document.getElementById('sales-total-items');
             const profitEl = document.getElementById('sales-total-profit');
-            if(itemsEl)  animateCountUp(itemsEl, todayItems.length, '');
+            if(itemsEl)  animateCountUp(itemsEl, filtered.length, '');
             if(profitEl) { animateCountUp(profitEl, profit); profitEl.style.color = profit < 0 ? 'var(--red)' : 'var(--text)'; }
+
+            // Update analytics
+            window.renderProfitChart(_chartDays);
+            window.renderBestItems();
+            updateNotifBadge();
         };
 
-        window.confirmClearSales = function() { window.showConfirm("Clear Sales", "Reset daily transaction history for today?", () => { state.sales = state.sales.filter(s => s.date !== new Date().toLocaleDateString()); saveDataToCloud(); window.renderSales(); window.showToast("Cleared"); }); };
+        window.confirmClearSales = function() { window.showConfirm("Clear Sales", "Reset daily transaction history for today?", () => { state.sales = state.sales.filter(s => s.date !== new Date().toLocaleDateString()); saveDataToCloud(); window.renderSales(); window.renderSummaryDashboard(); window.renderGameProfitChart(); window.renderProfitGoalBar(); window.showToast("Cleared"); }); };
+
+        // ================= UNDO SYSTEM =================
+        let _undoStack = [];
+        let _undoTimer = null;
+
+        function pushUndo(action, data) {
+            _undoStack.push({ action, data });
+            if (_undoStack.length > 20) _undoStack.shift();
+            const bar = document.getElementById('undo-bar');
+            const msg = document.getElementById('undo-msg');
+            if (msg) msg.innerText = action === 'deleteItem' ? `"${data.item.name}" deleted` : action === 'deleteGame' ? `Game "${data.game}" deleted` : 'Action undone';
+            bar.classList.add('show');
+            if (_undoTimer) clearTimeout(_undoTimer);
+            _undoTimer = setTimeout(() => { bar.classList.remove('show'); }, 5000);
+        }
+
+        window.undoLastAction = function() {
+            if (_undoStack.length === 0) return;
+            const last = _undoStack.pop();
+            if (last.action === 'deleteItem') {
+                if (!state.data[last.data.game]) return;
+                state.data[last.data.game].items.splice(last.data.idx, 0, last.data.item);
+                saveDataToCloud(); window.renderInventory();
+                window.showToast('Item restored!');
+            } else if (last.action === 'deleteGame') {
+                state.data[last.data.game] = last.data.gameData;
+                if (!state.gameOrder.includes(last.data.game)) state.gameOrder.push(last.data.game);
+                saveDataToCloud(); window.renderSidebarGames(); window.renderInventory();
+                window.showToast('Game restored!');
+            }
+            document.getElementById('undo-bar').classList.remove('show');
+        };
+
+        // ================= NOTIFICATION BADGE =================
+        function updateNotifBadge() {
+            const today = new Date().toLocaleDateString();
+            const count = state.sales.filter(s => s.date === today).length;
+            const badge = document.getElementById('notif-badge');
+            if (!badge) return;
+            if (count > 0) {
+                badge.innerText = count > 99 ? '99+' : count;
+                badge.classList.add('show');
+            } else {
+                badge.classList.remove('show');
+            }
+        }
+
+        // ================= PROFIT CHART =================
+        let _profitChart = null;
+        let _chartDays = 7;
+
+        window.renderProfitChart = function(days) {
+            _chartDays = days || 7;
+            // Update button states
+            [7, 14, 30].forEach(d => {
+                const btn = document.getElementById('chart-btn-' + d);
+                if (!btn) return;
+                if (d === _chartDays) {
+                    btn.style.background = 'var(--primary)'; btn.style.color = 'white'; btn.style.borderColor = 'var(--primary)';
+                } else {
+                    btn.style.background = 'var(--card)'; btn.style.color = 'var(--text-sec)'; btn.style.borderColor = 'var(--border)';
+                }
+            });
+
+            const labels = [], profits = [];
+            for (let i = _chartDays - 1; i >= 0; i--) {
+                const d = new Date(); d.setDate(d.getDate() - i);
+                const label = d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                const dayStr = d.toLocaleDateString();
+                const dayProfit = state.sales.filter(s => s.date === dayStr).reduce((sum, s) => sum + (s.profit || 0), 0);
+                labels.push(label);
+                profits.push(dayProfit);
+            }
+
+            const hasData = profits.some(p => p !== 0);
+            const emptyEl = document.getElementById('chart-empty');
+            const canvas = document.getElementById('profit-chart');
+            if (!hasData) {
+                if (emptyEl) emptyEl.style.display = 'block';
+                if (canvas) canvas.style.display = 'none';
+                return;
+            }
+            if (emptyEl) emptyEl.style.display = 'none';
+            if (canvas) canvas.style.display = 'block';
+
+            const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+            const gridColor = isDark ? 'rgba(255,255,255,0.06)' : 'rgba(0,0,0,0.06)';
+            const textColor = isDark ? '#94a3b8' : '#64748b';
+
+            if (_profitChart) { _profitChart.destroy(); _profitChart = null; }
+            const ctx = canvas.getContext('2d');
+            const gradient = ctx.createLinearGradient(0, 0, 0, 160);
+            gradient.addColorStop(0, 'rgba(24,119,242,0.35)');
+            gradient.addColorStop(1, 'rgba(24,119,242,0.0)');
+
+            _profitChart = new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels,
+                    datasets: [{
+                        label: 'Profit (KS)',
+                        data: profits,
+                        borderColor: '#1877f2',
+                        backgroundColor: gradient,
+                        borderWidth: 2.5,
+                        pointRadius: 4,
+                        pointBackgroundColor: '#1877f2',
+                        tension: 0.4,
+                        fill: true,
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: { legend: { display: false }, tooltip: { callbacks: { label: ctx => ' ' + ctx.parsed.y.toLocaleString() + ' KS' } } },
+                    scales: {
+                        x: { ticks: { color: textColor, font: { size: 10, weight: '700' }, maxTicksLimit: 7 }, grid: { color: gridColor } },
+                        y: { ticks: { color: textColor, font: { size: 10, weight: '700' }, callback: v => v.toLocaleString() }, grid: { color: gridColor } }
+                    }
+                }
+            });
+        };
+
+        // ================= BEST SELLING ITEMS =================
+        window.renderBestItems = function() {
+            const con = document.getElementById('best-items-container');
+            if (!con) return;
+            const counts = {};
+            state.sales.forEach(s => { counts[s.name] = (counts[s.name] || 0) + 1; });
+            const sorted = Object.entries(counts).sort((a, b) => b[1] - a[1]).slice(0, 5);
+            if (sorted.length === 0) { con.innerHTML = '<div style="text-align:center;padding:20px;color:var(--text-sec);font-weight:700;font-size:13px;">No sales data yet</div>'; return; }
+            const max = sorted[0][1];
+            const rankClass = ['gold', 'silver', 'bronze', '', ''];
+            con.innerHTML = sorted.map(([name, count], i) => `
+                <div class="best-item-row">
+                    <div class="best-item-rank ${rankClass[i] || ''}">${i + 1}</div>
+                    <div class="best-item-bar-wrap">
+                        <div class="best-item-name">${name}</div>
+                        <div class="best-item-bar" style="width:${Math.round((count/max)*100)}%"></div>
+                    </div>
+                    <div class="best-item-count">${count}x</div>
+                </div>`).join('');
+        };
+
+        // ================= EXPORT CSV =================
+        window.exportSalesCSV = function() {
+            if (state.sales.length === 0) return window.showToast('No sales data', 'error');
+            const rows = [['Date', 'Time', 'Game', 'Item', 'Profit (KS)', 'TXN ID', 'Customer']];
+            state.sales.forEach(s => rows.push([s.date, s.time || '', s.game || '', s.name || '', s.profit || 0, s.txnId || '', s.customer || '']));
+            const csv = rows.map(r => r.map(v => '"' + String(v).replace(/"/g, '""') + '"').join(',')).join('\n');
+            const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = (state.profile.name || 'PCA') + '_Sales_' + new Date().toISOString().slice(0, 10) + '.csv';
+            document.body.appendChild(a); a.click();
+            setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
+            window.showToast('CSV exported!');
+        };
+
+        // ================= EXPORT PDF =================
+        window.exportSalesPDF = function() {
+            const today = new Date().toLocaleDateString();
+            const filterDate = (document.getElementById('sales-date-filter') || {}).value;
+            let items = state.sales;
+            if (filterDate) {
+                const fd = new Date(filterDate).toLocaleDateString();
+                items = items.filter(s => s.date === fd);
+            } else {
+                items = items.filter(s => s.date === today);
+            }
+            if (items.length === 0) return window.showToast('No sales to export', 'error');
+            const totalProfit = items.reduce((sum, s) => sum + (s.profit || 0), 0);
+            const rows = items.slice().reverse().map(s => `<tr><td>${s.date}</td><td>${s.time||''}</td><td>${s.game||''}</td><td>${s.name||''}</td><td style="color:${(s.profit||0)>=0?'#10b981':'#ef4444'};font-weight:700;">${(s.profit||0)>=0?'+':''}${s.profit||0} KS</td></tr>`).join('');
+            const html = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Sales Report</title>
+            <style>body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;padding:24px;color:#1e293b;}
+            h1{font-size:18px;margin-bottom:4px;}p{font-size:12px;color:#64748b;margin-bottom:16px;}
+            table{width:100%;border-collapse:collapse;font-size:13px;}
+            th{background:#f1f5f9;padding:8px 10px;text-align:left;font-weight:800;font-size:11px;color:#64748b;text-transform:uppercase;letter-spacing:.5px;}
+            td{padding:8px 10px;border-bottom:1px solid #f1f5f9;font-weight:600;}
+            .total{margin-top:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid #e2e8f0;}
+            .total-lbl{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;}
+            .total-amt{font-size:17px;font-weight:900;color:#1877f2;}</style></head>
+            <body><h1>${state.profile.name||'PCA Store'} — Sales Report</h1>
+            <p>${filterDate || today} &nbsp;·&nbsp; ${items.length} items</p>
+            <table><thead><tr><th>Date</th><th>Time</th><th>Game</th><th>Item</th><th>Profit</th></tr></thead><tbody>${rows}</tbody></table>
+            <div class="total"><span class="total-lbl">NET PROFIT</span><span class="total-amt">${totalProfit>=0?'+':''}${totalProfit} KS</span></div>
+            </body></html>`;
+            const w = window.open('', '_blank', 'width=700,height=600');
+            w.document.write(html); w.document.close();
+            setTimeout(() => { w.print(); }, 400);
+        };
 
         // ================= TELEGRAM (HTML PARSE) =================
         window.sendTelegram = async function() {
@@ -1678,6 +2268,149 @@
             } catch(e) { window.showToast("Connection failed", "error"); }
         };
 
+        // ================= SUMMARY DASHBOARD =================
+        window.renderSummaryDashboard = function() {
+            const games = Object.keys(state.data);
+            let totalPackages = 0;
+            games.forEach(g => { totalPackages += (state.data[g].items || []).length; });
+            const allTimeProfit = state.sales.reduce((sum, s) => sum + (s.profit || 0), 0);
+
+            const elGames = document.getElementById('dash-total-games');
+            const elPackages = document.getElementById('dash-total-packages');
+            const elProfit = document.getElementById('dash-alltime-profit');
+            if(elGames) elGames.innerText = games.length;
+            if(elPackages) elPackages.innerText = totalPackages;
+            if(elProfit) { elProfit.innerText = (allTimeProfit>=0?'+':'') + allTimeProfit + ' KS'; elProfit.style.color = allTimeProfit < 0 ? 'var(--red)' : 'var(--primary)'; }
+        };
+
+        // ================= PER-GAME PROFIT BREAKDOWN =================
+        let _gameProfitChart = null;
+        window.renderGameProfitChart = function() {
+            const canvas = document.getElementById('game-profit-chart');
+            const emptyEl = document.getElementById('game-profit-empty');
+            if(!canvas) return;
+            const totals = {};
+            state.sales.forEach(s => { totals[s.game] = (totals[s.game] || 0) + (s.profit || 0); });
+            const labels = Object.keys(totals);
+            const values = labels.map(l => totals[l]);
+
+            if(labels.length === 0) {
+                canvas.style.display = 'none'; emptyEl.style.display = 'block';
+                if(_gameProfitChart) { _gameProfitChart.destroy(); _gameProfitChart = null; }
+                return;
+            }
+            canvas.style.display = 'block'; emptyEl.style.display = 'none';
+
+            const palette = ['#1877f2','#10b981','#f59e0b','#ef4444','#a855f7','#06b6d4','#ec4899','#84cc16'];
+            const colors = labels.map((_, i) => palette[i % palette.length]);
+
+            if(_gameProfitChart) _gameProfitChart.destroy();
+            _gameProfitChart = new Chart(canvas.getContext('2d'), {
+                type: 'pie',
+                data: { labels: labels, datasets: [{ data: values, backgroundColor: colors, borderWidth: 0 }] },
+                options: { responsive: true, plugins: { legend: { position: 'bottom', labels: { color: getComputedStyle(document.body).getPropertyValue('--text'), font: { weight: 700, size: 11 } } } } }
+            });
+        };
+
+        // ================= PROFIT GOAL =================
+        window.saveProfitGoal = function() {
+            const val = parseFloat(document.getElementById('set-profit-goal').value) || 0;
+            state.profitGoal = val;
+            localStorage.setItem('pcaProfitGoal', val);
+            window.renderProfitGoalBar();
+        };
+        window.renderProfitGoalBar = function() {
+            const goal = state.profitGoal || 0;
+            const today = new Date().toLocaleDateString();
+            const todayProfit = state.sales.filter(s => s.date === today).reduce((sum, s) => sum + (s.profit || 0), 0);
+            const pct = goal > 0 ? Math.min(100, Math.max(0, Math.round((todayProfit / goal) * 100))) : 0;
+            const bar = document.getElementById('profit-goal-bar');
+            const goalInput = document.getElementById('set-profit-goal');
+            if(bar) { bar.style.width = pct + '%'; bar.style.background = todayProfit < 0 ? 'var(--red)' : 'var(--green)'; }
+            if(goalInput && document.activeElement !== goalInput) goalInput.value = goal || '';
+            const curEl = document.getElementById('profit-goal-current'); if(curEl) curEl.innerText = todayProfit + ' KS / ' + goal + ' KS';
+            const pctEl = document.getElementById('profit-goal-pct'); if(pctEl) pctEl.innerText = pct + '%';
+        };
+
+        // ================= LOW MARGIN THRESHOLD =================
+        window.saveLowMarginThreshold = function(val) {
+            state.lowMarginThreshold = parseFloat(val);
+            localStorage.setItem('pcaLowMarginThreshold', val);
+            document.getElementById('margin-threshold-value').innerText = val + '%';
+            window.renderInventory();
+        };
+
+        // ================= DATA USAGE =================
+        window.renderDataUsage = function() {
+            const usage = window.getDataUsage();
+            const r = document.getElementById('dash-reads'); if(r) r.innerText = usage.reads || 0;
+            const w = document.getElementById('dash-writes'); if(w) w.innerText = usage.writes || 0;
+        };
+
+        // ================= BACKUP & RESTORE =================
+        window.exportBackupJSON = function() {
+            const backup = { exportedAt: new Date().toISOString(), data: state.data, sales: state.sales, gameOrder: state.gameOrder || [], profile: state.profile };
+            const blob = new Blob([JSON.stringify(backup, null, 2)], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url; a.download = `pca-store-backup-${new Date().toISOString().slice(0,10)}.json`;
+            document.body.appendChild(a); a.click(); document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+            window.showToast('Backup exported');
+        };
+
+        window.restoreBackupJSON = function(file) {
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                try {
+                    const backup = JSON.parse(e.target.result);
+                    window.showConfirm('Restore Backup', 'This will overwrite your current inventory and sales data. Continue?', () => {
+                        if(backup.data) state.data = backup.data;
+                        if(backup.sales) state.sales = backup.sales;
+                        if(backup.gameOrder) state.gameOrder = backup.gameOrder;
+                        if(backup.profile) state.profile = { ...state.profile, ...backup.profile };
+                        if(!state.activeGame || !state.data[state.activeGame]) state.activeGame = (state.gameOrder && state.gameOrder[0]) || Object.keys(state.data)[0] || '';
+                        saveDataToCloud(); applyGlobalUI(); window.showToast('Backup restored!');
+                    });
+                } catch(err) { window.showToast('Invalid backup file', 'error'); }
+                document.getElementById('restore-file-input').value = '';
+            };
+            reader.readAsText(file);
+        };
+
+        // ================= AUTO TELEGRAM DAILY REPORT =================
+        window.toggleAutoReport = function() {
+            const enabled = document.getElementById('auto-report-toggle').checked;
+            state.autoReportEnabled = enabled;
+            localStorage.setItem('pcaAutoReportEnabled', enabled ? '1' : '0');
+            window.showToast(enabled ? 'Auto Daily Report enabled' : 'Auto Daily Report disabled');
+        };
+        window.saveAutoReportTime = function() {
+            const val = document.getElementById('auto-report-time').value || '00:00';
+            state.autoReportTime = val;
+            localStorage.setItem('pcaAutoReportTime', val);
+        };
+        function _checkAutoReport() {
+            try {
+                if(!state.autoReportEnabled) return;
+                const now = new Date();
+                const target = state.autoReportTime || '00:00';
+                const [th, tm] = target.split(':').map(Number);
+                const todayKey = now.toLocaleDateString();
+                const lastSent = localStorage.getItem('pcaAutoReportLastSent');
+                if(lastSent === todayKey) return;
+                if(now.getHours() === th && now.getMinutes() === tm) {
+                    localStorage.setItem('pcaAutoReportLastSent', todayKey);
+                    window.sendTelegram().then(() => {
+                        const lastEl = document.getElementById('auto-report-last');
+                        if(lastEl) lastEl.innerText = 'Last sent: ' + now.toLocaleString();
+                    });
+                }
+            } catch(e) {}
+        }
+        setInterval(_checkAutoReport, 30000);
+
         // ================= VOUCHER & COUPON =================
         window.switchVCTab = function(t) { document.getElementById('tab-v').classList.remove('active'); document.getElementById('tab-c').classList.remove('active'); document.getElementById('sec-v').style.display = 'none'; document.getElementById('sec-c').style.display = 'none'; document.getElementById('tab-'+t).classList.add('active'); document.getElementById('sec-'+t).style.display = 'block'; };
         
@@ -1689,6 +2422,22 @@
             if (!text) return null;
             return new QRCode(el, { text, width: 90, height: 90, colorDark: '#1e293b', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.M });
         }
+
+        // ================= ORDER RECEIPT BRANDING (logo + QR, set once in Settings) =================
+        window.renderReceiptBranding = function() {
+            const wrap = document.getElementById('or-footer-brand');
+            const logoEl = document.getElementById('or-footer-logo');
+            const qrEl = document.getElementById('or-footer-qr');
+            if (!wrap) return;
+            const logo = state.profile.receiptLogo || '';
+            const qrText = state.profile.receiptQR || '';
+            let show = false;
+            if (logo) { logoEl.src = logo; logoEl.style.display = 'block'; show = true; }
+            else { logoEl.style.display = 'none'; }
+            if (qrText) { makeQR('or-footer-qr', qrText); qrEl.style.display = 'inline-block'; show = true; }
+            else { qrEl.innerHTML = ''; qrEl.style.display = 'none'; }
+            wrap.style.display = show ? 'flex' : 'none';
+        };
 
         window.updateV = function() {
             document.getElementById('vo-name').innerText = document.getElementById('v-name').value || "-";
@@ -1914,6 +2663,11 @@
             if (e.key === 'Escape') {
                 document.querySelectorAll('.modal.show').forEach(m => m.classList.remove('show'));
             }
+            // Ctrl+Z => undo
+            if ((e.ctrlKey || e.metaKey) && e.key === 'z') {
+                e.preventDefault();
+                window.undoLastAction();
+            }
         });
 
         // ================= PULL TO REFRESH =================
@@ -1966,6 +2720,7 @@
         function syncFromCloud() {
             window.showToast(currentLang === 'my' ? 'Cloud နှင့် sync လုပ်နေသည်...' : 'Syncing...');
             db.collection("stores").doc(state.uid).get().then(snap => {
+                _trackFirestore("reads");
                 if(snap.exists) {
                     let d = snap.data();
                     state.data = d.data || d.inventory || state.data;
@@ -2180,20 +2935,25 @@
             })();
             const dtStr    = confirmDate + '  ' + confirmTime;
             const customer = order.customerName || order.name || order.buyer || '-';
+            const ign      = order.inGameName || order.ign || order.ingameName || order.gameUsername || '-';
             const game     = order.game || order.gameName || '-';
             const playerId = order.playerId || order.uid || order.userId || order.gameId || '-';
             const pkg      = order.package || order.item || order.packageName || order.pkg || '-';
             const price    = order.price || order.amount || order.total || 0;
+            const orderId  = order.orderId || order._id || '-';
 
             // ── Populate modal ──
             document.getElementById('or-store-name').innerText  = state.profile.name || 'PCA Store';
+            document.getElementById('or-order-id').innerText   = orderId;
             document.getElementById('or-txn-id').innerText      = txnId;
             document.getElementById('or-datetime').innerText    = dtStr;
             document.getElementById('or-customer').innerText    = customer;
+            document.getElementById('or-ign').innerText         = ign;
             document.getElementById('or-game').innerText        = game;
             document.getElementById('or-player-id').innerText   = playerId;
             document.getElementById('or-package').innerText     = pkg;
             document.getElementById('or-price').innerText       = Number(price).toLocaleString() + ' KS';
+            window.renderReceiptBranding();
 
             // ── Save to Daily Sales (state.sales) ──
             const saleEntry = {
@@ -2203,6 +2963,7 @@
                 profit:   0,                    // no cost data from store orders
                 txnId:    txnId,
                 customer: customer,
+                ign:      ign,
                 game:     game,
                 playerId: playerId,
                 price:    Number(price),
@@ -2248,13 +3009,16 @@
         window.reShowOrderReceipt = function(s) {
             if (typeof s === 'string') { try { s = JSON.parse(s); } catch(e) { return; } }
             document.getElementById('or-store-name').innerText  = state.profile.name || 'PCA Store';
+            document.getElementById('or-order-id').innerText   = s.orderId || '-';
             document.getElementById('or-txn-id').innerText      = s.txnId  || '-';
             document.getElementById('or-datetime').innerText    = (s.date || '-') + '  ' + (s.time || '');
             document.getElementById('or-customer').innerText    = s.customer || '-';
+            document.getElementById('or-ign').innerText         = s.ign || s.inGameName || '-';
             document.getElementById('or-game').innerText        = s.game    || '-';
             document.getElementById('or-player-id').innerText   = s.playerId|| '-';
             document.getElementById('or-package').innerText     = s.name    || '-';
             document.getElementById('or-price').innerText       = Number(s.price||0).toLocaleString() + ' KS';
+            window.renderReceiptBranding();
             const qBar = document.getElementById('or-queue-bar');
             if (qBar) qBar.style.display = 'none';
             window.openModal('modal-order-receipt');
@@ -2319,6 +3083,12 @@
                 .total{background:#f8fafc;margin:10px 16px 16px;padding:12px 16px;border-radius:12px;display:flex;justify-content:space-between;align-items:center;border:1px solid #e2e8f0;}
                 .total-lbl{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;}
                 .total-amt{font-size:17px;font-weight:900;color:#1877f2;}
+                .receipt-top-bar{display:flex;justify-content:space-between;align-items:center;padding:16px 20px 0;}
+                .receipt-brand-title{font-size:15px;font-weight:900;color:#1e293b;letter-spacing:0.3px;}
+                .receipt-status-pill{display:inline-flex;align-items:center;gap:4px;background:#dcfce7;color:#16a34a;font-size:11px;font-weight:800;padding:4px 10px;border-radius:20px;}
+                .receipt-footer-brand{display:flex;flex-direction:column;align-items:center;gap:10px;padding:4px 20px 22px;text-align:center;}
+                .receipt-footer-logo{width:40px;height:40px;border-radius:10px;object-fit:cover;}
+                .receipt-footer-qr{background:#fff;padding:6px;border-radius:10px;display:inline-block;}
             </style></head><body><div class="receipt-card">${el.innerHTML}</div></body></html>`);
             w.document.close();
             setTimeout(() => { w.print(); w.close(); }, 500);
@@ -2440,11 +3210,17 @@
             <!-- Receipt Card -->
             <div style="padding:20px; background:var(--bg); overflow-y:auto; max-height:70vh;">
                 <div class="receipt-card" id="print-order-receipt">
-                    <div class="receipt-header">
+                    <div class="receipt-top-bar">
+                        <div class="receipt-brand-title" id="or-store-name">PCA Store</div>
+                        <span class="receipt-status-pill">
+                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
+                            Confirmed
+                        </span>
+                    </div>
+                    <div class="receipt-header" style="padding-top:14px;">
                         <div class="receipt-check-circle">
                             <svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
                         </div>
-                        <div class="receipt-store-name" id="or-store-name">PCA Store</div>
                         <span class="receipt-label">Order confirmed successfully</span>
                     </div>
                     <div class="receipt-divider">
@@ -2454,6 +3230,10 @@
                     </div>
                     <div class="receipt-body">
                         <div class="receipt-row">
+                            <span>Order ID</span>
+                            <span id="or-order-id" style="font-size:11px; letter-spacing:0.5px; color:var(--text);">-</span>
+                        </div>
+                        <div class="receipt-row">
                             <span>Transaction ID</span>
                             <span id="or-txn-id" style="font-size:11px; letter-spacing:0.5px; color:var(--primary);">-</span>
                         </div>
@@ -2461,20 +3241,19 @@
                             <span>Date &amp; Time</span>
                             <span id="or-datetime" style="font-size:12px;">-</span>
                         </div>
-                        <div class="receipt-row"><span>Customer</span> <span id="or-customer">-</span></div>
+                        <div class="receipt-row"><span>Customer Name</span> <span id="or-customer">-</span></div>
+                        <div class="receipt-row"><span>In-Game Name</span> <span id="or-ign">-</span></div>
                         <div class="receipt-row"><span>Game</span> <span id="or-game">-</span></div>
                         <div class="receipt-row"><span>Player ID</span> <span id="or-player-id">-</span></div>
                         <div class="receipt-row"><span>Package</span> <span id="or-package">-</span></div>
-                        <div class="receipt-row"><span>Status</span>
-                            <span style="color:#16a34a; font-weight:800; display:inline-flex; align-items:center; gap:4px;">
-                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>
-                                Confirmed
-                            </span>
-                        </div>
                     </div>
                     <div class="receipt-total">
                         <span class="receipt-total-label">Total Paid</span>
                         <span class="receipt-total-amount" id="or-price">0 KS</span>
+                    </div>
+                    <div class="receipt-footer-brand" id="or-footer-brand" style="display:none;">
+                        <img id="or-footer-logo" src="" style="display:none;" class="receipt-footer-logo">
+                        <div id="or-footer-qr" class="receipt-footer-qr" style="display:none;"></div>
                     </div>
                 </div>
                 <!-- Queue indicator -->
