@@ -1557,8 +1557,20 @@
             </div>
 
             <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 16px; color: #0088cc;">Telegram Bot Setup</h3>
-            <div class="input-group"><label>Bot Token</label><input type="password" class="input-field" id="set-tg-token"></div>
-            <div class="input-group"><label>Chat ID</label><input type="text" class="input-field" id="set-tg-chat"></div>
+
+            <!-- Admin Bot -->
+            <div style="background:rgba(0,136,204,0.06); border:1.5px solid rgba(0,136,204,0.2); border-radius:12px; padding:14px; margin-bottom:12px;">
+                <div style="font-size:11px; font-weight:900; color:#0088cc; letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px;">🔧 Admin Bot — Order info လက်ခံ</div>
+                <div class="input-group" style="margin-bottom:10px;"><label>Admin Bot Token</label><input type="password" class="input-field" id="set-tg-token" placeholder="123456:ABC-..."></div>
+                <div class="input-group" style="margin-bottom:0;"><label>Admin Chat ID</label><input type="text" class="input-field" id="set-tg-chat" placeholder="Admin ရဲ့ Chat ID"></div>
+            </div>
+
+            <!-- Customer Bot -->
+            <div style="background:rgba(16,185,129,0.06); border:1.5px solid rgba(16,185,129,0.2); border-radius:12px; padding:14px; margin-bottom:12px;">
+                <div style="font-size:11px; font-weight:900; color:var(--green); letter-spacing:0.5px; text-transform:uppercase; margin-bottom:10px;">🎁 Customer Bot — Voucher ပို့</div>
+                <div class="input-group" style="margin-bottom:10px;"><label>Customer Bot Token</label><input type="password" class="input-field" id="set-tg-cust-token" placeholder="123456:ABC-..."></div>
+                <div style="font-size:11px; color:var(--text-sec); font-weight:600;">Customer Chat ID ကို /order message ထဲက ChatID: field မှ ယူသည်</div>
+            </div>
             
             <!--  AUTO ORDER BOT  -->
             <div style="background:linear-gradient(135deg,rgba(0,136,204,0.08),rgba(0,136,204,0.04)); border:1.5px solid rgba(0,136,204,0.25); border-radius:14px; padding:16px; margin-top:4px; margin-bottom:16px;">
@@ -1921,7 +1933,7 @@ ChatID: 987654321</textarea>
 
         let state = {
             viewMode: 'mobile', theme: 'light', activeGame: '', fontSize: 14,
-            profile: { name: 'PCA Store', tgToken: '', tgChatId: '' }, data: {}, sales: [], uid: null,
+            profile: { name: 'PCA Store', tgToken: '', tgChatId: '', tgCustToken: '' }, data: {}, sales: [], uid: null,
             // settings = everything that used to live ONLY in localStorage.
             // This now gets synced to Firestore too, so it survives "clear browser data".
             settings: { profitGoal: 0, lowMarginThreshold: 10, autoReportEnabled: false, autoReportTime: '00:00', gameOrderGlobalLocked: false, exRates: {} }
@@ -2372,6 +2384,7 @@ ChatID: 987654321</textarea>
             document.getElementById('set-name').value = state.profile.name;
             document.getElementById('set-tg-token').value = state.profile.tgToken || "";
             document.getElementById('set-tg-chat').value = state.profile.tgChatId || "";
+            const custTokEl = document.getElementById('set-tg-cust-token'); if(custTokEl) custTokEl.value = state.profile.tgCustToken || "";
             const qrInput = document.getElementById('set-receipt-qr'); if(qrInput) qrInput.value = state.profile.receiptQR || "";
             // Refresh branding lock UI (logo + QR lock state)
             window._refreshBrandingLockUI && window._refreshBrandingLockUI();
@@ -2443,9 +2456,10 @@ ChatID: 987654321</textarea>
         };
 
         window.saveSettings = function() {
-            state.profile.name    = document.getElementById('set-name').value || "PCA Store";
-            state.profile.tgToken = document.getElementById('set-tg-token').value.trim();
-            state.profile.tgChatId= document.getElementById('set-tg-chat').value.trim();
+            state.profile.name      = document.getElementById('set-name').value || "PCA Store";
+            state.profile.tgToken   = document.getElementById('set-tg-token').value.trim();
+            state.profile.tgChatId  = document.getElementById('set-tg-chat').value.trim();
+            state.profile.tgCustToken = document.getElementById('set-tg-cust-token').value.trim();
             const newQR = document.getElementById('set-receipt-qr').value.trim();
             state.profile.receiptQR = newQR;
             saveDataToCloud(); applyGlobalUI();
@@ -2553,7 +2567,7 @@ ChatID: 987654321</textarea>
                     state.sales    = [];
                     state.activeGame = '';
                     state.gameOrder  = [];
-                    state.profile  = { name: state.profile.name || 'PCA Store', tgToken: '', tgChatId: '' };
+                    state.profile  = { name: state.profile.name || 'PCA Store', tgToken: '', tgChatId: '', tgCustToken: '' };
                     state.settings = { profitGoal: 0, lowMarginThreshold: 10, autoReportEnabled: false, autoReportTime: '00:00', gameOrderGlobalLocked: false, exRates: {}, monthlyProfitGoal: 0 };
 
                     // Wipe localStorage
@@ -3635,6 +3649,7 @@ ChatID: 987654321</textarea>
             //  Process a single confirmed /order message 
             async function _processOrder(update) {
                 const token  = state.profile.tgToken;
+                const custToken = state.profile.tgCustToken || token; // fallback to admin token if no cust token
                 const msg    = update.message || update.channel_post;
                 if (!msg || !msg.text) return;
                 const text   = msg.text.trim();
@@ -3668,36 +3683,34 @@ ChatID: 987654321</textarea>
                 _setStatus('busy', 'Capturing voucher...', null);
 
                 // Determine send targets
-                // If no explicit CustomerChatID in the /order message, the sender IS the customer
-                const adminChatId    = state.profile.tgChatId ? String(state.profile.tgChatId).trim() : fromChatId;
-                const custChatId     = order.customerChatId ? String(order.customerChatId).trim() : String(fromChatId);
-                const hasCustomer    = true; // always send to customer (the /order sender)
+                const adminChatId = state.profile.tgChatId ? String(state.profile.tgChatId).trim() : fromChatId;
+                const custChatId  = order.customerChatId ? String(order.customerChatId).trim() : null;
 
                 // Capture voucher off-screen and send as photo
                 try {
                     const blob    = await _captureVoucherOffscreen(order, txnId);
                     const caption = _buildVoucherCaption(order, txnId);
 
-                    async function _sendVoucherTo(targetId, isCustomer) {
+                    // Send using a given bot token
+                    async function _sendVoucherWith(useToken, targetId) {
                         if (blob) {
                             const fd = new FormData();
                             fd.append('chat_id',    targetId);
                             fd.append('photo',      blob, 'voucher.png');
                             fd.append('caption',    caption);
                             fd.append('parse_mode', 'HTML');
-                            const r = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: fd });
+                            const r = await fetch(`https://api.telegram.org/bot${useToken}/sendPhoto`, { method: 'POST', body: fd });
                             const d = await r.json();
                             if (!d.ok) {
-                                // Fallback to text if sendPhoto fails (e.g. customer never started bot)
-                                await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                                // Fallback to text
+                                await fetch(`https://api.telegram.org/bot${useToken}/sendMessage`, {
                                     method: 'POST',
                                     headers: { 'Content-Type': 'application/json' },
                                     body: JSON.stringify({ chat_id: targetId, text: caption, parse_mode: 'HTML' })
                                 });
                             }
                         } else {
-                            // No image → text only
-                            await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                            await fetch(`https://api.telegram.org/bot${useToken}/sendMessage`, {
                                 method: 'POST',
                                 headers: { 'Content-Type': 'application/json' },
                                 body: JSON.stringify({ chat_id: targetId, text: caption, parse_mode: 'HTML' })
@@ -3705,33 +3718,29 @@ ChatID: 987654321</textarea>
                         }
                     }
 
-                    if (hasCustomer) {
-                        // 1️⃣ Send voucher to CUSTOMER
-                        await _sendVoucherTo(custChatId, true);
-
-                        // 2️⃣ Send confirmation to ADMIN only if admin ≠ customer
-                        if (adminChatId && adminChatId !== custChatId) {
-                        const adminNote =
-                            `✅ <b>Voucher ပို့ပြီး</b>
-` +
-                            `👤 Customer: <b>${order.name || '-'}</b>
-` +
-                            `🎮 ${order.game || '-'} · ${order.package || '-'}
-` +
-                            `💳 ChatID: <code>${custChatId}</code>
-` +
-                            `🔖 TXN: <code>${txnId}</code>`;
-                        await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-                            method: 'POST',
-                            headers: { 'Content-Type': 'application/json' },
-                            body: JSON.stringify({ chat_id: adminChatId, text: adminNote, parse_mode: 'HTML' })
-                        });
-                        }
+                    if (custChatId) {
+                        // 1️⃣ Customer Bot → Customer
+                        await _sendVoucherWith(custToken, custChatId);
                         window.showToast('✅ Voucher → Customer ပို့ပြီး!', 'success');
+
+                        // 2️⃣ Admin Bot → Admin (confirmation only)
+                        if (adminChatId) {
+                            const adminNote =
+                                `✅ <b>Voucher ပို့ပြီး</b>\n` +
+                                `👤 Customer: <b>${order.name || '-'}</b>\n` +
+                                `🎮 ${order.game || '-'} · ${order.package || '-'}\n` +
+                                `💳 ChatID: <code>${custChatId}</code>\n` +
+                                `🔖 TXN: <code>${txnId}</code>`;
+                            await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+                                method: 'POST',
+                                headers: { 'Content-Type': 'application/json' },
+                                body: JSON.stringify({ chat_id: adminChatId, text: adminNote, parse_mode: 'HTML' })
+                            });
+                        }
                     } else {
-                        // No CustomerChatID → send to admin only (existing behaviour)
-                        await _sendVoucherTo(adminChatId, false);
-                        window.showToast('✅ Voucher Telegram ပို့ပြီး!', 'success');
+                        // No CustomerChatID → Admin Bot → Admin only
+                        await _sendVoucherWith(token, adminChatId);
+                        window.showToast('✅ Voucher → Admin ပို့ပြီး! (ChatID မပါ)', 'success');
                     }
 
                 } catch(e) {
@@ -3784,6 +3793,39 @@ ChatID: 987654321</textarea>
                 }
             }
 
+            // ── Wake Lock: screen ဖွင့်ထားသမျှ phone sleep မချအောင် ──
+            let _wakeLock = null;
+            async function _acquireWakeLock() {
+                if (!('wakeLock' in navigator)) return;
+                try {
+                    if (_wakeLock) return; // already held
+                    _wakeLock = await navigator.wakeLock.request('screen');
+                    _wakeLock.addEventListener('release', () => { _wakeLock = null; });
+                } catch(e) { /* silently ignore — not supported on all browsers */ }
+            }
+            function _releaseWakeLock() {
+                if (_wakeLock) { _wakeLock.release(); _wakeLock = null; }
+            }
+
+            // ── Visibility API: tab hidden → paused, visible → resume immediately ──
+            document.addEventListener('visibilitychange', () => {
+                if (!_botActive) return;
+                if (document.visibilityState === 'visible') {
+                    // Tab ပြန်ဝင်လာရင် immediately poll + wake lock ပြန်ယူ
+                    _poll();
+                    _acquireWakeLock();
+                }
+                // hidden ဖြစ်သွားလည်း setInterval ဆက်ရှိတယ် — browser က throttle လုပ်နိုင်တယ်
+                // ဒါကြောင့် hidden တုန်း fallback heartbeat ထပ်ထည့်တယ် (setTimeout chain)
+            });
+
+            // ── Heartbeat: browser က setInterval ကို throttle လုပ်တဲ့အခါ setTimeout chain နဲ့ backup ──
+            function _heartbeat() {
+                if (!_botActive) return;
+                _poll();
+                setTimeout(_heartbeat, 6000); // slightly offset from main interval
+            }
+
             //  Start / stop 
             window.toggleAutoOrderBot = function() {
                 const enabled = document.getElementById('auto-order-bot-toggle').checked;
@@ -3791,18 +3833,21 @@ ChatID: 987654321</textarea>
                 localStorage.setItem('pca_bot_active', enabled ? '1' : '0');
                 if (enabled) {
                     if (!state.profile.tgToken) {
-                        window.showToast('Bot Token ထည့်ပါ (Settings)', 'error');
+                        window.showToast('Admin Bot Token ထည့်ပါ (Settings)', 'error');
                         document.getElementById('auto-order-bot-toggle').checked = false;
                         _botActive = false;
                         return;
                     }
                     _setStatus('online', 'Starting...', null);
+                    _acquireWakeLock();
                     _poll(); // immediate first poll
-                    _botInterval = setInterval(_poll, 5000);
+                    _botInterval = setInterval(_poll, 5000); // main interval
+                    setTimeout(_heartbeat, 6000);            // backup heartbeat chain
                     window.showToast(' Auto Order Bot started!', 'success');
                 } else {
                     clearInterval(_botInterval);
                     _botInterval = null;
+                    _releaseWakeLock();
                     _setStatus('offline', 'Offline  toggle to start', null);
                     window.showToast('Bot stopped');
                 }
@@ -3837,8 +3882,14 @@ ChatID: 987654321</textarea>
                 setTimeout(() => {
                     const toggle = document.getElementById('auto-order-bot-toggle');
                     if (toggle) { toggle.checked = true; window.toggleAutoOrderBot(); }
+                    _acquireWakeLock();
                 }, 2000);
             }
+
+            // Re-acquire wake lock if released (e.g. phone plugged/unplugged)
+            document.addEventListener('visibilitychange', () => {
+                if (_botActive && document.visibilityState === 'visible') _acquireWakeLock();
+            });
         })();
 
         // ================= AUTO TELEGRAM DAILY REPORT =================
