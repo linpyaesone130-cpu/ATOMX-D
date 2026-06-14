@@ -2382,6 +2382,10 @@ Price: 5000</textarea>
             const orig = window.showView;
             window.showView = function(view) {
                 orig && orig(view);
+                // When navigating to Voucher view, refresh footer branding (logo + QR from settings)
+                if (view === 'vc') {
+                    setTimeout(function() { if (typeof _updateVFooter === 'function') _updateVFooter(); }, 80);
+                }
                 if (view === 'settings') {
                     const saved = state && state.profile && state.profile.orderFormat;
                     if (saved) {
@@ -3412,6 +3416,79 @@ Price: 5000</textarea>
                 } catch(e) {}
             }
 
+            //  Build caption text for voucher photo reply 
+            function _buildVoucherCaption(order, txnId) {
+                const store   = state.profile.name || 'PCA Store';
+                const now     = new Date();
+                const pad     = n => String(n).padStart(2,'0');
+                const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
+                const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
+                return ` <b>ORDER CONFIRMED</b>\n` +
+                       ` <b>${store}</b>\n` +
+                       `\n` +
+                       ` TXN: <code>${txnId}</code>\n` +
+                       ` ${dateStr}  ${timeStr}\n` +
+                       `\n` +
+                       ` Customer: <b>${order.name || '-'}</b>\n` +
+                       ` Game: ${order.game || '-'}\n` +
+                       ` Package: <b>${order.package || '-'}</b>\n` +
+                       (order.playerId ? ` Player ID: <code>${order.playerId}</code>\n` : '') +
+                       (order.ign      ? ` IGN: ${order.ign}\n` : '') +
+                       `\n` +
+                       ` Total: <b>${Number(order.price||0).toLocaleString()} KS</b>\n` +
+                       `\n` +
+                       ` Voucher ပေးပို့ပြီးပါပြီ `;
+            }
+
+            //  Render voucher into a hidden off-screen div and capture as blob (no UI navigation needed) 
+            async function _captureVoucherOffscreen(order, txnId) {
+                try {
+                    const store = state.profile.name || 'PCA Store';
+                    const now   = new Date();
+                    const pad   = n => String(n).padStart(2,'0');
+                    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+                    const dateStr = `${pad(now.getDate())} ${months[now.getMonth()]} ${now.getFullYear()}`;
+
+                    // Clone the voucher card (print-v) so we don't disturb the live UI
+                    const src = document.getElementById('print-v');
+                    if (!src) return null;
+
+                    // Fill the real voucher fields so the clone picks up updated values
+                    const setInput = (id, val) => { const el = document.getElementById(id); if(el) el.value = val; };
+                    const set      = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
+                    setInput('v-name',    order.name    || '');
+                    setInput('v-ign',     order.ign     || '');
+                    setInput('v-game',    order.playerId || order.game || '');
+                    setInput('v-item',    order.package  || '');
+                    setInput('v-orderid', txnId);
+                    setInput('v-price',   order.price   || '0');
+                    set('vo-store',   store);
+                    set('vo-name',    order.name    || '-');
+                    set('vo-ign',     order.ign     || '-');
+                    set('vo-game',    order.playerId || order.game || '-');
+                    set('vo-item',    order.package  || '-');
+                    set('vo-price',   Number(order.price||0).toLocaleString() + ' KS');
+                    set('vo-date',    dateStr);
+                    const oidRow = document.getElementById('vo-orderid-row');
+                    const oidEl  = document.getElementById('vo-orderid');
+                    if (oidRow && oidEl) { oidEl.innerText = txnId; oidRow.style.display = 'flex'; }
+
+                    // Place a hidden clone off-screen for capture
+                    const clone = src.cloneNode(true);
+                    clone.style.cssText = 'position:fixed;left:-9999px;top:-9999px;z-index:-1;visibility:hidden;';
+                    document.body.appendChild(clone);
+
+                    // Short wait for clone to paint
+                    await new Promise(r => setTimeout(r, 300));
+
+                    const canvas = await html2canvas(clone, { scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false });
+                    document.body.removeChild(clone);
+                    return await new Promise(res => canvas.toBlob(res, 'image/png', 1.0));
+                } catch(e) {
+                    return null;
+                }
+            }
+
             //  Process a single confirmed /order message 
             async function _processOrder(update) {
                 const token  = state.profile.tgToken;
@@ -3441,57 +3518,26 @@ Price: 5000</textarea>
                 const prefix = (state.profile.name || 'PCA').replace(/\s/g,'').substring(0,3).toUpperCase();
                 const txnId  = `${prefix}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
 
-                // 1⃣ Fill receipt modal (existing)
+                // ✅ STEP 1: Immediately send text receipt (< 1s, no DOM capture needed)
+                _setStatus('busy', 'Sending instant receipt...', null);
+                try {
+                    await _sendTextReceipt(token, fromChatId, order, txnId);
+                } catch(e) {
+                    // Non-fatal — still continue with voucher
+                }
+
+                // ✅ STEP 2: Save to sales log & update UI in background (no navigation)
                 _injectOrderToReceipt(order, txnId);
                 _showLastOrder(order);
+                window.showToast(' Order ဝင်လာပြီ! Receipt ပို့ပြီး — Voucher ပြင်ဆင်နေသည်...', 'success');
 
-                // 2⃣ Fill Voucher card (print-v)
-                _injectOrderToVoucher(order, txnId);
-
-                // 3⃣ Navigate to Voucher tab so card renders correctly
-                if (typeof window.switchView === 'function') window.switchView('vc');
-                if (typeof window.switchVCTab === 'function') window.switchVCTab('v');
-
-                // 4⃣ Show toast
-                window.showToast(' Order ဝင်လာပြီ! Voucher print + bot ပို့နေသည်...', 'success');
-
-                _setStatus('busy', 'Printing & sending voucher...', null);
-
-                // 5⃣ Wait for DOM to render voucher card, then print + send
-                await new Promise(r => setTimeout(r, 800));
-
+                // ✅ STEP 3: Capture voucher off-screen (no switchView/tab navigation required)
+                _setStatus('busy', 'Capturing voucher image...', null);
                 try {
-                    // Auto-print voucher
-                    await _autoPrintVoucher();
-
-                    // Capture voucher as image
-                    const blob = await _captureVoucherBlobBot();
+                    const blob = await _captureVoucherOffscreen(order, txnId);
 
                     if (blob) {
-                        // Build caption
-                        const store   = state.profile.name || 'PCA Store';
-                        const now     = new Date();
-                        const pad     = n => String(n).padStart(2,'0');
-                        const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
-                        const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
-                        const caption =
-                            ` <b>ORDER CONFIRMED</b>\n` +
-                            ` <b>${store}</b>\n` +
-                            `\n` +
-                            ` TXN: <code>${txnId}</code>\n` +
-                            ` ${dateStr}  ${timeStr}\n` +
-                            `\n` +
-                            ` Customer: <b>${order.name || '-'}</b>\n` +
-                            ` Game: ${order.game || '-'}\n` +
-                            ` Package: <b>${order.package || '-'}</b>\n` +
-                            (order.playerId ? ` Player ID: <code>${order.playerId}</code>\n` : '') +
-                            (order.ign      ? ` IGN: ${order.ign}\n` : '') +
-                            `\n` +
-                            ` Total: <b>${Number(order.price||0).toLocaleString()} KS</b>\n` +
-                            `\n` +
-                            ` Voucher ပေးပို့ပြီးပါပြီ `;
-
-                        // Send voucher photo back to bot
+                        const caption = _buildVoucherCaption(order, txnId);
                         const fd = new FormData();
                         fd.append('chat_id',    fromChatId);
                         fd.append('photo',      blob, 'voucher.png');
@@ -3500,24 +3546,20 @@ Price: 5000</textarea>
                         const res  = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: fd });
                         const data = await res.json();
                         if (data.ok) {
-                            window.showToast(' Voucher print + Telegram ပို့ပြီး!', 'success');
-                            _setStatus('online', `Active · last order ${new Date().toLocaleTimeString()}`, ` ${_pollCount}`);
+                            window.showToast(' Voucher image Telegram ပို့ပြီး!', 'success');
                         } else {
-                            throw new Error(data.description || 'sendPhoto failed');
+                            // sendPhoto failed but text was already sent — no action needed
+                            console.warn('sendPhoto failed:', data.description);
                         }
-                    } else {
-                        // Fallback: send text receipt if capture failed
-                        await _sendTextReceipt(token, fromChatId, order, txnId);
-                        _setStatus('online', `Active · last order ${new Date().toLocaleTimeString()}`, `#${_pollCount}`);
                     }
-
-                    // Also save to sales log via receipt inject
-                    // (already done inside _injectOrderToReceipt above)
+                    // (text receipt already sent above, so no fallback needed)
 
                 } catch(e) {
-                    window.showToast('Bot error: ' + (e.message || 'failed'), 'error');
-                    _setStatus('error', 'Send failed  check token', null);
+                    console.warn('Voucher capture error:', e.message);
+                    // Text receipt already delivered — this is a bonus step
                 }
+
+                _setStatus('online', `Active · last order ${new Date().toLocaleTimeString()}`, ` ${_pollCount}`);
             }
 
             //  Polling loop 
@@ -3645,7 +3687,7 @@ Price: 5000</textarea>
         setInterval(_checkAutoReport, 30000);
 
         // ================= VOUCHER & COUPON =================
-        window.switchVCTab = function(t) { document.getElementById('tab-v').classList.remove('active'); document.getElementById('tab-c').classList.remove('active'); document.getElementById('sec-v').style.display = 'none'; document.getElementById('sec-c').style.display = 'none'; document.getElementById('tab-'+t).classList.add('active'); document.getElementById('sec-'+t).style.display = 'block'; };
+        window.switchVCTab = function(t) { document.getElementById('tab-v').classList.remove('active'); document.getElementById('tab-c').classList.remove('active'); document.getElementById('sec-v').style.display = 'none'; document.getElementById('sec-c').style.display = 'none'; document.getElementById('tab-'+t).classList.add('active'); document.getElementById('sec-'+t).style.display = 'block'; if (t === 'v') { setTimeout(_updateVFooter, 50); } };
         
         // QR helpers
         let vQR = null, cQR = null;
@@ -3726,8 +3768,69 @@ Price: 5000</textarea>
         };
 
         function _updateVFooter() {
-            const footerEl = document.getElementById('vo-footer-brand');
-            if (footerEl) footerEl.style.display = 'none';
+            const footerEl  = document.getElementById('vo-footer-brand');
+            if (!footerEl) return;
+
+            const logoUrl = (state.profile && state.profile.receiptLogo) || '';
+            const qrText  = (state.profile && (state.profile.receiptQR || '').trim()) || '';
+
+            // Also check if a per-voucher logo was uploaded (vo-logo src set by uploadVoucherLogo)
+            const voLogoEl     = document.getElementById('vo-logo');
+            const vouchLogoSrc = voLogoEl ? voLogoEl.src : '';
+            const hasVouchLogo = vouchLogoSrc && vouchLogoSrc.startsWith('data:');
+
+            const hasLogo = hasVouchLogo || !!logoUrl;
+            const hasQR   = !!qrText;
+
+            if (!hasLogo && !hasQR) {
+                footerEl.style.display = 'none';
+                return;
+            }
+
+            footerEl.style.display      = 'flex';
+            footerEl.style.flexDirection = 'row';
+
+            // --- Logo ---
+            const logoWrap = document.getElementById('vo-logo-wrap');
+            if (logoWrap) {
+                if (hasLogo) {
+                    if (!hasVouchLogo && logoUrl && voLogoEl) {
+                        voLogoEl.src = logoUrl;
+                    }
+                    logoWrap.style.display = 'flex';
+                } else {
+                    logoWrap.style.display = 'none';
+                }
+            }
+
+            // --- QR Code ---
+            const qrWrap = document.getElementById('vo-qr-wrap');
+            const qrEl   = document.getElementById('vo-qr-code');
+            if (qrWrap) {
+                if (hasQR && qrEl) {
+                    if (qrEl.dataset.lastQr !== qrText) {
+                        qrEl.innerHTML = '';
+                        try {
+                            new QRCode(qrEl, {
+                                text:         qrText,
+                                width:        64,
+                                height:       64,
+                                colorDark:    '#0f172a',
+                                colorLight:   '#ffffff',
+                                correctLevel: QRCode.CorrectLevel.M
+                            });
+                        } catch(e) {}
+                        qrEl.dataset.lastQr = qrText;
+                    }
+                    qrWrap.style.display = 'flex';
+                } else {
+                    qrWrap.style.display = 'none';
+                }
+            }
+
+            // Tagline
+            const tagline = document.getElementById('vo-footer-tagline');
+            if (tagline && !tagline.innerText) tagline.innerText = 'Thank you for your purchase!';
         };
 
         window.updateC = function() {
