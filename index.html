@@ -3614,10 +3614,11 @@ ChatID: 987654321</textarea>
 
                     // Place a hidden clone off-screen for capture
                     // NOTE: must NOT use visibility:hidden or display:none — html2canvas renders blank for those
-                    // src.offsetWidth is 0 when voucher modal is closed → fallback to 380px
-                    const captureWidth = src.offsetWidth > 0 ? src.offsetWidth : 380;
+                    // Use fixed width 360px and ensure white background so CSS variables resolve correctly
                     const clone = src.cloneNode(true);
-                    clone.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-9999;opacity:0;pointer-events:none;width:' + captureWidth + 'px;';
+                    clone.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:99999;pointer-events:none;width:360px;background:#ffffff;border-radius:24px;';
+                    // Force light-mode CSS variable overrides so receipt renders cleanly regardless of app theme
+                    clone.querySelectorAll('.receipt-notch-left, .receipt-notch-right').forEach(el => { el.style.background = '#f4f6f8'; });
                     document.body.appendChild(clone);
 
                     // Wait for fonts/images inside clone to paint (800ms for slow connections)
@@ -3667,9 +3668,10 @@ ChatID: 987654321</textarea>
                 _setStatus('busy', 'Capturing voucher...', null);
 
                 // Determine send targets
-                const adminChatId    = fromChatId;
-                const custChatId     = order.customerChatId ? String(order.customerChatId).trim() : null;
-                const hasCustomer    = !!custChatId;
+                // If no explicit CustomerChatID in the /order message, the sender IS the customer
+                const adminChatId    = state.profile.tgChatId ? String(state.profile.tgChatId).trim() : fromChatId;
+                const custChatId     = order.customerChatId ? String(order.customerChatId).trim() : String(fromChatId);
+                const hasCustomer    = true; // always send to customer (the /order sender)
 
                 // Capture voucher off-screen and send as photo
                 try {
@@ -3707,7 +3709,8 @@ ChatID: 987654321</textarea>
                         // 1️⃣ Send voucher to CUSTOMER
                         await _sendVoucherTo(custChatId, true);
 
-                        // 2️⃣ Send confirmation to ADMIN (not the full voucher again, just a small note)
+                        // 2️⃣ Send confirmation to ADMIN only if admin ≠ customer
+                        if (adminChatId && adminChatId !== custChatId) {
                         const adminNote =
                             `✅ <b>Voucher ပို့ပြီး</b>
 ` +
@@ -3723,6 +3726,7 @@ ChatID: 987654321</textarea>
                             headers: { 'Content-Type': 'application/json' },
                             body: JSON.stringify({ chat_id: adminChatId, text: adminNote, parse_mode: 'HTML' })
                         });
+                        }
                         window.showToast('✅ Voucher → Customer ပို့ပြီး!', 'success');
                     } else {
                         // No CustomerChatID → send to admin only (existing behaviour)
