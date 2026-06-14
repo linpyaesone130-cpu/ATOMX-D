@@ -3614,12 +3614,14 @@ ChatID: 987654321</textarea>
 
                     // Place a hidden clone off-screen for capture
                     // NOTE: must NOT use visibility:hidden or display:none — html2canvas renders blank for those
+                    // src.offsetWidth is 0 when voucher modal is closed → fallback to 380px
+                    const captureWidth = src.offsetWidth > 0 ? src.offsetWidth : 380;
                     const clone = src.cloneNode(true);
-                    clone.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-9999;opacity:0;pointer-events:none;width:' + src.offsetWidth + 'px;';
+                    clone.style.cssText = 'position:fixed;left:-9999px;top:0;z-index:-9999;opacity:0;pointer-events:none;width:' + captureWidth + 'px;';
                     document.body.appendChild(clone);
 
-                    // Wait for fonts/images inside clone to paint
-                    await new Promise(r => setTimeout(r, 500));
+                    // Wait for fonts/images inside clone to paint (800ms for slow connections)
+                    await new Promise(r => setTimeout(r, 800));
 
                     const canvas = await html2canvas(clone, { scale: 3, backgroundColor: '#ffffff', useCORS: true, logging: false, allowTaint: true });
                     document.body.removeChild(clone);
@@ -4834,41 +4836,76 @@ ChatID: 987654321</textarea>
         };
 
         //  WHATSAPP SHARE  Receipt 
-        window.shareReceiptTelegram = function() {
+        window.shareReceiptTelegram = async function() {
             const el = document.getElementById('print-order-receipt');
             if (!el) return;
-            const origBg = el.style.background;
-            el.style.background = '#ffffff';
+
             _setBtnLoading('btn-receipt-wa', true);
             window.showToast('Preparing for Telegram...');
+
+            // Get current order info from receipt modal
+            const storeName = state.profile.name || 'PCA Store';
+            const txnEl  = document.getElementById('or-txn-id');
+            const custEl = document.getElementById('or-customer');
+            const amtEl  = document.getElementById('or-price');
+            const txnId  = txnEl  ? txnEl.innerText  : '';
+            const custName = custEl ? custEl.innerText : '';
+            const amount = amtEl  ? amtEl.innerText  : '';
+
+            // ── PATH 1: Bot token + chatId available → sendPhoto directly ──
+            const token  = state.profile.tgToken;
+            const chatId = state.profile.tgChatId;
+
+            if (token && chatId) {
+                try {
+                    const blob = await _captureReceiptBlob();
+                    if (blob) {
+                        const caption =
+                            `🧾 <b>${storeName}</b>\n` +
+                            `📋 Receipt: <code>${txnId}</code>\n` +
+                            `👤 Customer: <b>${custName}</b>\n` +
+                            `💰 Total: <b>${amount}</b>\n\n` +
+                            `Thank you for your purchase! 🙏`;
+                        const fd = new FormData();
+                        fd.append('chat_id',    chatId);
+                        fd.append('photo',      blob, 'receipt.png');
+                        fd.append('caption',    caption);
+                        fd.append('parse_mode', 'HTML');
+                        const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: fd });
+                        _setBtnLoading('btn-receipt-wa', false);
+                        if (res.ok) {
+                            window.showToast('Receipt sent to Telegram! ✅');
+                        } else {
+                            window.showToast('Telegram sendPhoto failed ❌', 'error');
+                        }
+                    } else {
+                        throw new Error('capture failed');
+                    }
+                } catch(e) {
+                    _setBtnLoading('btn-receipt-wa', false);
+                    window.showToast('Failed to send image ❌', 'error');
+                }
+                return;
+            }
+
+            // ── PATH 2: No bot token → Web Share / download fallback ──
+            const origBg = el.style.background;
+            el.style.background = '#ffffff';
             _captureElement(el, '#ffffff')
                 .then(canvas => {
                     el.style.background = origBg;
-                    const storeName = state.profile.name || 'PCA Store';
-                    const txnEl = document.getElementById('or-txn-id');
-                    const custEl = document.getElementById('or-cust');
-                    const amtEl = document.getElementById('or-amount');
-                    const txnId = txnEl ? txnEl.innerText : '';
-                    const custName = custEl ? custEl.innerText : '';
-                    const amount = amtEl ? amtEl.innerText : '';
-                    const msg = `*${storeName}*\nReceipt: ${txnId}\nCustomer: ${custName}\nTotal: ${amount}\n\nThank you for your purchase! `;
+                    const msg = `*${storeName}*\nReceipt: ${txnId}\nCustomer: ${custName}\nTotal: ${amount}\n\nThank you for your purchase! 🙏`;
                     canvas.toBlob(async blob => {
                         _setBtnLoading('btn-receipt-wa', false);
                         const fname = `${storeName}_Receipt_${txnId}.png`;
                         const file = new File([blob], fname, { type: 'image/png' });
-                        // Try Web Share API with image
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             try {
-                                await navigator.share({
-                                    files: [file],
-                                    title: `${storeName} Receipt`,
-                                    text: msg
-                                });
-                                window.showToast('Shared via Telegram! ');
+                                await navigator.share({ files: [file], title: `${storeName} Receipt`, text: msg });
+                                window.showToast('Shared via Telegram! ✅');
                                 return;
                             } catch(e) { /* cancelled */ }
                         }
-                        // Fallback: download image + open Telegram with text
                         const url = URL.createObjectURL(blob);
                         const a = document.createElement('a');
                         a.href = url; a.download = fname;
@@ -4877,7 +4914,7 @@ ChatID: 987654321</textarea>
                             document.body.removeChild(a); URL.revokeObjectURL(url);
                             const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(storeName)}&text=${encodeURIComponent(msg)}`;
                             window.open(tgUrl, '_blank');
-                            window.showToast('Image downloaded  Telegram opened');
+                            window.showToast('Image saved · Telegram opened');
                         }, 300);
                     }, 'image/png', 1.0);
                 })
