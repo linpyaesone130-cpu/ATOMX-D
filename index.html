@@ -28,9 +28,9 @@
             --border: #334155; --hover: #334155; --red: #f87171; --green: #34d399; --shadow: 0 4px 6px -1px rgba(0,0,0,0.3);
         }
 
-        /* ═══════════════════════════════════════════
+        /* 
            STYLE 1: MINIMAL (Clean, flat, crisp)
-        ═══════════════════════════════════════════ */
+         */
         [data-style="minimal"] {
             --primary: #2563eb; --bg: #f8fafc; --card: #ffffff; --text: #0f172a; --text-sec: #64748b;
             --border: #e2e8f0; --hover: #f1f5f9; --red: #ef4444; --green: #059669;
@@ -54,9 +54,9 @@
             --primary: #60a5fa; --bg: #0c1220; --card: #151f2e; --border: #1e2d42;
         }
 
-        /* ═══════════════════════════════════════════
+        /* 
            STYLE 2: PREMIUM (Glassmorphism, gradients)
-        ═══════════════════════════════════════════ */
+         */
         [data-style="premium"] {
             --primary: #7c3aed; --bg: #0f0a1e; --card: rgba(255,255,255,0.07); --text: #f1f0ff;
             --text-sec: #a89fc8; --border: rgba(255,255,255,0.1); --hover: rgba(255,255,255,0.08);
@@ -141,9 +141,9 @@
         [data-style="premium"] .game-item.active { border-left-color: #a78bfa; background: rgba(124,58,237,0.12); }
         [data-style="premium"] #ui-store-name { color: #a78bfa; }
 
-        /* ═══════════════════════════════════════════
+        /* 
            STYLE 3: DARK (Refined dark mode)
-        ═══════════════════════════════════════════ */
+         */
         [data-style="dark"] {
             --primary: #f59e0b; --bg: #0d1117; --card: #161b22; --text: #e6edf3; --text-sec: #7d8590;
             --border: #21262d; --hover: #21262d; --red: #f85149; --green: #3fb950;
@@ -174,7 +174,7 @@
         [data-style="dark"] #ui-store-name { color: #f59e0b; }
         [data-style="dark"] .sidebar-header { color: #f59e0b; }
 
-        /* ═══ SHARED ENHANCED ANIMATIONS ═══ */
+        /*  SHARED ENHANCED ANIMATIONS  */
         @keyframes slideInUp {
             from { opacity: 0; transform: translateY(16px); }
             to { opacity: 1; transform: translateY(0); }
@@ -229,7 +229,7 @@
         /* Header subtle border glow on scroll */
         .header.scrolled { box-shadow: 0 2px 12px rgba(0,0,0,0.1); }
 
-        /* ═══ THEME PICKER PANEL ═══ */
+        /*  THEME PICKER PANEL  */
         #theme-picker {
             position: fixed; bottom: 100px; right: 16px; z-index: 500;
             display: flex; flex-direction: column; gap: 8px;
@@ -310,7 +310,7 @@
         .input-field { width: 100%; padding: 14px; border-radius: 10px; border: 1px solid var(--border); background: var(--card); color: var(--text); font-size: 15px; font-weight: 600;}
         .card { background: var(--card); border-radius: 16px; padding: 20px; box-shadow: var(--shadow); margin-bottom: 20px; border: 1px solid var(--border);}
 
-        /* ================= SEARCH BAR — LIQUID MORPHING GLOW ================= */
+        /* ================= SEARCH BAR  LIQUID MORPHING GLOW ================= */
         .search-box { position: relative; margin-bottom: 20px; width: 100%; }
         .search-box .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); color: var(--text-sec); transition: color 0.3s, transform 0.4s cubic-bezier(0.34,1.56,0.64,1); pointer-events: none; z-index: 2; }
         .search-box input {
@@ -345,7 +345,7 @@
         .search-box input:focus ~ .search-icon { color: var(--primary); transform: translateY(-50%) scale(1.15) rotate(-8deg); }
         [data-theme="dark"] .search-box input:focus ~ .search-icon { color: #ff8c00; }
 
-        /* ================= VOUCHER & COUPON — COLORFUL & FUN ================= */
+        /* ================= VOUCHER & COUPON  COLORFUL & FUN ================= */
         /* Tabs */
         .vc-tabs { display: flex; gap: 10px; margin-bottom: 20px; }
         .vc-tab {
@@ -363,7 +363,7 @@
         }
         .vc-tab:not(.active):active { transform: scale(0.96); }
 
-        /* ===== RECEIPT CARD — MINIMAL CLEAN + APPLE PAY AMOUNT ===== */
+        /* ===== RECEIPT CARD  MINIMAL CLEAN + APPLE PAY AMOUNT ===== */
         @keyframes receiptPop {
             0%   { opacity:0; transform:scale(0.94) translateY(10px); }
             65%  { transform:scale(1.015) translateY(-1px); }
@@ -401,7 +401,7 @@
             box-shadow: 0 2px 8px rgba(0,0,0,0.3), 0 12px 32px rgba(0,0,0,0.4), 0 0 0 1px rgba(255,255,255,0.06);
         }
 
-        /* ── Header — clean white, no gradient ── */
+        /*  Header  clean white, no gradient  */
         .receipt-header {
             background: #ffffff;
             padding: 32px 24px 26px;
@@ -433,7 +433,7 @@
             background: #1e293b;
         }
 
-        /* Animated check circle — glassy on gradient */
+        /* Animated check circle  glassy on gradient */
         .receipt-check-circle {
             width: 64px; height: 64px; border-radius: 50%;
             background: #f0fdf4;
@@ -464,7 +464,7 @@
         }
         .receipt-store-emoji { display: none; }
 
-        /* ── Apple Pay–style centered amount block ── */
+        /*  Apple Paystyle centered amount block  */
         .receipt-amount-block {
             text-align: center;
             padding: 20px 24px 4px;
@@ -481,7 +481,7 @@
         }
         [data-theme="dark"] .receipt-amount-big { color: #f8fafc; }
 
-        /* ── Tear divider ── */
+        /*  Tear divider  */
         .receipt-divider {
             display: flex; align-items: center;
             margin: 0; position: relative;
@@ -501,7 +501,7 @@
         .receipt-dashed { flex: 1; border-top: 1.5px dashed #e2e8f0; }
         [data-theme="dark"] .receipt-dashed { border-color: #334155; }
 
-        /* ── Body rows — clean & airy ── */
+        /*  Body rows  clean & airy  */
         .receipt-body { padding: 6px 24px 10px; }
         .receipt-row {
             display: flex; justify-content: space-between; align-items: flex-start;
@@ -522,7 +522,7 @@
         }
         [data-theme="dark"] .receipt-row span:last-child { color: #e2e8f0; }
 
-        /* ── Old total box — hidden (replaced by amount block above) ── */
+        /*  Old total box  hidden (replaced by amount block above)  */
         .receipt-total { display: none !important; }
         .receipt-total::after { display: none; }
         .receipt-total-label { display: none; }
@@ -533,7 +533,7 @@
         .receipt-hole { display: none; }
         .receipt-top-bar { display: none; }
 
-        /* ── Footer brand ── */
+        /*  Footer brand  */
         .receipt-footer-brand {
             display: flex; flex-direction: row; align-items: center; gap: 14px;
             padding: 14px 22px 22px; border-top: 1.5px dashed #e8edf4;
@@ -820,7 +820,7 @@
         <span id="toast-msg"></span>
     </div>
 
-    <!-- ═══ THEME / STYLE PICKER ═══ -->
+    <!--  THEME / STYLE PICKER  -->
     <div id="theme-picker">
         <div class="theme-pill" id="tp-default" onclick="window.setAppStyle('default')">
             <span class="tp-dot" style="background:linear-gradient(135deg,#1877f2,#10b981);"></span>
@@ -898,7 +898,7 @@
                 Settings
             </div>
             
-            <!-- ═══ EXCHANGE CALCULATOR ═══ -->
+            <!--  EXCHANGE CALCULATOR  -->
             <div class="exchange-widget" id="exchange-widget" style="display:none;">
                 <div class="ex-title">
                     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg>
@@ -925,7 +925,7 @@
                     <span class="ex-label" id="ex-sym-label">R$</span>
                     <span style="font-size:14px;font-weight:800;color:var(--text-sec);">=</span>
                 </div>
-                <div class="ex-result" id="ex-result">— MMK</div>
+                <div class="ex-result" id="ex-result"> MMK</div>
                 <div class="ex-rate-badge" id="ex-rate-badge">1 R$ = 2,000 MMK</div>
                 <div id="ex-apply-wrap" style="display:none; margin-top:8px;">
                     <button onclick="window.applyNewRate()" style="width:100%; padding:8px; border-radius:8px; background:var(--primary); color:white; font-size:12px; font-weight:800; border:none; cursor:pointer; display:flex; align-items:center; justify-content:center; gap:6px;">
@@ -1003,22 +1003,22 @@
 
     <main class="view" id="view-sales">
 
-        <!-- ── Real-time Clock Banner ── -->
+        <!--  Real-time Clock Banner  -->
         <div style="background:linear-gradient(135deg,var(--primary),#6366f1); border-radius:16px; padding:16px 20px; margin-bottom:16px; color:#fff; display:flex; justify-content:space-between; align-items:center;">
             <div>
                 <div id="dash-clock" style="font-size:28px; font-weight:900; letter-spacing:-1px; line-height:1;">00:00:00</div>
-                <div id="dash-date" style="font-size:12px; font-weight:700; opacity:0.8; margin-top:3px;">–</div>
+                <div id="dash-date" style="font-size:12px; font-weight:700; opacity:0.8; margin-top:3px;"></div>
             </div>
             <div style="text-align:right;">
                 <div style="font-size:10px; font-weight:800; opacity:0.7; letter-spacing:1px; text-transform:uppercase; margin-bottom:4px;">Store</div>
-                <div id="dash-store-name" style="font-size:14px; font-weight:900;">–</div>
+                <div id="dash-store-name" style="font-size:14px; font-weight:900;"></div>
                 <div id="dash-live-dot" style="display:inline-flex; align-items:center; gap:5px; margin-top:6px; font-size:11px; font-weight:700; opacity:0.85;">
                     <span style="width:7px;height:7px;border-radius:50%;background:#4ade80;animation:dashPulse 1.4s ease-in-out infinite;display:inline-block;"></span>LIVE
                 </div>
             </div>
         </div>
 
-        <!-- ── Action Buttons ── -->
+        <!--  Action Buttons  -->
         <div style="display:flex; gap:8px; margin-bottom:16px; flex-wrap:wrap;">
             <button class="btn" style="background:#0088cc; flex:1; min-width:80px;" onclick="window.sendTelegram()">
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"></line><polygon points="22 2 15 22 11 13 2 9 22 2"></polygon></svg>
@@ -1037,7 +1037,7 @@
             </button>
         </div>
 
-        <!-- ── Stat Cards (2×2 grid) ── -->
+        <!--  Stat Cards (2×2 grid)  -->
         <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-bottom:16px;">
             <!-- Revenue -->
             <div class="card" style="padding:14px 16px; border-top:3px solid var(--primary); position:relative; overflow:hidden;">
@@ -1065,7 +1065,7 @@
             </div>
         </div>
 
-        <!-- ── Profit Goal Progress ── -->
+        <!--  Profit Goal Progress  -->
         <div id="profit-goal-section" style="display:none;" class="card" style="padding:16px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <span style="font-size:12px; font-weight:800; color:var(--text-sec);">DAILY GOAL</span>
@@ -1080,7 +1080,7 @@
             </div>
         </div>
 
-        <!-- ── Monthly Goal Progress ── -->
+        <!--  Monthly Goal Progress  -->
         <div id="monthly-goal-section" style="display:none;" class="card">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
                 <span style="font-size:12px; font-weight:800; color:var(--text-sec);">MONTHLY GOAL</span>
@@ -1095,7 +1095,7 @@
             </div>
         </div>
 
-        <!-- ── Transaction List ── -->
+        <!--  Transaction List  -->
         <div class="card" style="padding:0; overflow:hidden;">
             <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border);">
                 <div style="font-size:13px; font-weight:800;">Today's Transactions</div>
@@ -1340,7 +1340,7 @@
                 </div>
             </div>
             <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:8px;">
-                Margin % ဒီ threshold အောက်ဆင်းရင် ⚠️ badge ပြမည် (default: 10%)
+                Margin % ဒီ threshold အောက်ဆင်းရင်  badge ပြမည် (default: 10%)
             </div>
         </div>
 
@@ -1348,7 +1348,7 @@
         <div class="card" style="border-left: 4px solid var(--green);">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
                 <div>
-                    <div style="font-weight:900; font-size:16px;">🚀 Publish to Store</div>
+                    <div style="font-weight:900; font-size:16px;"> Publish to Store</div>
                     <div style="font-size:12px; color:var(--text-sec); font-weight:600; margin-top:3px;">Sell price ကိုသာ store.html သို့ push မယ်</div>
                 </div>
                 <button class="btn" id="publish-btn" onclick="window.openPublishAuth()" style="background:var(--green); min-width:100px;">
@@ -1396,17 +1396,17 @@
                 </div>
                 <div style="flex:1;">
                     <div id="logo-upload-btn" style="border: 2px dashed var(--border); padding: 12px; text-align: center; border-radius: 12px; cursor: pointer;" onclick="document.getElementById('receipt-logo-file').click()">
-                        <span style="font-size:12px; font-weight:700; color:var(--primary);">📷 Upload Receipt Logo</span>
+                        <span style="font-size:12px; font-weight:700; color:var(--primary);"> Upload Receipt Logo</span>
                         <input type="file" id="receipt-logo-file" accept="image/*" style="display:none;" onchange="window.uploadReceiptLogo(this)">
                     </div>
                     <div id="logo-locked-ui" style="display:none; background:rgba(16,185,129,0.08); border:1.5px solid rgba(16,185,129,0.25); border-radius:12px; padding:10px 14px; align-items:center; justify-content:space-between; gap:10px;">
                         <div>
-                            <div style="font-size:12px; font-weight:800; color:#10b981;">🔒 Logo Locked</div>
+                            <div style="font-size:12px; font-weight:800; color:#10b981;"> Logo Locked</div>
                             <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:2px;">Shows on every receipt</div>
                         </div>
                         <button onclick="window.unlockReceiptLogo()" style="font-size:11px; font-weight:700; color:var(--text-sec); border:1px solid var(--border); padding:5px 10px; border-radius:8px; background:var(--card);">Change</button>
                     </div>
-                    <div id="logo-upload-hint" style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:6px;">Saved once — shown on every receipt automatically</div>
+                    <div id="logo-upload-hint" style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:6px;">Saved once  shown on every receipt automatically</div>
                 </div>
             </div>
 
@@ -1419,14 +1419,14 @@
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10b981" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                     </div>
                 </div>
-                <div id="qr-lock-hint" style="display:none; font-size:11px; color:#10b981; font-weight:700; margin-top:5px;">🔒 QR saved — edit field above &amp; Save to update</div>
+                <div id="qr-lock-hint" style="display:none; font-size:11px; color:#10b981; font-weight:700; margin-top:5px;"> QR saved  edit field above &amp; Save to update</div>
             </div>
 
             <h3 style="font-size: 16px; margin-top: 24px; margin-bottom: 16px; color: #0088cc;">Telegram Bot Setup</h3>
             <div class="input-group"><label>Bot Token</label><input type="password" class="input-field" id="set-tg-token"></div>
             <div class="input-group"><label>Chat ID</label><input type="text" class="input-field" id="set-tg-chat"></div>
             
-            <!-- ═══ AUTO ORDER BOT ═══ -->
+            <!--  AUTO ORDER BOT  -->
             <div style="background:linear-gradient(135deg,rgba(0,136,204,0.08),rgba(0,136,204,0.04)); border:1.5px solid rgba(0,136,204,0.25); border-radius:14px; padding:16px; margin-top:4px; margin-bottom:16px;">
                 <div style="display:flex; align-items:center; gap:10px; margin-bottom:12px;">
                     <div style="width:36px; height:36px; background:#0088cc; border-radius:10px; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -1445,14 +1445,22 @@
                 <!-- Status indicator -->
                 <div id="bot-status-bar" style="display:flex; align-items:center; gap:8px; padding:8px 12px; background:var(--bg); border-radius:10px; margin-bottom:12px; border:1px solid var(--border);">
                     <div id="bot-status-dot" style="width:8px; height:8px; border-radius:50%; background:var(--text-sec); flex-shrink:0; transition:background 0.3s;"></div>
-                    <span id="bot-status-text" style="font-size:12px; font-weight:700; color:var(--text-sec); flex:1;">Offline — toggle to start</span>
+                    <span id="bot-status-text" style="font-size:12px; font-weight:700; color:var(--text-sec); flex:1;">Offline  toggle to start</span>
                     <span id="bot-poll-count" style="font-size:10px; font-weight:800; color:var(--text-sec);"></span>
                 </div>
 
                 <!-- Format guide -->
                 <div style="background:var(--bg); border-radius:10px; padding:12px; border:1px dashed var(--border);">
-                    <div style="font-size:11px; font-weight:900; color:var(--text-sec); letter-spacing:0.5px; margin-bottom:8px; text-transform:uppercase;">📋 Order Format (Telegram မှာ ပို့ပုံ)</div>
-                    <div style="font-family:monospace; font-size:12px; color:var(--text); line-height:1.8; background:var(--card); padding:10px; border-radius:8px; border:1px solid var(--border);">
+                    <div style="display:flex; align-items:center; justify-content:space-between; margin-bottom:8px;">
+                        <div style="font-size:11px; font-weight:900; color:var(--text-sec); letter-spacing:0.5px; text-transform:uppercase;"> Order Format (Telegram မှာ ပို့ပုံ)</div>
+                        <div style="display:flex; gap:6px;">
+                            <button id="btn-format-edit" onclick="window.toggleFormatEdit()" style="font-size:10px; font-weight:800; padding:4px 10px; border-radius:6px; border:1.5px solid var(--primary); background:rgba(24,119,242,0.08); color:var(--primary); cursor:pointer; transition:0.15s;"> Edit</button>
+                            <button id="btn-format-save" onclick="window.saveOrderFormat()" style="display:none; font-size:10px; font-weight:800; padding:4px 10px; border-radius:6px; border:1.5px solid var(--green); background:rgba(16,185,129,0.08); color:var(--green); cursor:pointer; transition:0.15s;"> Save</button>
+                            <button id="btn-format-reset" onclick="window.resetOrderFormat()" style="display:none; font-size:10px; font-weight:800; padding:4px 10px; border-radius:6px; border:1.5px solid var(--border); background:var(--bg); color:var(--text-sec); cursor:pointer; transition:0.15s;">↩ Reset</button>
+                        </div>
+                    </div>
+                    <!-- Preview mode -->
+                    <div id="format-preview" style="font-family:monospace; font-size:12px; color:var(--text); line-height:1.8; background:var(--card); padding:10px; border-radius:8px; border:1px solid var(--border);">
                         /order<br>
                         Name: <span style="color:var(--primary);">Mg Aung</span><br>
                         Game: <span style="color:var(--primary);">Mobile Legends</span><br>
@@ -1461,7 +1469,18 @@
                         IGN: <span style="color:var(--primary);">Shadow King</span><br>
                         Price: <span style="color:var(--green);">5000</span>
                     </div>
-                    <div style="font-size:10px; color:var(--text-sec); font-weight:600; margin-top:8px;">Bot ကို message ပို့လိုက်တာနဲ့ — auto receipt generate + Telegram ပြန်ပို့</div>
+                    <!-- Edit mode -->
+                    <div id="format-edit-area" style="display:none;">
+                        <textarea id="format-textarea" style="width:100%; min-height:160px; font-family:monospace; font-size:13px; color:var(--text); background:var(--card); border:1.5px solid var(--primary); border-radius:8px; padding:10px; resize:vertical; line-height:1.8; box-sizing:border-box; outline:none;" spellcheck="false">/order
+Name: Mg Aung
+Game: Mobile Legends
+Package: Weekly Diamond Pass
+PlayerID: 123456789
+IGN: Shadow King
+Price: 5000</textarea>
+                        <div style="font-size:10px; color:var(--text-sec); font-weight:600; margin-top:6px;"> Field names (Name, Game, Package, PlayerID, IGN, Price) ကို ပြင်ရေးနိုင်သည်။ Format ကို ပြောင်းလဲနိုင်သည်။</div>
+                    </div>
+                    <div style="font-size:10px; color:var(--text-sec); font-weight:600; margin-top:8px;">Bot ကို message ပို့လိုက်တာနဲ့  auto receipt generate + Telegram ပြန်ပို့</div>
                 </div>
 
                 <!-- Receipt send mode -->
@@ -1469,10 +1488,10 @@
                     <div style="font-size:11px; font-weight:800; color:var(--text-sec); margin-bottom:8px; text-transform:uppercase; letter-spacing:0.5px;">Auto Send Mode</div>
                     <div style="display:flex; gap:6px;">
                         <button id="bot-mode-text" onclick="window.setBotSendMode('text')" style="flex:1; padding:8px; border-radius:8px; border:2px solid var(--primary); background:rgba(24,119,242,0.08); color:var(--primary); font-size:12px; font-weight:800; cursor:pointer; transition:0.15s;">
-                            📝 Text Only
+                             Text Only
                         </button>
                         <button id="bot-mode-image" onclick="window.setBotSendMode('image')" style="flex:1; padding:8px; border-radius:8px; border:2px solid var(--border); background:var(--bg); color:var(--text-sec); font-size:12px; font-weight:800; cursor:pointer; transition:0.15s;">
-                            🖼️ Text + Image
+                             Text + Image
                         </button>
                     </div>
                     <div style="font-size:10px; color:var(--text-sec); font-weight:600; margin-top:6px;" id="bot-mode-hint">Text receipt ကို Telegram ပြန်ပို့မည်</div>
@@ -1488,7 +1507,7 @@
             <button class="btn" style="width: 100%; margin-top: 10px;" onclick="window.saveSettings()">Save Configuration</button>
         </div>
 
-        <!-- DANGER ZONE — user ကိုယ်တိုင်သာ ဖျက်နိုင် -->
+        <!-- DANGER ZONE  user ကိုယ်တိုင်သာ ဖျက်နိုင် -->
         <div class="card" style="border: 1.5px solid rgba(239,68,68,0.35); margin-top:8px;">
             <div style="display:flex; align-items:center; gap:10px; margin-bottom:14px;">
                 <div style="width:34px; height:34px; border-radius:10px; background:rgba(239,68,68,0.1); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
@@ -1503,7 +1522,7 @@
                 <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
                 Data အားလုံး ဖျက်မည် (Wipe All)
             </button>
-            <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:8px; text-align:center;">Logout မနှိပ်ဘဲ data မပျောက်ပါ — ဤနေရာမှသာ ဖျက်နိုင်သည်</div>
+            <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:8px; text-align:center;">Logout မနှိပ်ဘဲ data မပျောက်ပါ  ဤနေရာမှသာ ဖျက်နိုင်သည်</div>
         </div>
     </main>
 
@@ -1689,7 +1708,7 @@
         <div class="modal-content" style="max-width:460px;">
             <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:16px;">
                 <div>
-                    <h3 style="font-size:17px; font-weight:900;">📋 Price Change Log</h3>
+                    <h3 style="font-size:17px; font-weight:900;"> Price Change Log</h3>
                     <div style="font-size:12px; color:var(--text-sec); font-weight:600; margin-top:2px;">Complete audit trail of price edits</div>
                 </div>
                 <div style="display:flex; gap:8px; align-items:center;">
@@ -1706,9 +1725,9 @@
     </div>
 
     <script>
-        // ═══════════════════════════════
+        // 
         // STYLE / THEME PICKER SYSTEM
-        // ═══════════════════════════════
+        // 
         (function initStyleSystem() {
             const STYLE_KEY = 'pca_app_style';
             const styles = ['default', 'minimal', 'premium', 'dark'];
@@ -1730,7 +1749,7 @@
                     if (el) el.classList.toggle('active-style', s === style);
                 });
                 window.closePicker();
-                window.showToast('Style changed ✦', 'success');
+                window.showToast('Style changed ', 'success');
             };
 
             window.toggleThemePicker = function() {
@@ -1821,7 +1840,7 @@
         window.closeConfirm = function() { window.closeModal('modal-confirm'); confirmActionCallback = null; };
 
         // ================= FIREBASE CONFIG & AUTH LOGIC =================
-        // Primary DB — manage/auth data (atomx)
+        // Primary DB  manage/auth data (atomx)
         const firebaseConfig = {
             apiKey: "AIzaSyBCBimkrfs-TGM-TioINkZfmQiBvIBsp1s",
             authDomain: "atomx-d-project.firebaseapp.com",
@@ -1829,7 +1848,7 @@
             storageBucket: "atomx-d-project.appspot.com"
         };
 
-        // Store DB — dahlia store (for publishing games to store.html)
+        // Store DB  dahlia store (for publishing games to store.html)
         const storeFirebaseConfig = {
             apiKey: "AIzaSyCRq3M1hclmBnqClfQrmv8WGE6-hth0Zr0",
             authDomain: "dahliagametopupstore-9d3fd.firebaseapp.com",
@@ -1892,7 +1911,7 @@
                     }
                 });
             } else {
-                // No firebase — show login modal
+                // No firebase  show login modal
                 window.openModal('modal-login');
             }
         };
@@ -1924,16 +1943,16 @@
         window.continueOffline = function() {
             window._offlineMode = true;
             window.closeModal('modal-login');
-            window.showToast("Working offline — data saved locally only");
+            window.showToast("Working offline  data saved locally only");
         };
 
         window.confirmLogoutOnly = function() { window.showConfirm("Log Out", "Are you sure you want to log out?", () => {
-            // ── Data မဖျက် — session ကိုပဲ sign out ──
+            //  Data မဖျက်  session ကိုပဲ sign out 
             // Cloud Firestore မှာ backup ရှိပြီးသား ။ Login ပြန်ဝင်လာရင် syncDataWithCloud က auto restore ဖြစ်မည်
             if(auth) auth.signOut();
             state.uid = null;
             window._offlineMode = false;
-            window.showToast("Logged out — data preserved in cloud");
+            window.showToast("Logged out  data preserved in cloud");
             setTimeout(() => window.openModal('modal-login'), 400);
         }); };
 
@@ -2052,11 +2071,11 @@
                         state.sales = [...state.sales, ...newFromCloud];
                     }
                 } else {
-                    // New user / first login on this device — cloud မှာ data မရှိသေးဘူး
+                    // New user / first login on this device  cloud မှာ data မရှိသေးဘူး
                     // Local data ရှိရင် (previous session) → cloud သို့ push တင်မည် (data မဖျက်)
                     // Local data မရှိရင်သာ empty state ဆက်သုံး
                     if (Object.keys(state.data).length === 0) {
-                        // No local data either — fresh start
+                        // No local data either  fresh start
                         state.data = {};
                         state.sales = [];
                         state.activeGame = '';
@@ -2078,14 +2097,14 @@
         // Layer 1: localStorage  (fastest read/write)
         // Layer 2: IndexedDB     (survives most localStorage clears)
         // Layer 3: Cache Storage (survives "Clear cookies & site data" in some browsers)
-        // Layer 4: Firestore     (ultimate cloud backup — always restored on login)
-        // ──────────────────────────────────────────────────────────────────
+        // Layer 4: Firestore     (ultimate cloud backup  always restored on login)
+        // 
         const IDB_NAME  = 'pcaStoreBackup';
         const IDB_STORE = 'kv';
         const CACHE_NAME = 'pca-data-v1';
         let _idb = null;
 
-        // ── IndexedDB helpers ──
+        //  IndexedDB helpers 
         function _openIDB() {
             return new Promise((resolve, reject) => {
                 if (_idb) { resolve(_idb); return; }
@@ -2111,7 +2130,7 @@
             })).catch(() => null);
         }
 
-        // ── Cache Storage helpers (extra resilience) ──
+        //  Cache Storage helpers (extra resilience) 
         async function cacheSet(key, value) {
             try {
                 if (!('caches' in window)) return;
@@ -2131,7 +2150,7 @@
             } catch(e) { return null; }
         }
 
-        // ── Save to all local layers ──
+        //  Save to all local layers 
         function saveToIDB() {
             try {
                 const keys = ['pcaStoreData','pcaStoreProfile','pcaSalesData','pcaGameOrder','pcaSettings'];
@@ -2149,7 +2168,7 @@
             } catch(e) {}
         }
 
-        // ── Restore from IDB → Cache fallback — called on startup ──
+        //  Restore from IDB → Cache fallback  called on startup 
         async function loadFromIDBIfNeeded() {
             const keys = ['pcaStoreData','pcaStoreProfile','pcaSalesData','pcaGameOrder','pcaSettings'];
             for (const k of keys) {
@@ -2188,7 +2207,7 @@
             }
         }
 
-        // Debounced version for settings that change rapidly (sliders, typing) — avoids spamming Firestore writes
+        // Debounced version for settings that change rapidly (sliders, typing)  avoids spamming Firestore writes
         let _settingsSaveTimer = null;
         function saveSettingsDebounced() {
             saveDataToLocal();
@@ -2246,7 +2265,7 @@
             if(btn) btn.style.color = state.compactView ? 'var(--primary)' : 'var(--text-sec)';
             window.renderInventory();
         };
-        // ── Receipt branding lock UI ──
+        //  Receipt branding lock UI 
         window._refreshBrandingLockUI = function() {
             const hasLogo = !!state.profile.receiptLogo;
             const hasQR   = !!(state.profile.receiptQR || '').trim();
@@ -2298,10 +2317,95 @@
             window.showToast("Settings Configured!");
         };
 
-        // ── Wipe ALL data (user-initiated only) ──
+        //  Order Format Edit Functions 
+        window._orderFormatEditing = false;
+
+        window.toggleFormatEdit = function() {
+            const editArea  = document.getElementById('format-edit-area');
+            const preview   = document.getElementById('format-preview');
+            const btnEdit   = document.getElementById('btn-format-edit');
+            const btnSave   = document.getElementById('btn-format-save');
+            const btnReset  = document.getElementById('btn-format-reset');
+            const textarea  = document.getElementById('format-textarea');
+
+            window._orderFormatEditing = true;
+            // Load current saved format into textarea
+            const saved = state.profile.orderFormat || '/order\nName: Mg Aung\nGame: Mobile Legends\nPackage: Weekly Diamond Pass\nPlayerID: 123456789\nIGN: Shadow King\nPrice: 5000';
+            textarea.value = saved;
+
+            editArea.style.display = 'block';
+            preview.style.display  = 'none';
+            btnEdit.style.display  = 'none';
+            btnSave.style.display  = '';
+            btnReset.style.display = '';
+            textarea.focus();
+        };
+
+        window.saveOrderFormat = function() {
+            const textarea = document.getElementById('format-textarea');
+            const val = textarea.value.trim();
+            if (!val) { window.showToast('Format မရှိပါ!', 'error'); return; }
+
+            state.profile.orderFormat = val;
+            saveDataToCloud();
+
+            // Update preview with colored fields
+            const previewEl = document.getElementById('format-preview');
+            const lines = val.split('\n');
+            previewEl.innerHTML = lines.map((line, i) => {
+                if (i === 0) return line; // /order line
+                const m = line.match(/^([^:]+):\s*(.*)$/);
+                if (!m) return line;
+                const key = m[1], value = m[2];
+                const isPrice = key.toLowerCase().includes('price') || key.toLowerCase().includes('amount');
+                const colorStyle = isPrice ? 'color:var(--green)' : 'color:var(--primary)';
+                return `${key}: <span style="${colorStyle}">${value}</span>`;
+            }).join('<br>');
+
+            // Switch back to preview
+            document.getElementById('format-edit-area').style.display = 'none';
+            previewEl.style.display = '';
+            document.getElementById('btn-format-edit').style.display  = '';
+            document.getElementById('btn-format-save').style.display  = 'none';
+            document.getElementById('btn-format-reset').style.display = 'none';
+            window._orderFormatEditing = false;
+            window.showToast(' Order Format သိမ်းပြီးပါပြီ!', 'success');
+        };
+
+        window.resetOrderFormat = function() {
+            const defaultFormat = '/order\nName: Mg Aung\nGame: Mobile Legends\nPackage: Weekly Diamond Pass\nPlayerID: 123456789\nIGN: Shadow King\nPrice: 5000';
+            document.getElementById('format-textarea').value = defaultFormat;
+        };
+
+        // Load saved format on settings view open
+        (function _initOrderFormat() {
+            const orig = window.showView;
+            window.showView = function(view) {
+                orig && orig(view);
+                if (view === 'settings') {
+                    const saved = state && state.profile && state.profile.orderFormat;
+                    if (saved) {
+                        const previewEl = document.getElementById('format-preview');
+                        if (previewEl) {
+                            const lines = saved.split('\n');
+                            previewEl.innerHTML = lines.map((line, i) => {
+                                if (i === 0) return line;
+                                const m = line.match(/^([^:]+):\s*(.*)$/);
+                                if (!m) return line;
+                                const key = m[1], value = m[2];
+                                const isPrice = key.toLowerCase().includes('price') || key.toLowerCase().includes('amount');
+                                return `${key}: <span style="${isPrice ? 'color:var(--green)' : 'color:var(--primary)'}">${value}</span>`;
+                            }).join('<br>');
+                        }
+                    }
+                }
+            };
+        })();
+
+        //  Wipe ALL data (user-initiated only) 
         window.confirmWipeAllData = function() {
             window.showConfirm(
-                '⚠️ Data အားလုံး ဖျက်မည်',
+                ' Data အားလုံး ဖျက်မည်',
                 'Inventory, Sales History, Settings အားလုံး ဖျက်မည်။ Cloud မှပါ ဖျက်ပါမည်။ ဤ Action ကို ပြန်မလုပ်နိုင်ပါ။ သေချာပါသလား?',
                 () => {
                     // Wipe state
@@ -2344,7 +2448,7 @@
                     state.profile.receiptLogo = e.target.result;
                     saveDataToCloud(); applyGlobalUI();
                     window._refreshBrandingLockUI();
-                    window.showToast('🔒 Logo saved & locked!', 'success');
+                    window.showToast(' Logo saved & locked!', 'success');
                 };
                 reader.readAsDataURL(input.files[0]);
             }
@@ -2382,13 +2486,13 @@
                 const items = (state.data[g].items || []).filter(i => parseFloat(i.sell) > 0).length;
                 const img   = state.data[g].image || '';
                 return `<div style="display:flex; align-items:center; gap:6px; background:var(--bg); border:1px solid var(--border); border-radius:8px; padding:6px 10px;">
-                    ${img && !img.startsWith('data:image/svg') ? `<img src="${img}" style="width:20px; height:20px; border-radius:5px; object-fit:cover;">` : '🎮'}
+                    ${img && !img.startsWith('data:image/svg') ? `<img src="${img}" style="width:20px; height:20px; border-radius:5px; object-fit:cover;">` : ''}
                     <span style="font-size:12px; font-weight:800;">${g}</span>
                     <span style="font-size:10px; color:var(--text-sec); font-weight:700;">${items} pkg</span>
                 </div>`;
             }).join('');
             const last = localStorage.getItem('pcaLastPublish');
-            if (lastEl) lastEl.innerHTML = last ? `🕒 Last published: ${last}` : '';
+            if (lastEl) lastEl.innerHTML = last ? ` Last published: ${last}` : '';
         };
 
         window.openPublishAuth = function() {
@@ -2412,7 +2516,7 @@
             if (pw !== _PUB_PW) { err.textContent = 'Password မှားပါသည်'; return; }
 
             _pubAuthorized = true;
-            btn.innerHTML = '✅ Verified';
+            btn.innerHTML = ' Verified';
             window.closeModal('modal-publish-auth');
             setTimeout(() => window.publishToStore(), 300);
         };
@@ -2436,16 +2540,16 @@
                 const gData = state.data[gameName];
                 const items = gData.items || [];
 
-                // SELL PRICE ONLY — cost/profit data publish မလုပ်
+                // SELL PRICE ONLY  cost/profit data publish မလုပ်
                 const packages = items
                     .filter(itm => parseFloat(itm.sell) > 0)
                     .map(itm => ({
-                        d: itm.name,  // name ပဲ — combo မပါ
+                        d: itm.name,  // name ပဲ  combo မပါ
                         p: parseInt(itm.sell) || 0
                         // costMMK, costRS ထည့်မသွားပါ
                     }));
 
-                // merge:true နဲ့ set လုပ်မို့ pr, img, n ကိုသာ update — admin ထားတဲ့ cur, ci, e, c, pl, bannerImg မထိ
+                // merge:true နဲ့ set လုပ်မို့ pr, img, n ကိုသာ update  admin ထားတဲ့ cur, ci, e, c, pl, bannerImg မထိ
                 const gameDoc = {
                     n:           gameName,
                     img:         (gData.image && !gData.image.startsWith('data:image/svg')) ? gData.image : '',
@@ -2475,13 +2579,13 @@
 
             if (fail === 0) {
                 statusEl.style.color = 'var(--green)';
-                statusEl.innerHTML   = `✅ ${ok} game${ok>1?'s':''} published! Store.html မှာ live ဖြစ်ပြီ။`;
+                statusEl.innerHTML   = ` ${ok} game${ok>1?'s':''} published! Store.html မှာ live ဖြစ်ပြီ။`;
                 window.showToast(`${ok} games published!`);
                 localStorage.setItem('pcaLastPublish', new Date().toLocaleString());
                 window.updatePublishPreview();
             } else {
                 statusEl.style.color = 'var(--red)';
-                statusEl.innerHTML   = `⚠️ ${ok} success, ${fail} failed. Firestore rules စစ်ကြည့်ပါ။`;
+                statusEl.innerHTML   = ` ${ok} success, ${fail} failed. Firestore rules စစ်ကြည့်ပါ။`;
                 window.showToast('Publish partially failed', 'error');
             }
         };
@@ -2570,7 +2674,7 @@
                         saveDataToCloud(); window.renderSidebarGames();
                     });
                 } else {
-                    item.addEventListener('dragstart', e => { e.preventDefault(); window.showToast('Locked — tap LOCKED to unlock', 'lock'); });
+                    item.addEventListener('dragstart', e => { e.preventDefault(); window.showToast('Locked  tap LOCKED to unlock', 'lock'); });
                 }
                 // Touch drag support
                 let touchDragGame = null;
@@ -2834,7 +2938,7 @@
                 return `<div style="display:flex; justify-content:space-between; align-items:center; padding:12px 14px; border-radius:12px; background:var(--bg); border:1px solid var(--border);">
                     <div style="min-width:0;">
                         <div style="font-weight:800; font-size:14px;">${m.itm.name}</div>
-                        <div style="font-size:11px; color:var(--text-sec); font-weight:700; margin-top:2px;">${m.game} • ${m.itm.sell || 0} KS • profit ${profit}</div>
+                        <div style="font-size:11px; color:var(--text-sec); font-weight:700; margin-top:2px;">${m.game}  ${m.itm.sell || 0} KS  profit ${profit}</div>
                     </div>
                     <button onclick="window.quickSellRecord('${m.game.replace(/'/g,"\\'")}', ${m.idx})" style="background:rgba(16,185,129,0.1); color:var(--green); padding:8px 14px; border-radius:8px; font-size:12px; font-weight:800; flex-shrink:0;">Sell</button>
                 </div>`;
@@ -2900,16 +3004,16 @@
                         return gameColorMap[g];
                     };
                     const rows = filtered.slice().reverse().map((s, i) => {
-                        const color   = getColor(s.game || '–');
+                        const color   = getColor(s.game || '');
                         const profSign = (s.profit || 0) >= 0 ? '+' : '';
                         const profColor = (s.profit || 0) >= 0 ? 'var(--green)' : 'var(--red)';
-                        const emoji   = s.source === 'telegram_bot' ? '🤖' : '🛒';
+                        const emoji   = s.source === 'telegram_bot' ? '' : '';
                         return `<div class="dash-txn-row" onclick="window._openSaleTxn(${filtered.length - 1 - i})">
                             <div class="dash-txn-icon" style="background:${color}22;">
                                 <span style="font-size:16px;">${emoji}</span>
                             </div>
                             <div style="flex:1; min-width:0;">
-                                <div style="font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.name || '–'}</div>
+                                <div style="font-size:13px; font-weight:800; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;">${s.name || ''}</div>
                                 <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:2px;">
                                     ${s.customer ? s.customer + ' · ' : ''}${s.game || ''} ${s.time ? '· ' + s.time : ''}
                                 </div>
@@ -2938,14 +3042,14 @@
             // populate receipt modal fields
             const set = (id, val) => { const el = document.getElementById(id); if(el) el.innerText = val; };
             set('or-store-name', state.profile.name || 'PCA Store');
-            set('or-txn-id',     s.txnId    || '–');
-            set('or-order-id',   s.txnId    || '–');
+            set('or-txn-id',     s.txnId    || '');
+            set('or-order-id',   s.txnId    || '');
             set('or-datetime',   (s.date||'') + '  ' + (s.time||''));
-            set('or-customer',   s.customer || '–');
-            set('or-ign',        s.ign      || '–');
-            set('or-game',       s.game     || '–');
-            set('or-player-id',  s.playerId || '–');
-            set('or-package',    s.name     || '–');
+            set('or-customer',   s.customer || '');
+            set('or-ign',        s.ign      || '');
+            set('or-game',       s.game     || '');
+            set('or-player-id',  s.playerId || '');
+            set('or-package',    s.name     || '');
             set('or-price',      Number(s.price||0).toLocaleString() + ' KS');
             const amtEl = document.getElementById('or-amount');
             if (amtEl) amtEl.innerText = Number(s.price||0).toLocaleString() + ' KS';
@@ -3062,7 +3166,7 @@
             .total{margin-top:16px;padding:12px 16px;background:#f8fafc;border-radius:10px;display:flex;justify-content:space-between;align-items:center;border:1px solid #e2e8f0;}
             .total-lbl{font-size:11px;font-weight:700;color:#94a3b8;text-transform:uppercase;letter-spacing:1px;}
             .total-amt{font-size:17px;font-weight:900;color:#1877f2;}</style></head>
-            <body><h1>${state.profile.name||'PCA Store'} — Sales Report</h1>
+            <body><h1>${state.profile.name||'PCA Store'}  Sales Report</h1>
             <p>${filterDate || today} &nbsp;·&nbsp; ${items.length} items</p>
             <table><thead><tr><th>Date</th><th>Time</th><th>Game</th><th>Item</th><th>Profit</th></tr></thead><tbody>${rows}</tbody></table>
             <div class="total"><span class="total-lbl">NET PROFIT</span><span class="total-amt">${totalProfit>=0?'+':''}${totalProfit} KS</span></div>
@@ -3080,10 +3184,10 @@
             if(todayItems.length === 0) return window.showToast("No sales to report today", "error");
 
             var totalProfit = 0; var details = "";
-            todayItems.slice().reverse().forEach(s => { totalProfit += s.profit; var sign = s.profit <= 0 ? '' : '+'; details += "• " + s.name + " (" + sign + s.profit + " KS)\n"; });
+            todayItems.slice().reverse().forEach(s => { totalProfit += s.profit; var sign = s.profit <= 0 ? '' : '+'; details += " " + s.name + " (" + sign + s.profit + " KS)\n"; });
             var mainSign = totalProfit <= 0 ? '' : '+';
             
-            var text = "📊 <b>Daily Sales Report</b>\n📅 " + todayStr + "\n🏪 " + state.profile.name + "\n\n📦 Items Sold: " + todayItems.length + "\n💰 Net Profit: " + mainSign + totalProfit + " KS\n\n<b>Details:</b>\n" + details;
+            var text = " <b>Daily Sales Report</b>\n " + todayStr + "\n " + state.profile.name + "\n\n Items Sold: " + todayItems.length + "\n Net Profit: " + mainSign + totalProfit + " KS\n\n<b>Details:</b>\n" + details;
             
             try {
                 var res = await fetch("https://api.telegram.org/bot" + token + "/sendMessage", { method: "POST", headers: {"Content-Type": "application/json"}, body: JSON.stringify({ chat_id: chatId, text: text, parse_mode: "HTML" }) });
@@ -3091,9 +3195,9 @@
             } catch(e) { window.showToast("Connection failed", "error"); }
         };
 
-        // ═══════════════════════════════════════════════════════
-        // AUTO ORDER BOT — Telegram getUpdates polling system
-        // ═══════════════════════════════════════════════════════
+        // 
+        // AUTO ORDER BOT  Telegram getUpdates polling system
+        // 
         (function() {
             let _botInterval  = null;
             let _lastUpdateId = parseInt(localStorage.getItem('pca_bot_offset') || '0');
@@ -3101,7 +3205,7 @@
             let _botSendMode  = localStorage.getItem('pca_bot_mode') || 'text'; // 'text' | 'image'
             let _botActive    = localStorage.getItem('pca_bot_active') === '1';
 
-            // ── UI helpers ──
+            //  UI helpers 
             function _setStatus(state, text, count) {
                 const dot  = document.getElementById('bot-status-dot');
                 const txt  = document.getElementById('bot-status-text');
@@ -3118,10 +3222,10 @@
                 const txt  = document.getElementById('bot-last-order-text');
                 if (!box || !txt) return;
                 box.style.display = 'block';
-                txt.innerHTML = `👤 <b>${order.name}</b> · ${order.game}<br>📦 ${order.package} · <b>${Number(order.price||0).toLocaleString()} KS</b><br>🆔 ${order.playerId || '-'} · ${new Date().toLocaleTimeString()}`;
+                txt.innerHTML = ` <b>${order.name}</b> · ${order.game}<br> ${order.package} · <b>${Number(order.price||0).toLocaleString()} KS</b><br> ${order.playerId || '-'} · ${new Date().toLocaleTimeString()}`;
             }
 
-            // ── Parse incoming Telegram message ──
+            //  Parse incoming Telegram message 
             function _parseOrderMessage(text) {
                 // Supports /order ... or just field: value format
                 const lines = text.replace('/order', '').trim().split('\n');
@@ -3141,30 +3245,30 @@
                 };
             }
 
-            // ── Build receipt text for Telegram reply ──
+            //  Build receipt text for Telegram reply 
             function _buildReceiptText(order, txnId) {
                 const store   = state.profile.name || 'PCA Store';
                 const now     = new Date();
                 const dateStr = now.toLocaleDateString('en-GB', { day:'2-digit', month:'short', year:'numeric' });
                 const timeStr = now.toLocaleTimeString('en-GB', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
-                return `✅ <b>ORDER CONFIRMED</b>\n` +
-                       `🏪 <b>${store}</b>\n` +
-                       `━━━━━━━━━━━━━━━━━\n` +
-                       `🔖 TXN: <code>${txnId}</code>\n` +
-                       `📅 ${dateStr}  ${timeStr}\n` +
-                       `━━━━━━━━━━━━━━━━━\n` +
-                       `👤 Customer: <b>${order.name || '-'}</b>\n` +
-                       `🎮 Game: ${order.game || '-'}\n` +
-                       `📦 Package: <b>${order.package || '-'}</b>\n` +
-                       (order.playerId ? `🆔 Player ID: <code>${order.playerId}</code>\n` : '') +
-                       (order.ign      ? `🎭 IGN: ${order.ign}\n` : '') +
-                       `━━━━━━━━━━━━━━━━━\n` +
-                       `💰 Total: <b>${Number(order.price||0).toLocaleString()} KS</b>\n` +
-                       `━━━━━━━━━━━━━━━━━\n` +
-                       `Thank you for your purchase! 🙏`;
+                return ` <b>ORDER CONFIRMED</b>\n` +
+                       ` <b>${store}</b>\n` +
+                       `\n` +
+                       ` TXN: <code>${txnId}</code>\n` +
+                       ` ${dateStr}  ${timeStr}\n` +
+                       `\n` +
+                       ` Customer: <b>${order.name || '-'}</b>\n` +
+                       ` Game: ${order.game || '-'}\n` +
+                       ` Package: <b>${order.package || '-'}</b>\n` +
+                       (order.playerId ? ` Player ID: <code>${order.playerId}</code>\n` : '') +
+                       (order.ign      ? ` IGN: ${order.ign}\n` : '') +
+                       `\n` +
+                       ` Total: <b>${Number(order.price||0).toLocaleString()} KS</b>\n` +
+                       `\n` +
+                       `Thank you for your purchase! `;
             }
 
-            // ── Send text receipt to a specific chat ──
+            //  Send text receipt to a specific chat 
             async function _sendTextReceipt(token, chatId, order, txnId) {
                 const text = _buildReceiptText(order, txnId);
                 await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
@@ -3174,7 +3278,7 @@
                 });
             }
 
-            // ── Capture receipt card as blob ──
+            //  Capture receipt card as blob 
             async function _captureReceiptBlob() {
                 const el = document.getElementById('print-order-receipt');
                 if (!el) return null;
@@ -3190,7 +3294,7 @@
                 }
             }
 
-            // ── Send receipt image via sendPhoto ──
+            //  Send receipt image via sendPhoto 
             async function _sendPhotoReceipt(token, chatId, order, txnId) {
                 const blob = await _captureReceiptBlob();
                 if (!blob) {
@@ -3206,7 +3310,7 @@
                 await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: fd });
             }
 
-            // ── Inject order into receipt modal ──
+            //  Inject order into receipt modal 
             function _injectOrderToReceipt(order, txnId) {
                 const store = state.profile.name || 'PCA Store';
                 const now   = new Date();
@@ -3246,7 +3350,7 @@
                 }
             }
 
-            // ── Fill Voucher card (print-v) with order data ──
+            //  Fill Voucher card (print-v) with order data 
             function _injectOrderToVoucher(order, txnId) {
                 const store = state.profile.name || 'PCA Store';
                 const now   = new Date();
@@ -3279,7 +3383,7 @@
                 if (oidRow && oidEl) { oidEl.innerText = txnId; oidRow.style.display = 'flex'; }
             }
 
-            // ── Capture voucher card (print-v) as PNG blob ──
+            //  Capture voucher card (print-v) as PNG blob 
             async function _captureVoucherBlobBot() {
                 const el = document.getElementById('print-v');
                 if (!el) return null;
@@ -3289,7 +3393,7 @@
                 } catch(e) { return null; }
             }
 
-            // ── Auto-print voucher silently ──
+            //  Auto-print voucher silently 
             async function _autoPrintVoucher() {
                 const el = document.getElementById('print-v');
                 if (!el) return;
@@ -3308,7 +3412,7 @@
                 } catch(e) {}
             }
 
-            // ── Process a single confirmed /order message ──
+            //  Process a single confirmed /order message 
             async function _processOrder(update) {
                 const token  = state.profile.tgToken;
                 const msg    = update.message || update.channel_post;
@@ -3326,7 +3430,7 @@
                         headers: { 'Content-Type': 'application/json' },
                         body: JSON.stringify({
                             chat_id: fromChatId,
-                            text: '❌ Format မှားနေပါတယ်။\n\nမှန်ကန်သော format:\n\n/order\nName: အမည်\nGame: ဂိမ်းနာမည်\nPackage: ပက်ကေ့ဂျ်\nPlayerID: ID\nIGN: In-game name\nPrice: ဈေးနှုန်း',
+                            text: ' Format မှားနေပါတယ်။\n\nမှန်ကန်သော format:\n\n/order\nName: အမည်\nGame: ဂိမ်းနာမည်\nPackage: ပက်ကေ့ဂျ်\nPlayerID: ID\nIGN: In-game name\nPrice: ဈေးနှုန်း',
                             parse_mode: 'HTML'
                         })
                     });
@@ -3337,23 +3441,23 @@
                 const prefix = (state.profile.name || 'PCA').replace(/\s/g,'').substring(0,3).toUpperCase();
                 const txnId  = `${prefix}-${Date.now().toString(36).toUpperCase().slice(-6)}`;
 
-                // 1️⃣ Fill receipt modal (existing)
+                // 1⃣ Fill receipt modal (existing)
                 _injectOrderToReceipt(order, txnId);
                 _showLastOrder(order);
 
-                // 2️⃣ Fill Voucher card (print-v)
+                // 2⃣ Fill Voucher card (print-v)
                 _injectOrderToVoucher(order, txnId);
 
-                // 3️⃣ Navigate to Voucher tab so card renders correctly
+                // 3⃣ Navigate to Voucher tab so card renders correctly
                 if (typeof window.switchView === 'function') window.switchView('vc');
                 if (typeof window.switchVCTab === 'function') window.switchVCTab('v');
 
-                // 4️⃣ Show toast
-                window.showToast('📩 Order ဝင်လာပြီ! Voucher print + bot ပို့နေသည်...', 'success');
+                // 4⃣ Show toast
+                window.showToast(' Order ဝင်လာပြီ! Voucher print + bot ပို့နေသည်...', 'success');
 
                 _setStatus('busy', 'Printing & sending voucher...', null);
 
-                // 5️⃣ Wait for DOM to render voucher card, then print + send
+                // 5⃣ Wait for DOM to render voucher card, then print + send
                 await new Promise(r => setTimeout(r, 800));
 
                 try {
@@ -3371,21 +3475,21 @@
                         const dateStr = `${pad(now.getDate())}/${pad(now.getMonth()+1)}/${now.getFullYear()}`;
                         const timeStr = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
                         const caption =
-                            `✅ <b>ORDER CONFIRMED</b>\n` +
-                            `🏪 <b>${store}</b>\n` +
-                            `━━━━━━━━━━━━━━━━━\n` +
-                            `🔖 TXN: <code>${txnId}</code>\n` +
-                            `📅 ${dateStr}  ${timeStr}\n` +
-                            `━━━━━━━━━━━━━━━━━\n` +
-                            `👤 Customer: <b>${order.name || '-'}</b>\n` +
-                            `🎮 Game: ${order.game || '-'}\n` +
-                            `📦 Package: <b>${order.package || '-'}</b>\n` +
-                            (order.playerId ? `🆔 Player ID: <code>${order.playerId}</code>\n` : '') +
-                            (order.ign      ? `🎭 IGN: ${order.ign}\n` : '') +
-                            `━━━━━━━━━━━━━━━━━\n` +
-                            `💰 Total: <b>${Number(order.price||0).toLocaleString()} KS</b>\n` +
-                            `━━━━━━━━━━━━━━━━━\n` +
-                            `🎟️ Voucher ပေးပို့ပြီးပါပြီ ✓`;
+                            ` <b>ORDER CONFIRMED</b>\n` +
+                            ` <b>${store}</b>\n` +
+                            `\n` +
+                            ` TXN: <code>${txnId}</code>\n` +
+                            ` ${dateStr}  ${timeStr}\n` +
+                            `\n` +
+                            ` Customer: <b>${order.name || '-'}</b>\n` +
+                            ` Game: ${order.game || '-'}\n` +
+                            ` Package: <b>${order.package || '-'}</b>\n` +
+                            (order.playerId ? ` Player ID: <code>${order.playerId}</code>\n` : '') +
+                            (order.ign      ? ` IGN: ${order.ign}\n` : '') +
+                            `\n` +
+                            ` Total: <b>${Number(order.price||0).toLocaleString()} KS</b>\n` +
+                            `\n` +
+                            ` Voucher ပေးပို့ပြီးပါပြီ `;
 
                         // Send voucher photo back to bot
                         const fd = new FormData();
@@ -3396,8 +3500,8 @@
                         const res  = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: fd });
                         const data = await res.json();
                         if (data.ok) {
-                            window.showToast('✓ Voucher print + Telegram ပို့ပြီး!', 'success');
-                            _setStatus('online', `Active · last order ${new Date().toLocaleTimeString()}`, `✓ ${_pollCount}`);
+                            window.showToast(' Voucher print + Telegram ပို့ပြီး!', 'success');
+                            _setStatus('online', `Active · last order ${new Date().toLocaleTimeString()}`, ` ${_pollCount}`);
                         } else {
                             throw new Error(data.description || 'sendPhoto failed');
                         }
@@ -3412,15 +3516,15 @@
 
                 } catch(e) {
                     window.showToast('Bot error: ' + (e.message || 'failed'), 'error');
-                    _setStatus('error', 'Send failed — check token', null);
+                    _setStatus('error', 'Send failed  check token', null);
                 }
             }
 
-            // ── Polling loop ──
+            //  Polling loop 
             async function _poll() {
                 const token = state.profile.tgToken;
                 if (!token) {
-                    _setStatus('error', 'No bot token — check Settings', null);
+                    _setStatus('error', 'No bot token  check Settings', null);
                     return;
                 }
                 _pollCount++;
@@ -3429,7 +3533,7 @@
                         `https://api.telegram.org/bot${token}/getUpdates?offset=${_lastUpdateId + 1}&timeout=10&allowed_updates=["message"]`
                     );
                     if (!res.ok) {
-                        _setStatus('error', `API error ${res.status} — check token`, null);
+                        _setStatus('error', `API error ${res.status}  check token`, null);
                         return;
                     }
                     const data = await res.json();
@@ -3443,13 +3547,13 @@
                         localStorage.setItem('pca_bot_offset', _lastUpdateId);
                         await _processOrder(upd);
                     }
-                    _setStatus('online', `Active · polling every 5s`, `✓ ${_pollCount}`);
+                    _setStatus('online', `Active · polling every 5s`, ` ${_pollCount}`);
                 } catch(e) {
-                    _setStatus('error', 'Network error — retrying...', null);
+                    _setStatus('error', 'Network error  retrying...', null);
                 }
             }
 
-            // ── Start / stop ──
+            //  Start / stop 
             window.toggleAutoOrderBot = function() {
                 const enabled = document.getElementById('auto-order-bot-toggle').checked;
                 _botActive = enabled;
@@ -3464,16 +3568,16 @@
                     _setStatus('online', 'Starting...', null);
                     _poll(); // immediate first poll
                     _botInterval = setInterval(_poll, 5000);
-                    window.showToast('🤖 Auto Order Bot started!', 'success');
+                    window.showToast(' Auto Order Bot started!', 'success');
                 } else {
                     clearInterval(_botInterval);
                     _botInterval = null;
-                    _setStatus('offline', 'Offline — toggle to start', null);
+                    _setStatus('offline', 'Offline  toggle to start', null);
                     window.showToast('Bot stopped');
                 }
             };
 
-            // ── Send mode toggle ──
+            //  Send mode toggle 
             window.setBotSendMode = function(mode) {
                 _botSendMode = mode;
                 localStorage.setItem('pca_bot_mode', mode);
@@ -3570,7 +3674,7 @@
             // Show footer brand section
             wrap.style.display = 'flex';
 
-            // ── Logo ──
+            //  Logo 
             const logoWrap = document.getElementById('or-footer-logo-wrap');
             const logoImg  = document.getElementById('or-footer-logo');
             if (hasLogo) {
@@ -3580,7 +3684,7 @@
                 logoWrap.style.display = 'none';
             }
 
-            // ── QR Code ──
+            //  QR Code 
             const qrWrap = document.getElementById('or-footer-qr-wrap');
             const qrEl   = document.getElementById('or-footer-qr');
             if (hasQR) {
@@ -3635,7 +3739,7 @@
             if (wrap) wrap.style.display = 'none';
         };
 
-        // Logo upload — Voucher
+        // Logo upload  Voucher
         window.uploadVoucherLogo = function(input) {
             if (!input.files || !input.files[0]) return;
             const reader = new FileReader();
@@ -3654,7 +3758,7 @@
             _updateVFooter();
         };
 
-        // Logo upload — Coupon
+        // Logo upload  Coupon
         window.uploadCouponLogo = function(input) {
             if (!input.files || !input.files[0]) return;
             const reader = new FileReader();
@@ -3688,7 +3792,7 @@
             }).catch(()=>{});
         };
 
-        // ═══ CAPTURE VOUCHER AS BLOB ═══
+        //  CAPTURE VOUCHER AS BLOB 
         async function _captureVoucherBlob() {
             const el = document.getElementById('print-v');
             if (!el) return null;
@@ -3698,7 +3802,7 @@
             } catch(e) { return null; }
         }
 
-        // ═══ SEND VOUCHER IMAGE TO TELEGRAM BOT ═══
+        //  SEND VOUCHER IMAGE TO TELEGRAM BOT 
         window.sendVoucherToBot = async function() {
             const token  = state.profile.tgToken;
             const chatId = state.profile.tgChatId;
@@ -3724,16 +3828,16 @@
                 const timeStr   = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
                 const caption =
-                    `🎟️ <b>VOUCHER — ${storeName}</b>\n` +
-                    `━━━━━━━━━━━━━━━━━\n` +
-                    `👤 Customer: <b>${custName}</b>\n` +
-                    `🎭 IGN: ${ign}\n` +
-                    `🎮 Game/ID: ${game}\n` +
-                    `📦 Package: <b>${pkg}</b>\n` +
-                    `💰 Amount: <b>${Number(price).toLocaleString()} KS</b>\n` +
-                    `📅 ${dateStr}  ${timeStr}\n` +
-                    `━━━━━━━━━━━━━━━━━\n` +
-                    `Thank you! 🙏`;
+                    ` <b>VOUCHER  ${storeName}</b>\n` +
+                    `\n` +
+                    ` Customer: <b>${custName}</b>\n` +
+                    ` IGN: ${ign}\n` +
+                    ` Game/ID: ${game}\n` +
+                    ` Package: <b>${pkg}</b>\n` +
+                    ` Amount: <b>${Number(price).toLocaleString()} KS</b>\n` +
+                    ` ${dateStr}  ${timeStr}\n` +
+                    `\n` +
+                    `Thank you! `;
 
                 const fd = new FormData();
                 fd.append('chat_id',    chatId);
@@ -3744,7 +3848,7 @@
                 const res = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: fd });
                 const data = await res.json();
                 if (data.ok) {
-                    window.showToast('Voucher Telegram ပို့ပြီး! ✓');
+                    window.showToast('Voucher Telegram ပို့ပြီး! ');
                 } else {
                     throw new Error(data.description || 'API error');
                 }
@@ -3755,7 +3859,7 @@
             }
         };
 
-        // ═══ AUTO PRINT + SEND TO TELEGRAM BOT ═══
+        //  AUTO PRINT + SEND TO TELEGRAM BOT 
         window.printAndSendVoucher = async function() {
             const token  = state.profile.tgToken;
             const chatId = state.profile.tgChatId;
@@ -3797,16 +3901,16 @@
                     const timeStr   = `${pad(now.getHours())}:${pad(now.getMinutes())}`;
 
                     const caption =
-                        `🎟️ <b>VOUCHER — ${storeName}</b>\n` +
-                        `━━━━━━━━━━━━━━━━━\n` +
-                        `👤 Customer: <b>${custName}</b>\n` +
-                        `🎭 IGN: ${ign}\n` +
-                        `🎮 Game/ID: ${game}\n` +
-                        `📦 Package: <b>${pkg}</b>\n` +
-                        `💰 Amount: <b>${Number(price).toLocaleString()} KS</b>\n` +
-                        `📅 ${dateStr}  ${timeStr}\n` +
-                        `━━━━━━━━━━━━━━━━━\n` +
-                        `Thank you! 🙏`;
+                        ` <b>VOUCHER  ${storeName}</b>\n` +
+                        `\n` +
+                        ` Customer: <b>${custName}</b>\n` +
+                        ` IGN: ${ign}\n` +
+                        ` Game/ID: ${game}\n` +
+                        ` Package: <b>${pkg}</b>\n` +
+                        ` Amount: <b>${Number(price).toLocaleString()} KS</b>\n` +
+                        ` ${dateStr}  ${timeStr}\n` +
+                        `\n` +
+                        `Thank you! `;
 
                     const fd = new FormData();
                     fd.append('chat_id',    chatId);
@@ -3817,12 +3921,12 @@
                     const res  = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: fd });
                     const data = await res.json();
                     if (data.ok) {
-                        window.showToast('Print ✓  •  Telegram ပို့ပြီး ✓');
+                        window.showToast('Print     Telegram ပို့ပြီး ');
                     } else {
-                        window.showToast('Print ✓  •  Bot error: ' + (data.description || ''), 'error');
+                        window.showToast('Print     Bot error: ' + (data.description || ''), 'error');
                     }
                 } else {
-                    window.showToast('Print ✓  (Bot မရှိ — Settings မှာ ထည့်နိုင်သည်)');
+                    window.showToast('Print   (Bot မရှိ  Settings မှာ ထည့်နိုင်သည်)');
                 }
             } catch(e) {
                 window.showToast('Error: ' + (e.message || 'failed'), 'error');
@@ -3852,7 +3956,7 @@
                     setTimeout(() => {
                         document.body.removeChild(a); URL.revokeObjectURL(url);
                         if (btnId) _setBtnLoading(btnId, false);
-                        window.showToast(`${name} image saved! ✓`);
+                        window.showToast(`${name} image saved! `);
                     }, 150);
                 }, 'image/png', 1.0);
             }).catch(() => {
@@ -4168,7 +4272,7 @@
             const rate   = parseFloat(document.getElementById('ex-rate').value)   || 0;
             const sym    = (document.getElementById('ex-symbol').value || 'R$').trim();
             const result = Math.round(amount * rate);
-            document.getElementById('ex-result').innerText = result > 0 ? result.toLocaleString() + ' MMK' : '— MMK';
+            document.getElementById('ex-result').innerText = result > 0 ? result.toLocaleString() + ' MMK' : ' MMK';
             document.getElementById('ex-sym-label').innerText = sym;
         };
 
@@ -4183,26 +4287,26 @@
             document.getElementById('ex-rate-badge').innerText = '1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK';
             const rsLabel = document.getElementById('mi-cost-rs-label');
             if(rsLabel) rsLabel.innerText = 'Cost (' + sym + ')';
-            // NOTE: does NOT auto-recalc items — user must press Apply button
+            // NOTE: does NOT auto-recalc items  user must press Apply button
         };
 
-        // Show "rate changed" state — highlight badge, show Apply button
+        // Show "rate changed" state  highlight badge, show Apply button
         window.previewRate = function() {
             const rate = parseFloat(document.getElementById('ex-rate').value) || 0;
             const sym  = (document.getElementById('ex-symbol').value || 'R$').trim();
             const badge = document.getElementById('ex-rate-badge');
             const wrap  = document.getElementById('ex-apply-wrap');
-            if(badge) { badge.innerText = '1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK ✏️'; badge.style.color = 'var(--primary)'; }
+            if(badge) { badge.innerText = '1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK '; badge.style.color = 'var(--primary)'; }
             if(wrap)  wrap.style.display = 'block';
         };
 
-        // Called on blur/Enter — just make sure Apply button is visible
+        // Called on blur/Enter  just make sure Apply button is visible
         window.promptApplyRate = function() {
             window.saveExRate();
             window.previewRate();
         };
 
-        // User explicitly presses Apply — recalc all items
+        // User explicitly presses Apply  recalc all items
         window.applyNewRate = function() {
             const rate = parseFloat(document.getElementById('ex-rate').value) || 0;
             const sym  = (document.getElementById('ex-symbol').value || 'R$').trim();
@@ -4279,7 +4383,7 @@
             const price    = order.price || order.amount || order.total || 0;
             const orderId  = order.orderId || order._id || '-';
 
-            // ── Populate modal ──
+            //  Populate modal 
             document.getElementById('or-store-name').innerText  = state.profile.name || 'PCA Store';
             document.getElementById('or-order-id').innerText   = orderId;
             document.getElementById('or-txn-id').innerText      = txnId;
@@ -4292,7 +4396,7 @@
             document.getElementById('or-price').innerText       = Number(price).toLocaleString() + ' KS';
             window.renderReceiptBranding();
 
-            // ── Save to Daily Sales (state.sales) ──
+            //  Save to Daily Sales (state.sales) 
             const saleEntry = {
                 date:     confirmDate,          // e.g. "23 May 2026"
                 time:     confirmTime,          // e.g. "14:32:05"
@@ -4315,7 +4419,7 @@
                 window.renderSales();
             }
 
-            // ── Queue indicator ──
+            //  Queue indicator 
             const qBar  = document.getElementById('or-queue-bar');
             const qText = document.getElementById('or-queue-text');
             if (_orderQueue.length > 0) {
@@ -4361,7 +4465,7 @@
             window.openModal('modal-order-receipt');
         };
 
-        // ═══ IMAGE QUALITY STATE ═══
+        //  IMAGE QUALITY STATE 
         window._imgScale = 3; // HD default
         window.setImgQuality = function(q) {
             if (q === '4k') {
@@ -4370,18 +4474,18 @@
                 document.getElementById('img-q-hd').style.color = 'var(--text-sec)';
                 document.getElementById('img-q-4k').style.background = 'var(--primary)';
                 document.getElementById('img-q-4k').style.color = 'white';
-                document.getElementById('img-quality-hint').textContent = 'Scale 5× • Ultra HD (slower)';
+                document.getElementById('img-quality-hint').textContent = 'Scale 5×  Ultra HD (slower)';
             } else {
                 window._imgScale = 3;
                 document.getElementById('img-q-hd').style.background = 'var(--primary)';
                 document.getElementById('img-q-hd').style.color = 'white';
                 document.getElementById('img-q-4k').style.background = 'transparent';
                 document.getElementById('img-q-4k').style.color = 'var(--text-sec)';
-                document.getElementById('img-quality-hint').textContent = 'Scale 3× • High quality';
+                document.getElementById('img-quality-hint').textContent = 'Scale 3×  High quality';
             }
         };
 
-        // ═══ CAPTURE HELPER ═══
+        //  CAPTURE HELPER 
         function _captureElement(el, bgColor) {
             const scale = window._imgScale || 3;
             return html2canvas(el, {
@@ -4423,7 +4527,7 @@
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             try {
                                 await navigator.share({ files: [file], title: 'Order Receipt', text: `${storeName} Receipt` });
-                                window.showToast('Receipt saved / shared! ✓');
+                                window.showToast('Receipt saved / shared! ');
                                 return;
                             } catch(e) { /* user cancelled → fallback */ }
                         }
@@ -4433,7 +4537,7 @@
                         a.href = url; a.download = fname;
                         document.body.appendChild(a); a.click();
                         setTimeout(() => { document.body.removeChild(a); URL.revokeObjectURL(url); }, 200);
-                        window.showToast('Image saved! ✓');
+                        window.showToast('Image saved! ');
                     }, 'image/png', 1.0);
                 })
                 .catch(() => {
@@ -4443,7 +4547,7 @@
                 });
         };
 
-        // ═══ WHATSAPP SHARE — Receipt ═══
+        //  WHATSAPP SHARE  Receipt 
         window.shareReceiptTelegram = function() {
             const el = document.getElementById('print-order-receipt');
             if (!el) return;
@@ -4461,7 +4565,7 @@
                     const txnId = txnEl ? txnEl.innerText : '';
                     const custName = custEl ? custEl.innerText : '';
                     const amount = amtEl ? amtEl.innerText : '';
-                    const msg = `*${storeName}*\nReceipt: ${txnId}\nCustomer: ${custName}\nTotal: ${amount}\n\nThank you for your purchase! 🎮`;
+                    const msg = `*${storeName}*\nReceipt: ${txnId}\nCustomer: ${custName}\nTotal: ${amount}\n\nThank you for your purchase! `;
                     canvas.toBlob(async blob => {
                         _setBtnLoading('btn-receipt-wa', false);
                         const fname = `${storeName}_Receipt_${txnId}.png`;
@@ -4474,7 +4578,7 @@
                                     title: `${storeName} Receipt`,
                                     text: msg
                                 });
-                                window.showToast('Shared via Telegram! ✓');
+                                window.showToast('Shared via Telegram! ');
                                 return;
                             } catch(e) { /* cancelled */ }
                         }
@@ -4487,7 +4591,7 @@
                             document.body.removeChild(a); URL.revokeObjectURL(url);
                             const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(storeName)}&text=${encodeURIComponent(msg)}`;
                             window.open(tgUrl, '_blank');
-                            window.showToast('Image downloaded • Telegram opened');
+                            window.showToast('Image downloaded  Telegram opened');
                         }, 300);
                     }, 'image/png', 1.0);
                 })
@@ -4498,7 +4602,7 @@
                 });
         };
 
-        // ═══ TELEGRAM SHARE — Voucher / Coupon ═══
+        //  TELEGRAM SHARE  Voucher / Coupon 
         window.shareTelegram = function(id, name) {
             const el = document.getElementById(id);
             if (!el) return;
@@ -4509,7 +4613,7 @@
             _captureElement(el, bg)
                 .then(canvas => {
                     const storeName = state.profile.name || 'PCA Store';
-                    const msg = `*${storeName}* — ${name}\nFrom: ${storeName}\n\nThank you! 🎮`;
+                    const msg = `*${storeName}*  ${name}\nFrom: ${storeName}\n\nThank you! `;
                     canvas.toBlob(async blob => {
                         _setBtnLoading(btnId, false);
                         const fname = `${storeName}_${name}_${Date.now()}.png`;
@@ -4517,7 +4621,7 @@
                         if (navigator.canShare && navigator.canShare({ files: [file] })) {
                             try {
                                 await navigator.share({ files: [file], title: `${storeName} ${name}`, text: msg });
-                                window.showToast('Shared via Telegram! ✓');
+                                window.showToast('Shared via Telegram! ');
                                 return;
                             } catch(e) {}
                         }
@@ -4529,7 +4633,7 @@
                             document.body.removeChild(a); URL.revokeObjectURL(url);
                             const tgUrl = `https://t.me/share/url?url=${encodeURIComponent(storeName)}&text=${encodeURIComponent(msg)}`;
                             window.open(tgUrl, '_blank');
-                            window.showToast('Image saved • Telegram opened');
+                            window.showToast('Image saved  Telegram opened');
                         }, 300);
                     }, 'image/png', 1.0);
                 })
@@ -4590,7 +4694,7 @@
                     });
                     _showNextReceipt();
                 }, err => {
-                    // Fallback: receiptIssued field might not exist yet — query without it
+                    // Fallback: receiptIssued field might not exist yet  query without it
                     _orderUnsubscribe = storeDb.collection('orders')
                         .where('status', '==', 'confirmed')
                         .onSnapshot(snapshot => {
@@ -4652,7 +4756,7 @@
             const wrap = document.getElementById('ex-apply-wrap');
             if(wrap) wrap.style.display = 'none';
             document.getElementById('ex-amount').value = '';
-            document.getElementById('ex-result').innerText = '— MMK';
+            document.getElementById('ex-result').innerText = ' MMK';
         };
 
 
@@ -4809,7 +4913,7 @@
             if(!state.activeGame) return window.showToast('ဂိမ်းတစ်ခုအရင်ရွေးပါ', 'error');
             const items = (state.data[state.activeGame] || {}).items || [];
             if(items.length === 0) return window.showToast('Item မရှိသေးပါ', 'error');
-            document.getElementById('bpe-game-label').innerText = state.activeGame + ' — ' + items.length + ' items';
+            document.getElementById('bpe-game-label').innerText = state.activeGame + '  ' + items.length + ' items';
             document.getElementById('bpe-value').value = '';
             document.getElementById('bpe-preview').style.display = 'none';
             _bpeMode = 'sell'; _bpeType = 'pct'; _bpeSign = 1;
@@ -4941,7 +5045,7 @@
                         <div class="receipt-store-name" id="or-store-name">PCA Store</div>
                         <span class="receipt-label">Top-up confirmed successfully</span>
                     </div>
-                    <!-- Apple Pay–style amount -->
+                    <!-- Apple Paystyle amount -->
                     <div class="receipt-amount-block">
                         <div class="receipt-amount-label">Amount Paid</div>
                         <div class="receipt-amount-big" id="or-price">0 KS</div>
@@ -4981,7 +5085,7 @@
                     <span id="or-queue-text" style="font-size:12px; font-weight:700; color:var(--text-sec);"></span>
                 </div>
             </div>
-            <!-- Actions — Enhanced Share Panel -->
+            <!-- Actions  Enhanced Share Panel -->
             <div style="padding:14px 20px 20px; background:var(--card); border-top:1px solid var(--border);">
                 <!-- Share row -->
                 <div style="display:flex; gap:8px; margin-bottom:10px;">
@@ -5013,7 +5117,7 @@
                         <button id="img-q-hd" onclick="window.setImgQuality('hd')" style="padding:4px 10px; border-radius:6px; font-size:11px; font-weight:800; background:var(--primary); color:white; transition:0.15s;">HD</button>
                         <button id="img-q-4k" onclick="window.setImgQuality('4k')" style="padding:4px 10px; border-radius:6px; font-size:11px; font-weight:800; background:transparent; color:var(--text-sec); transition:0.15s;">4K</button>
                     </div>
-                    <div id="img-quality-hint" style="font-size:11px; color:var(--text-sec); font-weight:600; flex:1;">Scale 3× • High quality</div>
+                    <div id="img-quality-hint" style="font-size:11px; color:var(--text-sec); font-weight:600; flex:1;">Scale 3×  High quality</div>
                     <button onclick="window.closeOrderReceipt()" style="padding:10px 14px; border-radius:10px; border:1.5px solid var(--border); font-weight:700; font-size:13px; color:var(--text-sec); flex-shrink:0;">
                         Close
                     </button>
