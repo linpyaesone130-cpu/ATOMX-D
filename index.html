@@ -1053,7 +1053,15 @@
                     <input class="input-field" type="number" id="ex-rate" placeholder="Rate" value="2000" min="1" oninput="window.calcExchange(); window.previewRate()" onblur="window.promptApplyRate()" onkeydown="if(event.key==='Enter'){event.preventDefault();window.promptApplyRate();}" style="flex:1;padding:8px 10px;font-size:13px;">
                     <span class="ex-label">MMK</span>
                 </div>
+                <!-- Per-game Coin / Initial Balance -->
+                <div class="exchange-row" style="margin-top:6px;">
+                    <span style="font-size:11px;color:var(--text-sec);font-weight:700; flex:none; width:78px;">ကနဦးလက်ကျန်</span>
+                    <input class="input-field" type="number" id="ex-coin-initial" placeholder="e.g. 1000" min="0" oninput="window.saveCoinInitial()" style="flex:1;padding:8px 10px;font-size:13px;">
+                    <span class="ex-label" id="ex-coin-sym-label">R$</span>
+                </div>
+                <div id="ex-coin-remaining-badge" class="ex-rate-badge" style="display:none; margin-top:4px;"></div>
                 <!-- Calculator row -->
+
                 <div class="exchange-row">
                     <input class="input-field" type="number" id="ex-amount" placeholder="0.00" oninput="window.calcExchange()" style="flex:1;padding:8px 10px;font-size:13px;">
                     <span class="ex-label" id="ex-sym-label">R$</span>
@@ -1179,6 +1187,12 @@
                 <div id="sales-total-revenue" style="font-size:20px; font-weight:900; color:var(--primary);">0 KS</div>
                 <svg style="position:absolute;right:12px;top:12px;opacity:0.12;" width="28" height="28" viewBox="0 0 24 24" fill="var(--primary)"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1.41 16.09V20h-2.67v-1.93c-1.71-.36-3.16-1.46-3.27-3.4h1.96c.1 1.05.82 1.87 2.65 1.87 1.96 0 2.4-.98 2.4-1.59 0-.83-.44-1.61-2.67-2.14-2.48-.6-4.18-1.62-4.18-3.67 0-1.72 1.39-2.84 3.11-3.21V4h2.67v1.95c1.86.45 2.79 1.86 2.85 3.39H14.3c-.05-1.11-.64-1.87-2.22-1.87-1.5 0-2.4.68-2.4 1.64 0 .84.65 1.39 2.67 1.91s4.18 1.39 4.18 3.91c-.01 1.83-1.38 2.83-3.12 3.16z"/></svg>
             </div>
+            <!-- Cost -->
+            <div class="card" style="padding:14px 16px; border-top:3px solid #64748b; position:relative; overflow:hidden;">
+                <div style="font-size:10px; font-weight:800; color:var(--text-sec); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">အရင်းငွေ</div>
+                <div id="sales-total-cost" style="font-size:20px; font-weight:900; color:#64748b;">0 KS</div>
+                <svg style="position:absolute;right:12px;top:12px;opacity:0.12;" width="28" height="28" viewBox="0 0 24 24" fill="#64748b"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M8 8h8v2H8zM8 12h8v2H8z" fill="white" opacity="0.5"/></svg>
+            </div>
             <!-- Profit -->
             <div class="card" style="padding:14px 16px; border-top:3px solid var(--green); position:relative; overflow:hidden;">
                 <div style="font-size:10px; font-weight:800; color:var(--text-sec); letter-spacing:1px; text-transform:uppercase; margin-bottom:6px;">PROFIT</div>
@@ -1197,6 +1211,26 @@
                 <div id="sales-avg" style="font-size:20px; font-weight:900; color:#a78bfa;">0 KS</div>
                 <svg style="position:absolute;right:12px;top:12px;opacity:0.12;" width="28" height="28" viewBox="0 0 24 24" fill="#a78bfa"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
             </div>
+        </div>
+
+        <!-- Stock Balance Widget -->
+        <div id="stock-balance-widget" class="card" style="padding:0; overflow:hidden; margin-bottom:12px; display:none;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:30px; height:30px; border-radius:8px; background:rgba(24,119,242,0.1); display:flex; align-items:center; justify-content:center;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:13px; font-weight:800; line-height:1.2;">ရင်းနှီးငွေ</div>
+                        <div style="font-size:10px; font-weight:700; color:var(--text-sec); margin-top:1px;">Stock Balance Tracker</div>
+                    </div>
+                </div>
+                <button onclick="window.openStockSetup()" style="font-size:11px; font-weight:800; color:var(--primary); background:rgba(24,119,242,0.08); padding:6px 12px; border-radius:8px; border:1px solid rgba(24,119,242,0.2); display:flex; align-items:center; gap:5px;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Setup
+                </button>
+            </div>
+            <div id="stock-balance-list" style="padding:14px 16px; display:flex; flex-direction:column; gap:12px;"></div>
         </div>
 
         <!--  Profit Goal Progress  -->
@@ -1476,6 +1510,26 @@
             <div style="font-size:11px; color:var(--text-sec); font-weight:600; margin-top:8px;">
                 Margin % ဒီ threshold အောက်ဆင်းရင်  badge ပြမည် (default: 10%)
             </div>
+        </div>
+
+        <!-- INVESTED CURRENCY / STOCK BALANCE (Settings copy) -->
+        <div id="stock-balance-widget-settings" class="card" style="padding:0; overflow:hidden;">
+            <div style="display:flex; justify-content:space-between; align-items:center; padding:14px 16px; border-bottom:1px solid var(--border);">
+                <div style="display:flex; align-items:center; gap:8px;">
+                    <div style="width:30px; height:30px; border-radius:8px; background:rgba(24,119,242,0.1); display:flex; align-items:center; justify-content:center;">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="1" x2="12" y2="23"/><path d="M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>
+                    </div>
+                    <div>
+                        <div style="font-size:13px; font-weight:800; line-height:1.2;">ရင်းနှီးငွေ (Currency)</div>
+                        <div style="font-size:10px; font-weight:700; color:var(--text-sec); margin-top:1px;">ဝယ်ရင်းထားတဲ့ ငွေပမာဏ  ကြည့်/ပြင်ရန်</div>
+                    </div>
+                </div>
+                <button onclick="window.openStockSetup()" style="font-size:11px; font-weight:800; color:var(--primary); background:rgba(24,119,242,0.08); padding:6px 12px; border-radius:8px; border:1px solid rgba(24,119,242,0.2); display:flex; align-items:center; gap:5px; flex-shrink:0;">
+                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                    Setup
+                </button>
+            </div>
+            <div id="stock-balance-list-settings" style="padding:14px 16px; display:flex; flex-direction:column; gap:12px;"></div>
         </div>
 
         <!-- PUBLISH TO STORE -->
@@ -1776,6 +1830,23 @@ ChatID: 987654321</textarea>
                 <button class="btn" style="flex:1; background:var(--bg); color:var(--text); border:1px solid var(--border);" onclick="window.closeConfirm()">Cancel</button>
                 <button class="btn" id="confirm-yes-btn" style="flex:1; background:var(--red);">Confirm</button>
             </div>
+        </div>
+    </div>
+
+    <!-- STOCK SETUP MODAL -->
+    <div class="modal" id="modal-stock">
+        <div class="modal-content" style="max-width:400px;">
+            <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:20px;">
+                <div>
+                    <h3 style="font-size:17px; font-weight:800;">Stock Balance Setup</h3>
+                    <div style="font-size:12px; color:var(--text-sec); margin-top:3px; font-weight:600;">ကိုယ့်မှာရှိတဲ့ ရင်းနှီးကြေး သတ်မှတ်ပါ</div>
+                </div>
+                <button onclick="window.closeModal('modal-stock')">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+                </button>
+            </div>
+            <div id="stock-setup-list" style="display:flex; flex-direction:column; gap:12px; margin-bottom:20px;"></div>
+            <button class="btn" onclick="window.saveStockSetup()" style="width:100%;">Save</button>
         </div>
     </div>
 
@@ -2395,7 +2466,7 @@ ChatID: 987654321</textarea>
             if(state.viewMode === 'desktop') { document.getElementById('inv-mobile-container').style.display = 'none'; document.getElementById('inv-desktop-container').style.display = 'block'; } 
             else { document.getElementById('inv-mobile-container').style.display = 'block'; document.getElementById('inv-desktop-container').style.display = 'none'; }
             const cbtn = document.getElementById('btn-compact-toggle'); if(cbtn) cbtn.style.color = state.compactView ? 'var(--primary)' : 'var(--text-sec)';
-            window.renderSidebarGames(); window.renderInventory(); window.renderSales(); window.loadExRate();
+            window.renderSidebarGames(); window.renderInventory(); window.renderSales(); window.loadExRate(); window.renderStockWidget();
 
             const autoToggle = document.getElementById('auto-report-toggle'); if(autoToggle) autoToggle.checked = !!state.autoReportEnabled;
             const autoTime = document.getElementById('auto-report-time'); if(autoTime) autoTime.value = state.autoReportTime || '00:00';
@@ -2750,8 +2821,8 @@ ChatID: 987654321</textarea>
             document.querySelectorAll('.view').forEach(el => el.classList.remove('active')); document.getElementById('view-' + v).classList.add('active');
             document.querySelectorAll('.menu-item').forEach(el => el.classList.remove('active')); if(document.getElementById('nav-' + v)) document.getElementById('nav-' + v).classList.add('active');
             document.getElementById('sidebar').classList.remove('open'); document.getElementById('overlay').classList.remove('show');
-            if(v === 'inventory') window.renderInventory(); if(v === 'sales') window.renderSales();
-            if(v === 'settings') { window.updatePublishPreview(); }
+            if(v === 'inventory') window.renderInventory(); if(v === 'sales') { window.renderSales(); window.renderStockWidget(); }
+            if(v === 'settings') { window.updatePublishPreview(); window.renderStockWidget(); }
         };
 
         // ================= GAME MANAGMENT =================
@@ -2804,11 +2875,27 @@ ChatID: 987654321</textarea>
                 item.className = `game-item ${isActive}${locked ? ' locked' : ''}`;
                 item.draggable = !locked;
                 item.dataset.game = gName;
+                // Coin / stock balance badge for this game's currency (shared pool by symbol)
+                let coinBadgeHtml = '';
+                const exCfg = (state.settings.exRates || {})[gName];
+                if (exCfg && exCfg.sym) {
+                    const balKey = exCfg.sym.toUpperCase();
+                    const bal = (state.settings.stockBalances || {})[balKey];
+                    const initial = bal ? (parseFloat(bal.initial) || 0) : 0;
+                    if (initial > 0) {
+                        const spent     = parseFloat(bal.spent) || 0;
+                        const remaining = initial - spent;
+                        const isOver = remaining < 0;
+                        const isLow  = !isOver && (remaining / initial) < 0.2;
+                        const badgeColor = isOver ? 'var(--red)' : isLow ? '#f59e0b' : 'var(--green)';
+                        coinBadgeHtml = `<span style="font-size:10px; font-weight:800; color:${badgeColor};">${remaining.toLocaleString()} ${exCfg.sym} ကျန်</span>`;
+                    }
+                }
                 item.innerHTML = `
                     <span class="drag-handle" title="${locked ? 'Unlock to reorder' : 'Drag to reorder'}" style="${locked ? 'opacity:0.2;cursor:not-allowed;' : ''}">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="9" cy="5" r="1" fill="currentColor"/><circle cx="9" cy="12" r="1" fill="currentColor"/><circle cx="9" cy="19" r="1" fill="currentColor"/><circle cx="15" cy="5" r="1" fill="currentColor"/><circle cx="15" cy="12" r="1" fill="currentColor"/><circle cx="15" cy="19" r="1" fill="currentColor"/></svg>
                     </span>
-                    <div style="display:flex; align-items:center; gap:12px; flex-grow:1;" onclick="window.selectGame('${gName}')"><img src="${img}" style="width:28px; height:28px; border-radius:8px; object-fit:cover;"><span>${gName}</span></div>
+                    <div style="display:flex; align-items:center; gap:12px; flex-grow:1; min-width:0;" onclick="window.selectGame('${gName}')"><img src="${img}" style="width:28px; height:28px; border-radius:8px; object-fit:cover; flex-shrink:0;"><div style="display:flex; flex-direction:column; gap:1px; min-width:0; overflow:hidden;"><span style="overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">${gName}</span>${coinBadgeHtml}</div></div>
                     <div style="display:flex; gap:4px;">
                         <button onclick="window.openEditGameModal('${gName}', event)" style="padding:6px; color:var(--primary);">${svgEdit}</button>
                         <button onclick="window.confirmDeleteGame('${gName}', event)" style="padding:6px; color:var(--red);">${svgTrash}</button>
@@ -3101,7 +3188,38 @@ ChatID: 987654321</textarea>
 
         window.quickSellRecord = function(game, idx) {
             const itm = state.data[game].items[idx]; let cMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
-            state.sales.push({ date: new Date().toLocaleDateString(), game: game, name: itm.name, profit: (itm.sell||0)-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+            const sellPrice = parseFloat(itm.sell) || 0;
+
+            // --- Coin/Stock balance check (block sale if not enough left) ---
+            const costRS = parseFloat(itm.costRS) || 0;
+            const exRate = (state.settings.exRates || {})[game] || {};
+            const sym = exRate.sym || 'RS';
+            const key = sym.toUpperCase();
+            if (costRS > 0) {
+                const bal = (state.settings.stockBalances || {})[key];
+                if (bal && (parseFloat(bal.initial) || 0) > 0) {
+                    const remaining = (parseFloat(bal.initial) || 0) - (parseFloat(bal.spent) || 0);
+                    if (remaining < costRS) {
+                        window.showToast(`${sym} လက်ကျန် မလောက်တော့ပါ (ကျန် ${remaining.toLocaleString()} ${sym})`, 'error');
+                        return;
+                    }
+                }
+            }
+
+            state.sales.push({ date: new Date().toLocaleDateString(), game: game, name: itm.name, price: sellPrice, cost: cMMK, profit: sellPrice-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+
+            // --- Stock deduction ---
+            if (costRS > 0) {
+                state.settings.stockBalances = state.settings.stockBalances || {};
+                state.settings.stockBalances[key] = state.settings.stockBalances[key] || { initial: 0, spent: 0, sym: key };
+                state.settings.stockBalances[key].spent = (state.settings.stockBalances[key].spent || 0) + costRS;
+                state.settings.stockBalances[key].sym = sym;
+                window.renderStockWidget();
+                window.renderSidebarGames();
+                window.refreshCoinBalanceUI();
+            }
+            // ----------------------
+
             saveDataToCloud(); window.showToast(`Sold 1x ${itm.name}`); window.renderSales(); updateNotifBadge();
            
             if(game === state.activeGame) window.renderInventory();
@@ -3112,10 +3230,228 @@ ChatID: 987654321</textarea>
         window.recordSale = function(idx, e) {
             if(e) e.stopPropagation();
             const itm = state.data[state.activeGame].items[idx]; let cMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
-            state.sales.push({ date: new Date().toLocaleDateString(), game: state.activeGame, name: itm.name, profit: (itm.sell||0)-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+            const sellPrice = parseFloat(itm.sell) || 0;
+
+            // --- Coin/Stock balance check (block sale if not enough left) ---
+            const costRS = parseFloat(itm.costRS) || 0;
+            const exRate = (state.settings.exRates || {})[state.activeGame] || {};
+            const sym = exRate.sym || 'RS';
+            const key = sym.toUpperCase();
+            if (costRS > 0) {
+                const bal = (state.settings.stockBalances || {})[key];
+                if (bal && (parseFloat(bal.initial) || 0) > 0) {
+                    const remaining = (parseFloat(bal.initial) || 0) - (parseFloat(bal.spent) || 0);
+                    if (remaining < costRS) {
+                        window.showToast(`${sym} လက်ကျန် မလောက်တော့ပါ (ကျန် ${remaining.toLocaleString()} ${sym})`, 'error');
+                        return;
+                    }
+                }
+            }
+
+            state.sales.push({ date: new Date().toLocaleDateString(), game: state.activeGame, name: itm.name, price: sellPrice, cost: cMMK, profit: sellPrice-cMMK, time: new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'}) });
+
+            // --- Stock deduction ---
+            if(costRS > 0) {
+                state.settings.stockBalances = state.settings.stockBalances || {};
+                state.settings.stockBalances[key] = state.settings.stockBalances[key] || { initial: 0, spent: 0, sym: key };
+                state.settings.stockBalances[key].spent = (state.settings.stockBalances[key].spent || 0) + costRS;
+                state.settings.stockBalances[key].sym = sym;
+                window.renderStockWidget();
+                window.renderSidebarGames();
+                window.refreshCoinBalanceUI();
+            }
+            // ----------------------
+
             saveDataToCloud(); window.showToast(`Sold 1x ${itm.name}`); window.renderSales(); updateNotifBadge();
-           
         };
+
+        // --- Stock Balance Functions ---
+        window.renderStockWidget = function() {
+            const balances = state.settings.stockBalances || {};
+            const keys = Object.keys(balances);
+            const widget = document.getElementById('stock-balance-widget');
+            const list = document.getElementById('stock-balance-list');
+            const settingsList = document.getElementById('stock-balance-list-settings');
+            if(!widget && !list && !settingsList) return;
+            if(keys.length === 0) {
+                if(widget) widget.style.display = 'none';
+                if(settingsList) settingsList.innerHTML = `<div style="text-align:center; padding:10px 4px; font-size:12px; font-weight:700; color:var(--text-sec);">ရင်းနှီးငွေ မထည့်ရသေးပါ  အပေါ်က Setup ကိုနှိပ်ပြီး စတင်ပါ</div>`;
+                return;
+            }
+            if(widget) widget.style.display = 'block';
+
+            // Calculate profit per currency from today's sales
+            const today = new Date().toLocaleDateString();
+            const profitBySym = {};
+            (state.sales || []).filter(s => s.date === today).forEach(s => {
+                const game = s.game;
+                const ex = (state.settings.exRates || {})[game] || {};
+                const sym = (ex.sym || 'RS').toUpperCase();
+                // find item to get costRS
+                const items = (state.data[game] || {}).items || [];
+                const itm = items.find(i => i.name === s.name);
+                const costRS = itm ? (parseFloat(itm.costRS) || 0) : 0;
+                const sell = itm ? (parseFloat(itm.sell) || 0) : 0;
+                const costMMK = itm ? (parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0) : 0;
+                profitBySym[sym] = profitBySym[sym] || { profitMMK: 0, count: 0 };
+                profitBySym[sym].profitMMK += (sell - costMMK);
+                profitBySym[sym].count += 1;
+            });
+
+            const stockHtml = keys.map(k => {
+                const b = balances[k];
+                const initial = parseFloat(b.initial) || 0;
+                const spent = parseFloat(b.spent) || 0;
+                const remaining = initial - spent;
+                const pct = initial > 0 ? Math.min(100, Math.round((spent / initial) * 100)) : 0;
+                const remainPct = 100 - pct;
+                const isLow = initial > 0 && remaining / initial < 0.2;
+                const isOver = remaining < 0;
+                const remainColor = isOver ? '#ef4444' : isLow ? '#f59e0b' : 'var(--green)';
+                const barUsedColor = isOver ? '#ef4444' : isLow ? '#f59e0b' : 'var(--primary)';
+                const sym = b.sym || k;
+                const profitData = profitBySym[k] || { profitMMK: 0, count: 0 };
+                const todayProfit = profitData.profitMMK;
+                const todayProfitColor = todayProfit >= 0 ? 'var(--green)' : '#ef4444';
+                const todaySign = todayProfit >= 0 ? '+' : '';
+
+                return `<div style="border:1px solid var(--border); border-radius:12px; overflow:hidden;">
+
+                    <!-- Currency Header -->
+                    <div style="background:var(--bg); padding:10px 14px; display:flex; align-items:center; justify-content:space-between; border-bottom:1px solid var(--border);">
+                        <div style="display:flex; align-items:center; gap:8px;">
+                            <div style="width:28px; height:28px; border-radius:7px; background:rgba(24,119,242,0.12); display:flex; align-items:center; justify-content:center;">
+                                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="var(--primary)" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="10"/><path d="M16 8h-6a2 2 0 1 0 0 4h4a2 2 0 1 1 0 4H8"/><line x1="12" y1="6" x2="12" y2="18"/></svg>
+                            </div>
+                            <span style="font-size:13px; font-weight:900; letter-spacing:0.3px;">${sym}</span>
+                        </div>
+                        ${isOver ? `<span style="font-size:10px; font-weight:800; color:#ef4444; background:rgba(239,68,68,0.1); padding:3px 8px; border-radius:6px; border:1px solid rgba(239,68,68,0.2);">OVER BUDGET</span>` :
+                          isLow ? `<span style="font-size:10px; font-weight:800; color:#f59e0b; background:rgba(245,158,11,0.1); padding:3px 8px; border-radius:6px; border:1px solid rgba(245,158,11,0.2);">LOW STOCK</span>` :
+                          `<span style="font-size:10px; font-weight:800; color:var(--green); background:rgba(16,185,129,0.08); padding:3px 8px; border-radius:6px; border:1px solid rgba(16,185,129,0.15);">${remainPct}% ကျန်</span>`}
+                    </div>
+
+                    <!-- 3 stat rows -->
+                    <div style="display:grid; grid-template-columns:1fr 1fr 1fr; border-bottom:1px solid var(--border);">
+                        <div style="padding:12px 14px; border-right:1px solid var(--border);">
+                            <div style="font-size:9px; font-weight:800; color:var(--text-sec); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:5px;">ရင်းနှီး</div>
+                            <div style="font-size:14px; font-weight:900; color:var(--text);">${initial.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+                            <div style="font-size:9px; font-weight:700; color:var(--text-sec); margin-top:2px;">${sym}</div>
+                        </div>
+                        <div style="padding:12px 14px; border-right:1px solid var(--border);">
+                            <div style="font-size:9px; font-weight:800; color:var(--text-sec); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:5px;">သုံးပြီး</div>
+                            <div style="font-size:14px; font-weight:900; color:#ef4444;">${spent.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+                            <div style="font-size:9px; font-weight:700; color:var(--text-sec); margin-top:2px;">${sym}</div>
+                        </div>
+                        <div style="padding:12px 14px;">
+                            <div style="font-size:9px; font-weight:800; color:var(--text-sec); text-transform:uppercase; letter-spacing:0.8px; margin-bottom:5px;">လက်ကျန်</div>
+                            <div style="font-size:14px; font-weight:900; color:${remainColor};">${remaining.toLocaleString(undefined,{maximumFractionDigits:2})}</div>
+                            <div style="font-size:9px; font-weight:700; color:var(--text-sec); margin-top:2px;">${sym}</div>
+                        </div>
+                    </div>
+
+                    <!-- Progress bar -->
+                    <div style="padding:10px 14px; background:var(--bg);">
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
+                            <span style="font-size:10px; font-weight:700; color:var(--text-sec);">သုံးပြီး ${pct}%</span>
+                            ${todayProfit !== 0 ? `<span style="font-size:10px; font-weight:800; color:${todayProfitColor};">ဒီနေ့အမြတ် ${todaySign}${Math.round(todayProfit).toLocaleString()} KS</span>` : ''}
+                        </div>
+                        <div style="height:5px; background:var(--border); border-radius:99px; overflow:hidden;">
+                            <div style="height:100%; width:${pct}%; background:${barUsedColor}; border-radius:99px; transition:width 0.6s cubic-bezier(0.34,1.56,0.64,1);"></div>
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            if(list) list.innerHTML = stockHtml;
+            if(settingsList) settingsList.innerHTML = stockHtml;
+        };
+
+        window.openStockSetup = function() {
+            state.settings.stockBalances = state.settings.stockBalances || {};
+            // Collect all unique syms from games
+            const syms = new Set();
+            Object.keys(state.data || {}).forEach(g => {
+                const ex = (state.settings.exRates || {})[g];
+                if(ex && ex.sym) syms.add(ex.sym.toUpperCase());
+            });
+            // Also add existing keys
+            Object.keys(state.settings.stockBalances).forEach(k => syms.add(k));
+            if(syms.size === 0) syms.add('COIN');
+            const container = document.getElementById('stock-setup-list');
+            if(!container) return;
+            container.innerHTML = [...syms].map(sym => {
+                const b = state.settings.stockBalances[sym] || {};
+                return `<div style="background:var(--bg); border-radius:12px; padding:14px; border:1px solid var(--border);">
+                    <div style="font-size:12px; font-weight:800; color:var(--text-sec); margin-bottom:10px; text-transform:uppercase; letter-spacing:0.5px;">${sym} Balance</div>
+                    <div style="display:flex; gap:8px; align-items:center;">
+                        <div style="flex:1;">
+                            <label style="font-size:11px; font-weight:700; color:var(--text-sec);">ရင်းနှီးငွေ (Initial)</label>
+                            <input type="number" id="stock-initial-${sym}" value="${b.initial || ''}" placeholder="e.g. 1000" class="input-field" style="margin-top:4px; width:100%;">
+                        </div>
+                        <div style="flex:1;">
+                            <label style="font-size:11px; font-weight:700; color:var(--text-sec);">သုံးပြီး (Spent)</label>
+                            <input type="number" id="stock-spent-${sym}" value="${b.spent || ''}" placeholder="0" class="input-field" style="margin-top:4px; width:100%;">
+                        </div>
+                    </div>
+                </div>`;
+            }).join('');
+            window.openModal('modal-stock');
+        };
+
+        window.saveStockSetup = function() {
+            state.settings.stockBalances = state.settings.stockBalances || {};
+            const updates = {};
+            const errors = [];
+            document.querySelectorAll('#stock-setup-list [id^="stock-initial-"]').forEach(el => {
+                const sym = el.id.replace('stock-initial-', '');
+                const initial = parseFloat(el.value) || 0;
+                const spent = parseFloat(document.getElementById('stock-spent-' + sym)?.value) || 0;
+                if(initial > 0 || spent > 0) {
+                    if(initial < spent) {
+                        // Manual edit must never leave remaining negative.
+                        // (Going negative is only allowed via real auto sale deduction.)
+                        errors.push(`${sym}: ရင်းနှီး ${initial.toLocaleString()} ဟာ သုံးပြီးသား ${spent.toLocaleString()} ထက် မနည်းရပါ`);
+                    } else {
+                        updates[sym] = { initial, spent, sym };
+                    }
+                }
+            });
+            if(errors.length > 0) {
+                window.showToast(errors[0] + (errors.length > 1 ? ` (+${errors.length - 1} more)` : ''), 'error');
+                return;
+            }
+            Object.keys(updates).forEach(sym => { state.settings.stockBalances[sym] = updates[sym]; });
+            saveDataToCloud();
+            window.closeModal('modal-stock');
+            window.renderStockWidget();
+            window.showToast('Stock balance saved.', 'success');
+        };
+        // --- End Stock Balance ---
+
+        // Shared helper: given a game + package name + sale price, look up the
+        // item's real cost (MMK + foreign-currency cost), deduct that foreign-currency
+        // cost from the invested stock balance (so ရင်းနှီးငွေ/remaining drops on every
+        // sale), and return the real profit (price - costMMK) instead of a hardcoded 0.
+        function _applyOrderCostAndStock(game, pkgName, price) {
+            let costMMK = 0, costRS = 0;
+            const items = (state.data[game] || {}).items || [];
+            const itm = items.find(i => i.name === pkgName);
+            if (itm) {
+                costMMK = parseFloat(itm.costMMK) || parseFloat(itm.cost) || 0;
+                costRS  = parseFloat(itm.costRS) || 0;
+            }
+            const exRate = (state.settings.exRates || {})[game] || {};
+            const sym = exRate.sym || 'RS';
+            const key = sym.toUpperCase();
+            if (costRS > 0) {
+                state.settings.stockBalances = state.settings.stockBalances || {};
+                state.settings.stockBalances[key] = state.settings.stockBalances[key] || { initial: 0, spent: 0, sym: key };
+                state.settings.stockBalances[key].spent = (state.settings.stockBalances[key].spent || 0) + costRS;
+                state.settings.stockBalances[key].sym = sym;
+                if (typeof window.renderStockWidget === 'function') window.renderStockWidget();
+                if (typeof window.renderSidebarGames === 'function') window.renderSidebarGames();
+            }
+            return { profit: Number(price || 0) - costMMK, costMMK };
+        }
 
         window.renderSales = function() {
             const today = new Date().toLocaleDateString();
@@ -3123,20 +3459,24 @@ ChatID: 987654321</textarea>
 
             let profit  = 0;
             let revenue = 0;
+            let cost    = 0;
             filtered.forEach(s => {
                 profit  += (s.profit || 0);
                 revenue += (s.price  || 0);
+                cost    += (s.cost !== undefined ? s.cost : ((s.price || 0) - (s.profit || 0)));
             });
             const avg = filtered.length ? Math.round(revenue / filtered.length) : 0;
 
             const itemsEl   = document.getElementById('sales-total-items');
             const profitEl  = document.getElementById('sales-total-profit');
             const revenueEl = document.getElementById('sales-total-revenue');
+            const costEl    = document.getElementById('sales-total-cost');
             const avgEl     = document.getElementById('sales-avg');
 
             if (itemsEl)   animateCountUp(itemsEl, filtered.length, '');
             if (profitEl)  { animateCountUp(profitEl, profit);  profitEl.style.color  = profit  < 0 ? 'var(--red)' : 'var(--green)'; }
             if (revenueEl) { animateCountUp(revenueEl, revenue); }
+            if (costEl)    { animateCountUp(costEl, cost); }
             if (avgEl)     { animateCountUp(avgEl, avg); }
 
             // Transaction list
@@ -3491,16 +3831,17 @@ ChatID: 987654321</textarea>
                 window.renderReceiptBranding();
 
                 // Save to sales log
-                const saleEntry = {
-                    date: dateStr, time: timeStr,
-                    name: order.package || '-',
-                    profit: 0, txnId, price: Number(order.price||0),
-                    customer: order.name, ign: order.ign,
-                    game: order.game, playerId: order.playerId,
-                    orderId: txnId, source: 'telegram_bot'
-                };
                 const dupe = state.sales.some(s => s.txnId === txnId);
                 if (!dupe) {
+                    const _cost = _applyOrderCostAndStock(order.game, order.package, order.price);
+                    const saleEntry = {
+                        date: dateStr, time: timeStr,
+                        name: order.package || '-',
+                        profit: _cost.profit, cost: _cost.costMMK, txnId, price: Number(order.price||0),
+                        customer: order.name, ign: order.ign,
+                        game: order.game, playerId: order.playerId,
+                        orderId: txnId, source: 'telegram_bot'
+                    };
                     state.sales.push(saleEntry);
                     saveDataToCloud();
                     if (typeof window.renderSales === 'function') window.renderSales();
@@ -4630,7 +4971,53 @@ ChatID: 987654321</textarea>
             document.getElementById('ex-rate-badge').innerText = '1 ' + sym + ' = ' + rate.toLocaleString() + ' MMK';
             const rsLabel = document.getElementById('mi-cost-rs-label');
             if(rsLabel) rsLabel.innerText = 'Cost (' + sym + ')';
+            window.refreshCoinBalanceUI();
             // NOTE: does NOT auto-recalc items  user must press Apply button
+        };
+
+        // ================= PER-GAME COIN / STOCK BALANCE =================
+        // The balance pool is keyed by currency SYMBOL (uppercased), so any game
+        // sharing the same symbol automatically shares the same pool/remaining.
+        window.refreshCoinBalanceUI = function() {
+            const symInput = document.getElementById('ex-symbol');
+            const sym = (symInput && symInput.value || 'R$').trim();
+            const key = sym.toUpperCase();
+            const bal = (state.settings.stockBalances || {})[key] || { initial: 0, spent: 0 };
+            const initialEl  = document.getElementById('ex-coin-initial');
+            const symLabelEl = document.getElementById('ex-coin-sym-label');
+            const badgeEl     = document.getElementById('ex-coin-remaining-badge');
+            if (symLabelEl) symLabelEl.innerText = sym;
+            // Don't stomp on what the user is actively typing
+            if (initialEl && document.activeElement !== initialEl) initialEl.value = bal.initial || '';
+            if (badgeEl) {
+                const initial   = parseFloat(bal.initial) || 0;
+                const spent     = parseFloat(bal.spent) || 0;
+                const remaining = initial - spent;
+                if (initial > 0) {
+                    const isOver = remaining < 0;
+                    const isLow  = !isOver && (remaining / initial) < 0.2;
+                    badgeEl.style.display = 'block';
+                    badgeEl.style.color = isOver ? 'var(--red)' : isLow ? '#f59e0b' : 'var(--green)';
+                    badgeEl.innerText = 'ကျန် ' + remaining.toLocaleString() + ' ' + sym + (isOver ? ' (OVER)' : '');
+                } else {
+                    badgeEl.style.display = 'none';
+                }
+            }
+        };
+
+        window.saveCoinInitial = function() {
+            const symInput = document.getElementById('ex-symbol');
+            const sym = (symInput && symInput.value || 'R$').trim();
+            const key = sym.toUpperCase();
+            const initial = parseFloat(document.getElementById('ex-coin-initial').value) || 0;
+            state.settings.stockBalances = state.settings.stockBalances || {};
+            state.settings.stockBalances[key] = state.settings.stockBalances[key] || { initial: 0, spent: 0, sym: key };
+            state.settings.stockBalances[key].initial = initial;
+            state.settings.stockBalances[key].sym = sym;
+            saveSettingsDebounced();
+            window.refreshCoinBalanceUI();
+            window.renderStockWidget();
+            window.renderSidebarGames();
         };
 
         // Show "rate changed" state  highlight badge, show Apply button
@@ -4740,23 +5127,25 @@ ChatID: 987654321</textarea>
             window.renderReceiptBranding();
 
             //  Save to Daily Sales (state.sales) 
-            const saleEntry = {
-                date:     confirmDate,          // e.g. "23 May 2026"
-                time:     confirmTime,          // e.g. "14:32:05"
-                name:     pkg,                  // package shown in sales list
-                profit:   0,                    // no cost data from store orders
-                txnId:    txnId,
-                customer: customer,
-                ign:      ign,
-                game:     game,
-                playerId: playerId,
-                price:    Number(price),
-                orderId:  order._id,
-                source:   'store'
-            };
             // Dedup by orderId
             const alreadySaved = state.sales.some(s => s.orderId === order._id);
             if (!alreadySaved) {
+                const _cost = _applyOrderCostAndStock(game, pkg, price);
+                const saleEntry = {
+                    date:     confirmDate,          // e.g. "23 May 2026"
+                    time:     confirmTime,          // e.g. "14:32:05"
+                    name:     pkg,                  // package shown in sales list
+                    profit:   _cost.profit,         // real profit = price - item cost
+                    cost:     _cost.costMMK,
+                    txnId:    txnId,
+                    customer: customer,
+                    ign:      ign,
+                    game:     game,
+                    playerId: playerId,
+                    price:    Number(price),
+                    orderId:  order._id,
+                    source:   'store'
+                };
                 state.sales.push(saleEntry);
                 saveDataToCloud();
                 window.renderSales();
@@ -5135,6 +5524,7 @@ ChatID: 987654321</textarea>
             if(wrap) wrap.style.display = 'none';
             document.getElementById('ex-amount').value = '';
             document.getElementById('ex-result').innerText = ' MMK';
+            window.refreshCoinBalanceUI();
         };
 
 
